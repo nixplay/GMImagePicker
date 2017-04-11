@@ -24,6 +24,10 @@ static CGSize const kPopoverContentSize = {480, 720};
  */
 @interface GMImagePickerController : UIViewController
 
+- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets;
+
+@property (nonatomic, assign) BOOL allow_video;
+
 /**
  *  The assets picker’s delegate object.
  */
@@ -121,6 +125,8 @@ static CGSize const kPopoverContentSize = {480, 720};
  */
 @property (nonatomic, assign) BOOL autoSelectCameraImages;
 
+
+@property (nonatomic, assign) BOOL shouldCancelWhenBlur;
 /**
  *  Grid customizations:
  *

@@ -16,6 +16,76 @@
 @end
 
 @implementation GMImagePickerController
+- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets
+{
+    if (self = [super init])
+    {
+        _selectedAssets = [[NSMutableArray alloc] init];
+        
+        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
+        
+        for (PHAsset *asset in fetchResult) {
+            [_selectedAssets addObject: asset];
+        }
+        
+        // _selectedAssets = [fetchResult copy];
+        _allow_video = allow_v;
+        
+        _shouldCancelWhenBlur = YES;
+        
+        // Default values:
+        _displaySelectionInfoToolbar = YES;
+        _displayAlbumsNumberOfAssets = YES;
+        _autoDisableDoneButton = YES;
+        _allowsMultipleSelection = YES;
+        _confirmSingleSelection = NO;
+        _showCameraButton = NO;
+        
+        // Grid configuration:
+        _colsInPortrait = 3;
+        _colsInLandscape = 5;
+        _minimumInteritemSpacing = 2.0;
+        
+        // Sample of how to select the collections you want to display:
+        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
+                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
+                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
+                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
+                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+        // If you don't want to show smart collections, just put _customSmartCollections to nil;
+        //_customSmartCollections=nil;
+        
+        // Which media types will display
+        _mediaTypes = @[@(PHAssetMediaTypeAudio),
+                        @(PHAssetMediaTypeVideo),
+                        @(PHAssetMediaTypeImage)];
+        
+        self.preferredContentSize = kPopoverContentSize;
+        
+        // UI Customisation
+        _pickerBackgroundColor = [UIColor whiteColor];
+        _pickerTextColor = [UIColor darkTextColor];
+        _pickerFontName = @"HelveticaNeue";
+        _pickerBoldFontName = @"HelveticaNeue-Bold";
+        _pickerFontNormalSize = 14.0f;
+        _pickerFontHeaderSize = 17.0f;
+        
+        _navigationBarBackgroundColor = [UIColor whiteColor];
+        _navigationBarTextColor = [UIColor darkTextColor];
+        _navigationBarTintColor = [UIColor darkTextColor];
+        
+        _toolbarBarTintColor = [UIColor whiteColor];
+        _toolbarTextColor = [UIColor darkTextColor];
+        _toolbarTintColor = [UIColor darkTextColor];
+        
+        _pickerStatusBarStyle = UIStatusBarStyleLightContent;
+        
+        [self setupNavigationController];
+    }
+    return self;
+}
 
 - (id)init
 {
@@ -86,7 +156,7 @@
     _navigationController.toolbar.translucent = YES;
     _navigationController.toolbar.barTintColor = _toolbarBarTintColor;
     _navigationController.toolbar.tintColor = _toolbarTintColor;
-    [(UIView*)[_navigationController.toolbar.subviews objectAtIndex:0] setAlpha:0.75f];  // URGH - I know!
+//    [(UIView*)[_navigationController.toolbar.subviews objectAtIndex:0] setAlpha:0.75f];  // URGH - I know!
     
     _navigationController.navigationBar.backgroundColor = _navigationBarBackgroundColor;
     _navigationController.navigationBar.tintColor = _navigationBarTintColor;
