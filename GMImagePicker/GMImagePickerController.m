@@ -194,6 +194,10 @@
     [self.view addSubview:_navigationController.view];
     [self addChildViewController:_navigationController];
     [_navigationController didMoveToParentViewController:self];
+    
+    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
+        [albumsViewController selectAllAlbumsCell];
+    }
 }
 
 

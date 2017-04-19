@@ -323,5 +323,5 @@ static CGSize const kPopoverContentSize = {480, 720};
 
 
 
-
+- (BOOL)shouldSelectAllAlbumCell;
 @end
