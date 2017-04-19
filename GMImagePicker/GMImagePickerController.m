@@ -16,10 +16,11 @@
 @end
 
 @implementation GMImagePickerController
-- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets
+- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets delegate: (id<GMImagePickerControllerDelegate>) delegate
 {
     if (self = [super init])
     {
+        self.delegate = delegate;
         _selectedAssets = [[NSMutableArray alloc] init];
         
         PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
