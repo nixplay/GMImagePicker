@@ -197,7 +197,22 @@
     [_navigationController didMoveToParentViewController:self];
     
     if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
-        [albumsViewController selectAllAlbumsCell];
+        if([self.delegate respondsToSelector:@selector(controllerTitle)])
+            self.title = [self.delegate controllerTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
+            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
+            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
+            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
+        
+        
+        if([self.delegate shouldSelectAllAlbumCell]){
+            [albumsViewController selectAllAlbumsCell];
+        }
     }
 }
 

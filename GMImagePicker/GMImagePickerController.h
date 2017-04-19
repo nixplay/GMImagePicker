@@ -324,4 +324,13 @@ static CGSize const kPopoverContentSize = {480, 720};
 
 
 - (BOOL)shouldSelectAllAlbumCell;
+
+
+- (NSString*) controllerTitle;
+
+- (NSString*) controllerCustomDoneButtonTitle;
+
+- (NSString*) controllerCustomCancelButtonTitle;
+
+- (NSString*) controllerCustomNavigationBarPrompt;
 @end
