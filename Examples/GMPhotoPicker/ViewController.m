@@ -34,7 +34,7 @@
 
 - (IBAction)launchGMImagePicker:(id)sender
 {
-    GMImagePickerController *picker = [[GMImagePickerController alloc] init];
+    GMImagePickerController *picker = [[GMImagePickerController alloc] init:NO withAssets:nil delegate:self];
     picker.delegate = self;
     picker.title = @"Custom title";
     
@@ -50,8 +50,8 @@
 //    picker.confirmSingleSelection = YES;
 //    picker.confirmSingleSelectionPrompt = @"Do you want to select the image you have chosen?";
     
-//    picker.showCameraButton = YES;
-//    picker.autoSelectCameraImages = YES;
+    picker.showCameraButton = YES;
+    picker.autoSelectCameraImages = YES;
     
     picker.modalPresentationStyle = UIModalPresentationPopover;
 
@@ -127,4 +127,29 @@
 {
     NSLog(@"GMImagePicker: User pressed cancel button");
 }
+
+
+-(BOOL) shouldSelectAllAlbumCell{
+    return YES;
+}
+
+- (NSString*) controllerTitle{
+    return @"Custom title";
+}
+
+- (NSString*) controllerCustomDoneButtonTitle{
+    return @"Finished";
+}
+
+
+- (NSString*) controllerCustomCancelButtonTitle{
+    return @"Nope";
+}
+
+
+//- (NSString*) controllerCustomNavigationBarPrompt{
+//    return @"Take a new photo or select an existing one!";
+//}
+
+
 @end
