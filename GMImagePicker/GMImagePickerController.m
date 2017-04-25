@@ -142,19 +142,9 @@
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
         // Save to the album
-        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                
-            } completionHandler:^(BOOL success, NSError *error) {
-                if (success) {
-                    [self setupNavigationController];
-                }
-                else {
-                    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
-                }
-
-            }];
-        }];
+        
+        [self setupNavigationController];
+        
 
     }
     return self;
