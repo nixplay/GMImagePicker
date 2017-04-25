@@ -48,21 +48,25 @@
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
+//        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
         _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
-                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
-                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
-                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
-                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
-                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
-                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+                                          @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+                                          @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+
         // If you don't want to show smart collections, just put _customSmartCollections to nil;
         //_customSmartCollections=nil;
         
         // Which media types will display
-        _mediaTypes = @[@(PHAssetMediaTypeAudio),
-                        @(PHAssetMediaTypeVideo),
-                        @(PHAssetMediaTypeImage)];
-        
+//        _mediaTypes = @[@(PHAssetMediaTypeAudio),
+//                        @(PHAssetMediaTypeVideo),
+//                        @(PHAssetMediaTypeImage)];
+        _mediaTypes = @[@(PHAssetMediaTypeImage)];
         self.preferredContentSize = kPopoverContentSize;
         
         // UI Customisation
@@ -82,7 +86,6 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleLightContent;
-        
         [self setupNavigationController];
     }
     return self;
@@ -212,13 +215,13 @@
         if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
             self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
         
-        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
-        // Check if the user has access to photos
-        if (authStatus == PHAuthorizationStatusAuthorized) {
-            if([self.delegate shouldSelectAllAlbumCell]){
-                [albumsViewController selectAllAlbumsCell];
-            }
-        }
+//        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+//        // Check if the user has access to photos
+//        if (authStatus == PHAuthorizationStatusAuthorized) {
+//            if([self.delegate shouldSelectAllAlbumCell]){
+//                [albumsViewController selectAllAlbumsCell];
+//            }
+//        }
     }
 }
 
