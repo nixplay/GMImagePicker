@@ -212,15 +212,13 @@
         if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
             self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
         
-        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
-            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                
-            } completionHandler:^(BOOL success, NSError *error) {
-                if([self.delegate shouldSelectAllAlbumCell]){
-                    [albumsViewController selectAllAlbumsCell];
-                }
-            }];
-        }];
+        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+        // Check if the user has access to photos
+        if (authStatus == PHAuthorizationStatusAuthorized) {
+            if([self.delegate shouldSelectAllAlbumCell]){
+                [albumsViewController selectAllAlbumsCell];
+            }
+        }
     }
 }
 
