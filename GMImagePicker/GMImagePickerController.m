@@ -212,10 +212,15 @@
         if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
             self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
         
-        
-        if([self.delegate shouldSelectAllAlbumCell]){
-            [albumsViewController selectAllAlbumsCell];
-        }
+        [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                
+            } completionHandler:^(BOOL success, NSError *error) {
+                if([self.delegate shouldSelectAllAlbumCell]){
+                    [albumsViewController selectAllAlbumsCell];
+                }
+            }];
+        }];
     }
 }
 
