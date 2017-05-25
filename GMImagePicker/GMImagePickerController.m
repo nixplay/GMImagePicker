@@ -70,10 +70,15 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
-        
-        [self setupNavigationController];
     }
     return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+
+    [self setupNavigationController];
 }
 
 - (void)viewWillAppear:(BOOL)animated
