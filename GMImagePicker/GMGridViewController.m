@@ -162,11 +162,16 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 #pragma mark - Rotation
 
-- (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration
+- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
+    [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
+
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         return;
     }
+
+    UIInterfaceOrientation toInterfaceOrientation = (size.height > size.width ? UIInterfaceOrientationPortrait
+                                                     : UIInterfaceOrientationLandscapeLeft);
     
     UICollectionViewFlowLayout *layout = [self collectionViewFlowLayoutForOrientation:toInterfaceOrientation];
     
@@ -175,25 +180,26 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
     
     [self resetCachedAssets];
-    //This is optional. Reload visible thumbnails:
-    for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
-        NSInteger currentTag = cell.tag;
-        [self.imageManager requestImageForAsset:cell.asset
-                                     targetSize:AssetGridThumbnailSize
-                                    contentMode:PHImageContentModeAspectFill
-                                        options:nil
-                                  resultHandler:^(UIImage *result, NSDictionary *info)
-                                    {
-                                        // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                        if (cell.tag == currentTag) {
-                                            [cell.imageView setImage:result];
-                                        }
-                                    }];
-    }
-    
-    [self.collectionView setCollectionViewLayout:layout animated:YES];
-}
 
+    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+            //This is optional. Reload visible thumbnails:
+            for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
+                NSInteger currentTag = cell.tag;
+                [self.imageManager requestImageForAsset:cell.asset
+                                             targetSize:AssetGridThumbnailSize
+                                            contentMode:PHImageContentModeAspectFill
+                                                options:nil
+                                          resultHandler:^(UIImage *result, NSDictionary *info) {
+                                              // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                              if (cell.tag == currentTag) {
+                                                  [cell.imageView setImage:result];
+                                              }
+                                          }];
+            }
+
+            [self.collectionView setCollectionViewLayout:layout animated:NO];
+        } completion:nil];
+}
 
 #pragma mark - Setup
 
