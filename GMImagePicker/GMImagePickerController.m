@@ -16,6 +16,80 @@
 @end
 
 @implementation GMImagePickerController
+- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets delegate: (id<GMImagePickerControllerDelegate>) delegate
+{
+    if (self = [super init])
+    {
+        self.delegate = delegate;
+        _selectedAssets = [[NSMutableArray alloc] init];
+        
+        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
+        
+        for (PHAsset *asset in fetchResult) {
+            [_selectedAssets addObject: asset];
+        }
+        
+        // _selectedAssets = [fetchResult copy];
+        _allow_video = allow_v;
+        
+        _shouldCancelWhenBlur = YES;
+        
+        // Default values:
+        _displaySelectionInfoToolbar = YES;
+        _displayAlbumsNumberOfAssets = YES;
+        _autoDisableDoneButton = YES;
+        _allowsMultipleSelection = YES;
+        _confirmSingleSelection = NO;
+        _showCameraButton = NO;
+        
+        // Grid configuration:
+        _colsInPortrait = 3;
+        _colsInLandscape = 5;
+        _minimumInteritemSpacing = 2.0;
+        
+        // Sample of how to select the collections you want to display:
+//        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
+                                          @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+                                          @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+
+        // If you don't want to show smart collections, just put _customSmartCollections to nil;
+        //_customSmartCollections=nil;
+        
+        // Which media types will display
+//        _mediaTypes = @[@(PHAssetMediaTypeAudio),
+//                        @(PHAssetMediaTypeVideo),
+//                        @(PHAssetMediaTypeImage)];
+        _mediaTypes = @[@(PHAssetMediaTypeImage)];
+        self.preferredContentSize = kPopoverContentSize;
+        
+        // UI Customisation
+        _pickerBackgroundColor = [UIColor whiteColor];
+        _pickerTextColor = [UIColor darkTextColor];
+        _pickerFontName = @"HelveticaNeue";
+        _pickerBoldFontName = @"HelveticaNeue-Bold";
+        _pickerFontNormalSize = 14.0f;
+        _pickerFontHeaderSize = 17.0f;
+        
+        _navigationBarBackgroundColor = [UIColor whiteColor];
+        _navigationBarTextColor = [UIColor darkTextColor];
+        _navigationBarTintColor = [UIColor darkTextColor];
+        
+        _toolbarBarTintColor = [UIColor whiteColor];
+        _toolbarTextColor = [UIColor darkTextColor];
+        _toolbarTintColor = [UIColor darkTextColor];
+        
+        _pickerStatusBarStyle = UIStatusBarStyleLightContent;
+        [self setupNavigationController];
+    }
+    return self;
+}
 
 - (id)init
 {
@@ -70,15 +144,13 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
+        // Save to the album
+        
+        [self setupNavigationController];
+        
+
     }
     return self;
-}
-
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-
-    [self setupNavigationController];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -129,6 +201,28 @@
     [self.view addSubview:_navigationController.view];
     [self addChildViewController:_navigationController];
     [_navigationController didMoveToParentViewController:self];
+    
+    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
+        if([self.delegate respondsToSelector:@selector(controllerTitle)])
+            self.title = [self.delegate controllerTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
+            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
+            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
+            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
+        
+//        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+//        // Check if the user has access to photos
+//        if (authStatus == PHAuthorizationStatusAuthorized) {
+//            if([self.delegate shouldSelectAllAlbumCell]){
+//                [albumsViewController selectAllAlbumsCell];
+//            }
+//        }
+    }
 }
 
 
@@ -339,7 +433,7 @@
     UIBarButtonItem *space  = [self spaceButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
-    if (_showCameraButton) {
+    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) && self.isCameraRoll) {
         [items addObject:camera];
     }
     [items addObject:space];
