@@ -479,4 +479,29 @@
     // Note: The image view will auto refresh as the photo's are being observed in the other VCs
 }
 
+
+- (BOOL)shouldAutorotate
+{
+    if ([self.delegate respondsToSelector:@selector(shouldAutorotate)]) {
+        return [self.delegate shouldAutorotate];
+    }
+    return NO;
+}
+
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    if ([self.delegate respondsToSelector:@selector(supportedInterfaceOrientations)]) {
+        return [self.delegate supportedInterfaceOrientations];
+    }
+    return 1 << UIInterfaceOrientationPortrait;
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
+{
+    if ([self.delegate respondsToSelector:@selector(shouldAutorotateToInterfaceOrientation:)]) {
+        return [self.delegate shouldAutorotateToInterfaceOrientation:interfaceOrientation];
+    }
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+
+}
 @end

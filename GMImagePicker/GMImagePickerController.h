@@ -336,4 +336,9 @@ static CGSize const kPopoverContentSize = {480, 720};
 - (NSString*) controllerCustomCancelButtonTitle;
 
 - (NSString*) controllerCustomNavigationBarPrompt;
+
+- (BOOL)shouldAutorotate;
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations;
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+
 @end
