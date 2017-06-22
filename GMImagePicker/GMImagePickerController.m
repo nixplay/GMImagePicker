@@ -433,7 +433,7 @@
     UIBarButtonItem *space  = [self spaceButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
-    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) && self.isCameraRoll) {
+    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) ) {
         [items addObject:camera];
     }
     [items addObject:space];

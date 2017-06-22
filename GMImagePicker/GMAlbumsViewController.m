@@ -332,11 +332,6 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 {
     UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
     
-    if(indexPath.row==0 && indexPath.section==0){
-        [self picker].isCameraRoll = YES;
-    }else{
-        [self picker].isCameraRoll = NO;
-    }
     // Init the GMGridViewController
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:[self picker]];
     // Set the title
