@@ -24,6 +24,8 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>App uses camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>App uses microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>App uses photo library</string>
 	<key>UILaunchStoryboardName</key>

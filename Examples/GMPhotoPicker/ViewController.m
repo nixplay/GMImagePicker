@@ -59,7 +59,7 @@
             
             picker.modalPresentationStyle = UIModalPresentationPopover;
             
-            //    picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
+                picker.mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
             
             //    picker.pickerBackgroundColor = [UIColor blackColor];
             //    picker.pickerTextColor = [UIColor whiteColor];

@@ -48,24 +48,24 @@
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
-//        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
-//                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+        //        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
+        //                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
         _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
-                                          @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
-                                          @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
-
+                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+        
         // If you don't want to show smart collections, just put _customSmartCollections to nil;
         //_customSmartCollections=nil;
         
         // Which media types will display
-//        _mediaTypes = @[@(PHAssetMediaTypeAudio),
-//                        @(PHAssetMediaTypeVideo),
-//                        @(PHAssetMediaTypeImage)];
+        //        _mediaTypes = @[@(PHAssetMediaTypeAudio),
+        //                        @(PHAssetMediaTypeVideo),
+        //                        @(PHAssetMediaTypeImage)];
         _mediaTypes = @[@(PHAssetMediaTypeImage)];
         self.preferredContentSize = kPopoverContentSize;
         
@@ -148,7 +148,7 @@
         
         [self setupNavigationController];
         
-
+        
     }
     return self;
 }
@@ -156,10 +156,10 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
     // Ensure nav and toolbar customisations are set. Defaults are in place, but the user may have changed them
     self.view.backgroundColor = _pickerBackgroundColor;
-
+    
     _navigationController.toolbar.translucent = YES;
     _navigationController.toolbar.barTintColor = _toolbarBarTintColor;
     _navigationController.toolbar.tintColor = _toolbarTintColor;
@@ -215,13 +215,13 @@
         if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
             self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
         
-//        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
-//        // Check if the user has access to photos
-//        if (authStatus == PHAuthorizationStatusAuthorized) {
-//            if([self.delegate shouldSelectAllAlbumCell]){
-//                [albumsViewController selectAllAlbumsCell];
-//            }
-//        }
+        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+        //        // Check if the user has access to photos
+        //        if (authStatus == PHAuthorizationStatusAuthorized) {
+        //            if([self.delegate shouldSelectAllAlbumCell]){
+        //                [albumsViewController selectAllAlbumsCell];
+        //            }
+        //        }
     }
 }
 
@@ -290,7 +290,7 @@
     if (!self.allowsMultipleSelection && !self.showCameraButton) {
         return;
     }
-
+    
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
         NSUInteger index = 1;
@@ -373,7 +373,7 @@
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
         [alert show];
-
+        
         return;
     }
     
@@ -384,7 +384,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.mediaTypes = @[(NSString *)kUTTypeImage];
+    picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
     picker.allowsEditing = NO;
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
@@ -449,7 +449,7 @@
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
 {
     [picker.presentingViewController dismissViewControllerAnimated:YES completion:nil];
-
+    
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *image = info[UIImagePickerControllerOriginalImage];
@@ -457,6 +457,36 @@
                                        self,
                                        @selector(image:finishedSavingWithError:contextInfo:),
                                        nil);
+    }else if ([mediaType isEqualToString:(NSString *)kUTTypeMovie]) {
+        __block NSURL *movieUrl = info[UIImagePickerControllerMediaURL];
+        dispatch_semaphore_t sema = dispatch_semaphore_create(0);
+        
+        if ([PHObject class]) {
+            __block PHAssetChangeRequest *assetRequest;
+            __block PHObjectPlaceholder *placeholder;
+            // Save to the album
+            [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+                
+                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                    
+                    
+                    assetRequest = [PHAssetChangeRequest creationRequestForAssetFromVideoAtFileURL:movieUrl];
+                    placeholder = [assetRequest placeholderForCreatedAsset];
+                } completionHandler:^(BOOL success, NSError *error) {
+                    if (success) {
+                        
+                        NSLog(@"localIdentifier %@", placeholder.localIdentifier);
+                        
+                        dispatch_semaphore_signal(sema);
+                    }
+                    else {
+                        NSLog(@"%@", error);
+                        dispatch_semaphore_signal(sema);
+                    }
+                }];
+                
+            }];
+        }
     }
 }
 
@@ -502,6 +532,6 @@
         return [self.delegate shouldAutorotateToInterfaceOrientation:interfaceOrientation];
     }
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
-
+    
 }
 @end
