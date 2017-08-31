@@ -85,7 +85,7 @@
         _toolbarTextColor = [UIColor darkTextColor];
         _toolbarTintColor = [UIColor darkTextColor];
         
-        _pickerStatusBarStyle = UIStatusBarStyleLightContent;
+        _pickerStatusBarStyle = UIStatusBarStyleDefault;
         [self setupNavigationController];
     }
     return self;
