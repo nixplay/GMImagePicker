@@ -45,7 +45,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     [super viewDidLoad];
     
     self.view.backgroundColor = [self.picker pickerBackgroundColor];
-
+    
     // Navigation bar customization
     if (self.picker.customNavigationBarPrompt) {
         self.navigationItem.prompt = self.picker.customNavigationBarPrompt;
@@ -56,10 +56,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     // Table view aspect
     self.tableView.rowHeight = kAlbumRowHeight;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-
+    
     // Buttons
     NSDictionary* barButtonItemAttributes = @{NSFontAttributeName: [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize]};
-
+    
     NSString *cancelTitle = self.picker.customCancelButtonTitle ? self.picker.customCancelButtonTitle : NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel");
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:cancelTitle
                                                                              style:UIBarButtonItemStylePlain
@@ -69,7 +69,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         [self.navigationItem.leftBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateNormal];
         [self.navigationItem.leftBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateSelected];
     }
-
+    
     if (self.picker.allowsMultipleSelection) {
         NSString *doneTitle = self.picker.customDoneButtonTitle ? self.picker.customDoneButtonTitle : NSLocalizedStringFromTableInBundle(@"picker.navigation.done-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Done");
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:doneTitle
@@ -97,8 +97,13 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     // Fetch PHAssetCollections:
     PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
     PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
-    self.collectionsFetchResults = @[topLevelUserCollections, smartAlbums];
-    self.collectionsLocalizedTitles = @[NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums"), NSLocalizedStringFromTableInBundle(@"picker.table.smart-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Smart Albums")];
+    PHFetchResult *myPhotoStreamAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
+    PHFetchResult *cloudSharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
+    
+    self.collectionsFetchResults = @[topLevelUserCollections, smartAlbums, myPhotoStreamAlbums, cloudSharedAlbums];
+    self.collectionsLocalizedTitles = @[NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums"), NSLocalizedStringFromTableInBundle(@"picker.table.smart-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Smart Albums"),
+                                        @"My Photo Stream",
+                                        @"Cloud Shared"];
     
     [self updateFetchResults];
     
@@ -137,6 +142,8 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     //Fetch PHAssetCollections:
     PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:0];
     PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:1];
+    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:2];
+    PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:3];
     
     //All album: Sorted by descending creation date.
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
@@ -169,7 +176,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         }
     }
     
-                                  
+    
     //Smart albums: Sorted by descending creation date.
     NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *smartFetchResultLabel = [[NSMutableArray alloc] init];
@@ -196,8 +203,53 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         }
     }
     
-    self.collectionsFetchResultsAssets= @[allFetchResultArray,userFetchResultArray,smartFetchResultArray];
-    self.collectionsFetchResultsTitles= @[allFetchResultLabel,userFetchResultLabel,smartFetchResultLabel];
+    
+    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in myPhotoStream)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
+                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    
+    NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in cloudShared)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [cloudSharedFetchResultArray addObject:assetsFetchResult];
+                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    
+    self.collectionsFetchResultsAssets= @[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray];
+    self.collectionsFetchResultsTitles= @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel];
 }
 
 
@@ -248,7 +300,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     // Increment the cell's tag
     NSInteger currentTag = cell.tag + 1;
     cell.tag = currentTag;
-
+    
     // Set the label
     cell.textLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize];
     cell.textLabel.text = (self.collectionsFetchResultsTitles[indexPath.section])[indexPath.row];
@@ -277,10 +329,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                                     contentMode:PHImageContentModeAspectFill
                                         options:nil
                                   resultHandler:^(UIImage *result, NSDictionary *info) {
-             if (cell.tag == currentTag) {
-                 cell.imageView1.image = result;
-             }
-         }];
+                                      if (cell.tag == currentTag) {
+                                          cell.imageView1.image = result;
+                                      }
+                                  }];
         
         // Second & third images:
         // TODO: Only preload the 3pixels height visible frame!
@@ -293,10 +345,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                                         contentMode:PHImageContentModeAspectFill
                                             options:nil
                                       resultHandler:^(UIImage *result, NSDictionary *info) {
-                 if (cell.tag == currentTag) {
-                     cell.imageView2.image = result;
-                 }
-             }];
+                                          if (cell.tag == currentTag) {
+                                              cell.imageView2.image = result;
+                                          }
+                                      }];
         } else {
             cell.imageView2.image = nil;
         }
@@ -309,10 +361,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                                         contentMode:PHImageContentModeAspectFill
                                             options:nil
                                       resultHandler:^(UIImage *result, NSDictionary *info) {
-                 if (cell.tag == currentTag) {
-                     cell.imageView3.image = result;
-                 }
-             }];
+                                          if (cell.tag == currentTag) {
+                                              cell.imageView3.image = result;
+                                          }
+                                      }];
         } else {
             cell.imageView3.image = nil;
         }
@@ -349,9 +401,9 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 -(void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section
 {
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
-    header.contentView.backgroundColor = [UIColor clearColor];
+    header.contentView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.9f];
     header.backgroundView.backgroundColor = [UIColor clearColor];
-
+    
     // Default is a bold font, but keep this styled as a normal font
     header.textLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontNormalSize];
     header.textLabel.textColor = self.picker.pickerTextColor;
