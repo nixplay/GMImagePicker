@@ -401,7 +401,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 -(void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section
 {
     UITableViewHeaderFooterView *header = (UITableViewHeaderFooterView *)view;
-    header.contentView.backgroundColor = [UIColor clearColor];
+    header.contentView.backgroundColor = [UIColor colorWithWhite:1.0f alpha:0.9f];
     header.backgroundView.backgroundColor = [UIColor clearColor];
     
     // Default is a bold font, but keep this styled as a normal font
