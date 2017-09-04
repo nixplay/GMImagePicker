@@ -248,8 +248,8 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         }
     }
     
-    self.collectionsFetchResultsAssets= @[allFetchResultArray,userFetchResultArray,smartFetchResultArray,myPhotoStreamFetchResultArray,cloudSharedFetchResultArray];
-    self.collectionsFetchResultsTitles= @[allFetchResultLabel,userFetchResultLabel,smartFetchResultLabel,myPhotoStreamFetchResultLabel,cloudSharedFetchResultLabel];
+    self.collectionsFetchResultsAssets= @[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray];
+    self.collectionsFetchResultsTitles= @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel];
 }
 
 
