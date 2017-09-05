@@ -44,8 +44,13 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        _colsInPortrait = 3;
-        _colsInLandscape = 5;
+        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+            _colsInPortrait = 6;
+            _colsInLandscape = 10;
+        }else{
+            _colsInPortrait = 3;
+            _colsInLandscape = 5;
+        }
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
@@ -87,6 +92,7 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
+        _barStyle = UIBarStyleDefault;
         [self setupNavigationController];
     }
     return self;
@@ -106,8 +112,13 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        _colsInPortrait = 3;
-        _colsInLandscape = 5;
+        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+            _colsInPortrait = 6;
+            _colsInLandscape = 10;
+        }else{
+            _colsInPortrait = 3;
+            _colsInLandscape = 5;
+        }
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
@@ -145,6 +156,7 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
+        _barStyle = UIBarStyleDefault;
         // Save to the album
         
         [self setupNavigationController];
@@ -168,6 +180,10 @@
     
     _navigationController.navigationBar.backgroundColor = _navigationBarBackgroundColor;
     _navigationController.navigationBar.tintColor = _navigationBarTintColor;
+    
+    _navigationController.navigationBar.barStyle = _barStyle;
+    _navigationController.navigationBar.barTintColor = _toolbarBarTintColor;
+    
     NSDictionary *attributes;
     if (_useCustomFontForNavigationBar) {
         attributes = @{NSForegroundColorAttributeName : _navigationBarTextColor,
