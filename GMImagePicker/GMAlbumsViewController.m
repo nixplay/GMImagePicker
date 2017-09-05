@@ -18,8 +18,6 @@
 
 @property (strong) NSArray *collectionsFetchResults;
 @property (strong) NSArray *collectionsLocalizedTitles;
-@property (strong) NSArray *collectionsFetchResultsAssets;
-@property (strong) NSArray *collectionsFetchResultsTitles;
 @property (nonatomic, weak) GMImagePickerController *picker;
 @property (strong) PHCachingImageManager *imageManager;
 
@@ -100,10 +98,11 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     PHFetchResult *myPhotoStreamAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
     PHFetchResult *cloudSharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
     
-    self.collectionsFetchResults = @[topLevelUserCollections, smartAlbums, myPhotoStreamAlbums, cloudSharedAlbums];
-    self.collectionsLocalizedTitles = @[NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums"), NSLocalizedStringFromTableInBundle(@"picker.table.smart-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Smart Albums"),
-                                        @"My Photo Stream",
-                                        @"Cloud Shared"];
+    self.collectionsFetchResults = @[myPhotoStreamAlbums, smartAlbums, cloudSharedAlbums,topLevelUserCollections];
+    self.collectionsLocalizedTitles = @[NSLocalizedStringFromTableInBundle(@"picker.table.my-photo-stream-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"My Photo Stream"),
+                                        NSLocalizedStringFromTableInBundle(@"picker.table.smart-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Smart Albums"),
+                                        NSLocalizedStringFromTableInBundle(@"picker.table.cloud-shared-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cloud Shared"),
+                                        NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums")];
     
     [self updateFetchResults];
     
@@ -140,10 +139,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     self.collectionsFetchResultsTitles=nil;
     
     //Fetch PHAssetCollections:
-    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:0];
+    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:0];
     PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:1];
-    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:2];
-    PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:3];
+    PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:2];
+    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:3];
     
     //All album: Sorted by descending creation date.
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];

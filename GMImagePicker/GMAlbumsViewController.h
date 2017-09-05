@@ -26,6 +26,8 @@ static CGSize const kAlbumThumbnailSize3 = {62.0f , 62.0f};
 
 
 @interface GMAlbumsViewController : UITableViewController
+@property (strong,atomic) NSArray *collectionsFetchResultsAssets;
+@property (strong,atomic) NSArray *collectionsFetchResultsTitles;
 
 - (void)selectAllAlbumsCell;
 

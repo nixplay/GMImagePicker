@@ -25,6 +25,12 @@
 /* All photos */
 "picker.table.all-photos-label" = "Camera Roll";
 
+/* My Photo Stream */
+"picker.table.my-photo-stream-header" = "MY PHOTO STREAM";
+
+/* Cloud Shared */
+"picker.table.cloud-shared-header" = "CLOUD SHARED";
+
 /* Smart Albums */
 "picker.table.smart-albums-header" = "SMART COLLECTIONS";
 

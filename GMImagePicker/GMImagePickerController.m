@@ -9,6 +9,7 @@
 #import <MobileCoreServices/MobileCoreServices.h>
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
+#import "GMGridViewController.h"
 @import Photos;
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
@@ -186,15 +187,84 @@
 
 #pragma mark - Setup Navigation Controller
 
+//- (void)setupNavigationController
+//{
+//    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+//    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+//    _navigationController.delegate = self;
+//    
+//    _navigationController.navigationBar.translucent = YES;
+//    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+//    _navigationController.navigationBar.shadowImage = [UIImage new];
+//    
+//    [_navigationController willMoveToParentViewController:self];
+//    [_navigationController.view setFrame:self.view.frame];
+//    [self.view addSubview:_navigationController.view];
+//    [self addChildViewController:_navigationController];
+//    [_navigationController didMoveToParentViewController:self];
+//    
+//    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
+//        if([self.delegate respondsToSelector:@selector(controllerTitle)])
+//            self.title = [self.delegate controllerTitle];
+//        
+//        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
+//            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
+//        
+//        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
+//            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
+//        
+//        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
+//            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
+//        
+//        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+//        //        // Check if the user has access to photos
+//        //        if (authStatus == PHAuthorizationStatusAuthorized) {
+//        //            if([self.delegate shouldSelectAllAlbumCell]){
+//        //                [albumsViewController selectAllAlbumsCell];
+//        //            }
+//        //        }
+//    }
+//}
 - (void)setupNavigationController
 {
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    
     GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+    
+    
+    GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
+    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
+    
+    //All album: Sorted by descending creation date.
+    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+    {
+        PHFetchOptions *options = [[PHFetchOptions alloc] init];
+        if(_allow_video){
+            _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+        }
+        options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
+        options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+        PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+        
+        [allFetchResultArray addObject:assetsFetchResult];
+        [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+    }
+    
+    albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
+    albumsViewController.collectionsFetchResultsTitles= @[allFetchResultLabel];
+    
+    
+    gridViewController.assetsFetchResults = [[albumsViewController.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    
+    
     _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
     _navigationController.delegate = self;
     
-    _navigationController.navigationBar.translucent = YES;
-    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-    _navigationController.navigationBar.shadowImage = [UIImage new];
+    
+    //    _navigationController.navigationBar.translucent = YES;
+    //    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    //    _navigationController.navigationBar.shadowImage = [UIImage new];
     
     [_navigationController willMoveToParentViewController:self];
     [_navigationController.view setFrame:self.view.frame];
@@ -202,29 +272,10 @@
     [self addChildViewController:_navigationController];
     [_navigationController didMoveToParentViewController:self];
     
-    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
-        if([self.delegate respondsToSelector:@selector(controllerTitle)])
-            self.title = [self.delegate controllerTitle];
-        
-        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
-            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
-        
-        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
-            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
-        
-        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
-            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
-        
-        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
-        //        // Check if the user has access to photos
-        //        if (authStatus == PHAuthorizationStatusAuthorized) {
-        //            if([self.delegate shouldSelectAllAlbumCell]){
-        //                [albumsViewController selectAllAlbumsCell];
-        //            }
-        //        }
-    }
+    
+    // Push GMGridViewController
+    [_navigationController pushViewController:gridViewController animated:YES];
 }
-
 
 #pragma mark - UIAlertViewDelegate
 
@@ -385,6 +436,7 @@
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
     picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
+    picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
     picker.allowsEditing = NO;
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
