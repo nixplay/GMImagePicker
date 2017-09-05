@@ -451,8 +451,12 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
-    picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+    if(_allow_video){
+        picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
+        picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+    }else{
+        picker.mediaTypes = @[(NSString *)kUTTypeImage];
+    }
     picker.allowsEditing = NO;
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
