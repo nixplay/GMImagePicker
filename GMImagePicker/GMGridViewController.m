@@ -163,6 +163,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     [self updateCachedAssets];
 }
 
+-(void) didReceiveMemoryWarning {
+    [self resetCachedAssets];
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+}
+
 - (void)dealloc
 {
     [self resetCachedAssets];
