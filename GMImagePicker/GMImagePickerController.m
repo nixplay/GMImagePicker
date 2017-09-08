@@ -255,16 +255,18 @@
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
     {
-        PHFetchOptions *options = [[PHFetchOptions alloc] init];
-        if(_allow_video){
-            _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            if(_allow_video){
+                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+            }
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
         }
-        options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
-        options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-        PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-        
-        [allFetchResultArray addObject:assetsFetchResult];
-        [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
     }
     
     albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
