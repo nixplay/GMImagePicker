@@ -495,36 +495,36 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
             // get the new fetch result
             self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-
+            //http://crashes.to/s/0483c5ef912
             UICollectionView *collectionView = self.collectionView;
-
-            if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
-                // we need to reload all if the incremental diffs are not available
-                [collectionView reloadData];
-
-            } else {
-                // if we have incremental diffs, tell the collection view to animate insertions and deletions
-                [collectionView performBatchUpdates:^{
-                    NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
-                    if ([removedIndexes count]) {
-                        [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                    }
-                    NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
-                    if ([insertedIndexes count]) {
-                        [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                        if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
-                            for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
-                                [self collectionView:collectionView didSelectItemAtIndexPath:path];
+            if(collectionView != nil){
+                if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
+                    // we need to reload all if the incremental diffs are not available
+                    [collectionView reloadData];
+                    
+                } else {
+                    // if we have incremental diffs, tell the collection view to animate insertions and deletions
+                    [collectionView performBatchUpdates:^{
+                        NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
+                        if ([removedIndexes count]) {
+                            [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+                        }
+                        NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
+                        if ([insertedIndexes count]) {
+                            [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+                            if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
+                                for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
+                                    [self collectionView:collectionView didSelectItemAtIndexPath:path];
+                                }
                             }
                         }
-                    }
-                    NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
-                    if ([changedIndexes count]) {
-                        [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                    }
-                } completion:NULL];
+                        NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
+                        if ([changedIndexes count]) {
+                            [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+                        }
+                    } completion:NULL];
+                }
             }
-
             [self resetCachedAssets];
         }
     });
