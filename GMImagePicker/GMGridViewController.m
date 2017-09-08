@@ -133,8 +133,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     // PHImageRequestOptionsDeliveryModeOpportunistic is a good compromise: it provides a lower quality image quickly
     // and then a higher quality image later, without excessive memory usage.
     self.imageRequestOptions = [[PHImageRequestOptions alloc] init];
-    self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
-    self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
+    NSOperatingSystemVersion systemVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if(systemVersion.majorVersion > 10){
+        self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
+        self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
+    }
 
     [self resetCachedAssets];
 
@@ -352,9 +355,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                         options:self.imageRequestOptions
                                   resultHandler:^(UIImage *result, NSDictionary *info) {
                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                      if (cell.tag == currentTag) {
-                                          [cell.imageView setImage:result];
-                                      }
+                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                          if (cell.tag == currentTag) {
+                                              [cell.imageView setImage:result];
+                                          }
+                                      });
                                   }];
     }
 
