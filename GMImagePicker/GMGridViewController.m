@@ -477,59 +477,128 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 
 #pragma mark - PHPhotoLibraryChangeObserver
-
-- (void)photoLibraryDidChange:(PHChange *)changeInstance
-{
-    //http://crashes.to/s/0483c5ef912
-    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+- (void)photoLibraryDidChange:(PHChange *)changeInfo {
+    // Photos may call this method on a background queue;
+    // switch to the main queue to update the UI.
+    __weak __typeof(self) weakSelf = self;
     dispatch_async(dispatch_get_main_queue(), ^{
+        // Check for changes to the displayed album itself
+        // (its existence and metadata, not its member assets).
         
-        // check if there are changes to the assets (insertions, deletions, updates)
-        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
+        // Check for changes to the list of assets (insertions, deletions, moves, or updates).
+        PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
         if (collectionChanges) {
+            // Get the new fetch result for future change tracking.
+            weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
             
-            // get the new fetch result
-            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-            
-            UICollectionView *collectionView = self.collectionView;
-            
-            if(collectionView != nil){
-                if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
-                    // we need to reload all if the incremental diffs are not available
-                    [collectionView reloadData];
-                    
-                } else {
-                    // if we have incremental diffs, tell the collection view to animate insertions and deletions
-                    [collectionView performBatchUpdates:^{
-                        NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
-                        if ([removedIndexes count]) {
-                            [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                        }
-                        NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
-                        if ([insertedIndexes count]) {
-                            [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                            if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
-                                for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
-                                    [self collectionView:collectionView didSelectItemAtIndexPath:path];
-                                }
+            if (collectionChanges.hasIncrementalChanges)  {
+                // Tell the collection view to animate insertions/deletions/moves
+                // and to refresh any cells that have changed content.
+                [weakSelf.collectionView performBatchUpdates:^{
+                    typeof(self) strongSelf = weakSelf;
+                    NSIndexSet *removed = collectionChanges.removedIndexes;
+                    if (removed.count) {
+                        NSLog(@"[strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];");
+                        [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                    }
+                    NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                    if (inserted.count) {
+                        NSLog(@"[strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];");
+                        [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                        //auto select
+                        if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                            for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                                [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
                             }
                         }
-                        NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
-                        if ([changedIndexes count]) {
-                            [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                        }
-                    } completion:^(BOOL finished) {
-                        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
-                    }];
-                }
+                    }
+                    NSIndexSet *changed = collectionChanges.changedIndexes;
+                    if (changed.count) {
+                        NSLog(@"[strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];");
+                        [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                    }
+                    if (collectionChanges.hasMoves) {
+                        [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                            NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                            NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                            NSLog(@"[strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];");
+                            [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                        }];
+                    }
+                } completion:nil];
+            } else {
+                // Detailed change information is not available;
+                // repopulate the UI from the current fetch result.
+                [weakSelf resetCachedAssets];
             }
-            [self resetCachedAssets];
-        }else{
-            [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
         }
     });
 }
+
+- (NSArray *)indexPathsFromIndexSet:(NSIndexSet *)indexSet withSection:(int)section {
+    if (indexSet == nil) {
+        return nil;
+    }
+    NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
+    
+    [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [indexPaths addObject:[NSIndexPath indexPathForItem:idx inSection:section]];
+    }];
+    
+    return indexPaths;
+}
+//- (void)photoLibraryDidChange:(PHChange *)changeInstance
+//{
+//    //http://crashes.to/s/0483c5ef912
+//    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+//    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//
+//        // check if there are changes to the assets (insertions, deletions, updates)
+//        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
+//        if (collectionChanges) {
+//
+//            // get the new fetch result
+//            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+//
+//            UICollectionView *collectionView = self.collectionView;
+//
+//            if(collectionView != nil){
+//                if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
+//                    // we need to reload all if the incremental diffs are not available
+//                    [collectionView reloadData];
+//
+//                } else {
+//                    // if we have incremental diffs, tell the collection view to animate insertions and deletions
+//                    [collectionView performBatchUpdates:^{
+//                        NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
+//                        if ([removedIndexes count]) {
+//                            [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                        }
+//                        NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
+//                        if ([insertedIndexes count]) {
+//                            [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                            if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
+//                                for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
+//                                    [self collectionView:collectionView didSelectItemAtIndexPath:path];
+//                                }
+//                            }
+//                        }
+//                        NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
+//                        if ([changedIndexes count]) {
+//                            [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                        }
+//                    } completion:^(BOOL finished) {
+//                        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+//                    }];
+//                }
+//            }
+//            [self resetCachedAssets];
+//        }else{
+//            [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+//        }
+//    });
+//}
 
 
 #pragma mark - UIScrollViewDelegate
