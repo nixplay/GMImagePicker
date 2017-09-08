@@ -133,7 +133,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     // PHImageRequestOptionsDeliveryModeOpportunistic is a good compromise: it provides a lower quality image quickly
     // and then a higher quality image later, without excessive memory usage.
     self.imageRequestOptions = [[PHImageRequestOptions alloc] init];
-    self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
+    self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
     self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
     self.imageRequestOptions.networkAccessAllowed = YES;
     
