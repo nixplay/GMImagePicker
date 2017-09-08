@@ -115,6 +115,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     }
 }
 
+-(void) didReceiveMemoryWarning {
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+}
+
 - (void)dealloc
 {
     [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
