@@ -162,11 +162,6 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     [self updateCachedAssets];
 }
 
--(void) didReceiveMemoryWarning {
-    [self resetCachedAssets];
-    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
-}
-
 - (void)dealloc
 {
     [self resetCachedAssets];
@@ -485,6 +480,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 - (void)photoLibraryDidChange:(PHChange *)changeInstance
 {
+    //http://crashes.to/s/0483c5ef912
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
     // Call might come on any background queue. Re-dispatch to the main queue to handle it.
     dispatch_async(dispatch_get_main_queue(), ^{
         
@@ -494,8 +491,9 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             
             // get the new fetch result
             self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-            //http://crashes.to/s/0483c5ef912
+            
             UICollectionView *collectionView = self.collectionView;
+            
             if(collectionView != nil){
                 if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
                     // we need to reload all if the incremental diffs are not available
@@ -521,10 +519,14 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                         if ([changedIndexes count]) {
                             [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
                         }
-                    } completion:NULL];
+                    } completion:^(BOOL finished) {
+                        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+                    }];
                 }
             }
             [self resetCachedAssets];
+        }else{
+            [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
         }
     });
 }
