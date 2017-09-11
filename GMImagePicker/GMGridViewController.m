@@ -498,12 +498,10 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                     typeof(self) strongSelf = weakSelf;
                     NSIndexSet *removed = collectionChanges.removedIndexes;
                     if (removed.count) {
-                        NSLog(@"[strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];");
                         [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
                     }
                     NSIndexSet *inserted = collectionChanges.insertedIndexes;
                     if (inserted.count) {
-                        NSLog(@"[strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];");
                         [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
                         //auto select
                         if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
@@ -514,14 +512,13 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                     }
                     NSIndexSet *changed = collectionChanges.changedIndexes;
                     if (changed.count) {
-                        NSLog(@"[strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];");
                         [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
                     }
                     if (collectionChanges.hasMoves) {
                         [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
                             NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
                             NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                            NSLog(@"[strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];");
+                            
                             [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
                         }];
                     }
