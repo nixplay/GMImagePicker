@@ -135,6 +135,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     self.imageRequestOptions = [[PHImageRequestOptions alloc] init];
     self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
     self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
+    self.imageRequestOptions.synchronous = NO;
     self.imageRequestOptions.networkAccessAllowed = YES;
     
     
@@ -348,18 +349,23 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
      else*/
     {
         //NSLog(@"Image manager: Requesting FILL image for iPhone");
-        [self.imageManager requestImageForAsset:asset
+        PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
                                      targetSize:AssetGridThumbnailSize
                                     contentMode:PHImageContentModeAspectFill
                                         options:self.imageRequestOptions
                                   resultHandler:^(UIImage *result, NSDictionary *info) {
                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                      
-                                      if (cell.tag == currentTag) {
-                                          [cell.imageView setImage:result];
-                                      }
+                                      dispatch_async(dispatch_get_main_queue(), ^{
+                                          if (cell.tag == currentTag) {
+                                              [cell.imageView setImage:result];
+                                          }
+                                      });
                                       
                                   }];
+        if(requestID != cell.assetRequestID){
+            [cell cancelImageRequest];
+            cell.assetRequestID = requestID;
+        }
     }
     
     

@@ -22,6 +22,7 @@ static UIColor *titleColor;
 static UIImage *checkedIcon;
 static UIColor *selectedColor;
 static UIColor *disabledColor;
+static PHImageRequestID assetRequestID;
 
 + (void)initialize
 {
@@ -32,6 +33,7 @@ static UIColor *disabledColor;
     checkedIcon     = [UIImage imageNamed:@"CTAssetsPickerChecked"];
     selectedColor   = [UIColor colorWithWhite:1 alpha:0.3];
     disabledColor   = [UIColor colorWithWhite:1 alpha:0.9];
+    assetRequestID  = PHInvalidImageRequestID;
 }
 
 - (void)awakeFromNib
@@ -171,6 +173,13 @@ static UIColor *disabledColor;
     NSInteger minutes = (ti / 60) % 60;
     //NSInteger hours = (ti / 3600);
     return [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
+}
+
+- (void)cancelImageRequest {
+    if (assetRequestID != PHInvalidImageRequestID) {
+        [[PHImageManager defaultManager] cancelImageRequest:assetRequestID];
+        assetRequestID = PHInvalidImageRequestID;
+    }
 }
 
 @end
