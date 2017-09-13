@@ -188,7 +188,7 @@
         _barStyle = UIBarStyleDefault;
         // Save to the album
         
-        [self setupNavigationController];
+
         
         
     }
