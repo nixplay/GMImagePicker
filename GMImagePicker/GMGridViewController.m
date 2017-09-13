@@ -112,8 +112,9 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                 AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
             }
             
+        }else{
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
         }
-        
         
         self.collectionView.allowsMultipleSelection = picker.allowsMultipleSelection;
         
@@ -212,6 +213,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
         }
         
+    }else{
+        AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
     }
     
     [self resetCachedAssets];
@@ -521,54 +524,59 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     // Photos may call this method on a background queue;
     // switch to the main queue to update the UI.
     __weak __typeof(self) weakSelf = self;
+    PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
+    if (collectionChanges == nil) {
+        return;
+    }
+    weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
     dispatch_async(dispatch_get_main_queue(), ^{
         // Check for changes to the displayed album itself
         // (its existence and metadata, not its member assets).
         
         // Check for changes to the list of assets (insertions, deletions, moves, or updates).
-        PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
-        if (collectionChanges) {
-            // Get the new fetch result for future change tracking.
-            weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
-            
-            if (collectionChanges.hasIncrementalChanges)  {
-                // Tell the collection view to animate insertions/deletions/moves
-                // and to refresh any cells that have changed content.
-                [weakSelf.collectionView performBatchUpdates:^{
-                    typeof(self) strongSelf = weakSelf;
-                    NSIndexSet *removed = collectionChanges.removedIndexes;
-                    if (removed.count) {
-                        [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
-                    }
-                    NSIndexSet *inserted = collectionChanges.insertedIndexes;
-                    if (inserted.count) {
-                        [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
-                        //auto select
-                        if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
-                            for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
-                                [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
-                            }
+        
+        
+        // Get the new fetch result for future change tracking.
+        
+        
+        if (collectionChanges.hasIncrementalChanges)  {
+            // Tell the collection view to animate insertions/deletions/moves
+            // and to refresh any cells that have changed content.
+            [weakSelf.collectionView performBatchUpdates:^{
+                typeof(self) strongSelf = weakSelf;
+                NSIndexSet *removed = collectionChanges.removedIndexes;
+                if (removed.count) {
+                    [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                }
+                NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                if (inserted.count) {
+                    [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                    //auto select
+                    if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                        for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                            [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
                         }
                     }
-                    NSIndexSet *changed = collectionChanges.changedIndexes;
-                    if (changed.count) {
-                        [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
-                    }
-                    if (collectionChanges.hasMoves) {
-                        [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                            NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
-                            NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                            
-                            [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-                        }];
-                    }
-                } completion:nil];
-            } else {
-                // Detailed change information is not available;
-                // repopulate the UI from the current fetch result.
-                [weakSelf resetCachedAssets];
-            }
+                }
+                NSIndexSet *changed = collectionChanges.changedIndexes;
+                if (changed.count) {
+                    [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                }
+                if (collectionChanges.hasMoves) {
+                    [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                        NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                        NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                        
+                        [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                    }];
+                }
+            } completion:nil];
+        } else {
+            // Detailed change information is not available;
+            // repopulate the UI from the current fetch result.
+            [weakSelf resetCachedAssets];
         }
+        
     });
 }
 
