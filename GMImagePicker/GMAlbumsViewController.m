@@ -131,6 +131,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 
 -(void)updateFetchResults
 {
+    NSLog(@"updateFetchResults");
     //What I do here is fetch both the albums list and the assets of each album.
     //This way I have acces to the number of items in each album, I can load the 3
     //thumbnails directly and I can pass the fetched result to the gridViewController.
@@ -148,12 +149,14 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
     {
-        PHFetchOptions *options = [[PHFetchOptions alloc] init];
-        options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
-        options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-        PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-        [allFetchResultArray addObject:assetsFetchResult];
-        [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+        if(![self.picker.mediaTypes isEqual:[NSNull null]] && self.picker != nil){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+        }
     }
     
     //User albums:
@@ -163,15 +166,17 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
         {
-            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
-            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-            
-            //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
-            
-            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            [userFetchResultArray addObject:assetsFetchResult];
-            [userFetchResultLabel addObject:collection.localizedTitle];
+            if(![self.picker.mediaTypes isEqual:[NSNull null]] && self.picker != nil){
+                PHFetchOptions *options = [[PHFetchOptions alloc] init];
+                options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+                PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+                
+                //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
+                
+                PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+                [userFetchResultArray addObject:assetsFetchResult];
+                [userFetchResultLabel addObject:collection.localizedTitle];
+            }
         }
     }
     
@@ -184,19 +189,20 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         if ([collection isKindOfClass:[PHAssetCollection class]])
         {
             PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-            
-            //Smart collections are PHAssetCollectionType=2;
-            if(self.picker.customSmartCollections && [self.picker.customSmartCollections containsObject:@(assetCollection.assetCollectionSubtype)])
-            {
-                PHFetchOptions *options = [[PHFetchOptions alloc] init];
-                options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
-                options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-                
-                PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-                if(assetsFetchResult.count>0)
+            if(![self.picker.mediaTypes isEqual:[NSNull null]] && self.picker != nil){
+                //Smart collections are PHAssetCollectionType=2;
+                if(self.picker.customSmartCollections && [self.picker.customSmartCollections containsObject:@(assetCollection.assetCollectionSubtype)])
                 {
-                    [smartFetchResultArray addObject:assetsFetchResult];
-                    [smartFetchResultLabel addObject:collection.localizedTitle];
+                    PHFetchOptions *options = [[PHFetchOptions alloc] init];
+                    options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+                    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+                    
+                    PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+                    if(assetsFetchResult.count>0)
+                    {
+                        [smartFetchResultArray addObject:assetsFetchResult];
+                        [smartFetchResultLabel addObject:collection.localizedTitle];
+                    }
                 }
             }
         }
@@ -205,47 +211,49 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     
     NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
-    for(PHCollection *collection in myPhotoStream)
-    {
-        if ([collection isKindOfClass:[PHAssetCollection class]])
-        {
-            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-            
-            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
-            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-            
-            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            if(assetsFetchResult.count>0)
-            {
-                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
-                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
-            }
-            
-        }
-    }
+//    for(PHCollection *collection in myPhotoStream)
+//    {
+//        if ([collection isKindOfClass:[PHAssetCollection class]])
+//        {
+//            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+//            
+//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+//            
+//            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+//            
+//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+//            if(assetsFetchResult.count>0)
+//            {
+//                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
+//                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
+//            }
+//            
+//        }
+//    }
     
     NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
-    for(PHCollection *collection in cloudShared)
-    {
-        if ([collection isKindOfClass:[PHAssetCollection class]])
-        {
-            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-            
-            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
-            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-            
-            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            if(assetsFetchResult.count>0)
-            {
-                [cloudSharedFetchResultArray addObject:assetsFetchResult];
-                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
-            }
-            
-        }
-    }
+//    for(PHCollection *collection in cloudShared)
+//    {
+//        if ([collection isKindOfClass:[PHAssetCollection class]])
+//        {
+//            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+//            
+//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+//            
+//            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+//            
+//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+//            if(assetsFetchResult.count>0)
+//            {
+//                [cloudSharedFetchResultArray addObject:assetsFetchResult];
+//                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
+//            }
+//            
+//        }
+//    }
     
     self.collectionsFetchResultsAssets= @[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray];
     self.collectionsFetchResultsTitles= @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel];
@@ -446,12 +454,13 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         // This only affects to changes in albums level (add/remove/edit album)
         if (updatedCollectionsFetchResults) {
             self.collectionsFetchResults = updatedCollectionsFetchResults;
+            [self updateFetchResults];
+            [self.tableView reloadData];
         }
         
         // However, we want to update if photos are added, so the counts of items & thumbnails are updated too.
         // Maybe some checks could be done here , but for now is OKey.
-        [self updateFetchResults];
-        [self.tableView reloadData];
+        
         
     });
 }
@@ -469,3 +478,4 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 
 
 @end
+

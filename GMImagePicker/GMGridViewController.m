@@ -74,7 +74,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 {
     //Custom init. The picker contains custom information to create the FlowLayout
     self.picker = picker;
-
+    
     //Ipad popover is not affected by rotation!
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
     {
@@ -94,24 +94,36 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             screenHeight = CGRectGetHeight(picker.view.bounds);
         }
     }
-
-
+    
+    
     UICollectionViewFlowLayout *layout = [self collectionViewFlowLayoutForOrientation:[UIApplication sharedApplication].statusBarOrientation];
     if (self = [super initWithCollectionViewLayout:layout])
     {
         //Compute the thumbnail pixel size:
         CGFloat scale = [UIScreen mainScreen].scale;
         //NSLog(@"This is @%fx scale device", scale);
-        AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
-
+        NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+            if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                // iOS 8.0.1 and above logic
+                AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+            } else {
+                // iOS 8.0.0 and below logic
+                AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
+            }
+            
+        }else{
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+        }
+        
         self.collectionView.allowsMultipleSelection = picker.allowsMultipleSelection;
-
+        
         [self.collectionView registerClass:GMGridViewCell.class
                 forCellWithReuseIdentifier:GMGridViewCellIdentifier];
-
+        
         self.preferredContentSize = kPopoverContentSize;
     }
-
+    
     return self;
 }
 
@@ -119,27 +131,30 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 {
     [super viewDidLoad];
     [self setupViews];
-
+    
     // Navigation bar customization
     if (self.picker.customNavigationBarPrompt) {
         self.navigationItem.prompt = self.picker.customNavigationBarPrompt;
     }
-
+    
     self.imageManager = [[PHCachingImageManager alloc] init];
     // This keeps memory usage to a sensible size when working with large photo collections.
     self.imageManager.allowsCachingHighQualityImages = NO;
-
+    
     // The same applies to our PHImageRequestOptions.
     // PHImageRequestOptionsDeliveryModeOpportunistic is a good compromise: it provides a lower quality image quickly
     // and then a higher quality image later, without excessive memory usage.
     self.imageRequestOptions = [[PHImageRequestOptions alloc] init];
     self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
     self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
-
+    self.imageRequestOptions.synchronous = NO;
+    self.imageRequestOptions.networkAccessAllowed = YES;
+    
+    
     [self resetCachedAssets];
-
+    
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
-
+    
     if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)])
     {
         self.edgesForExtendedLayout = UIRectEdgeNone;
@@ -149,7 +164,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
     [self setupButtons];
     [self setupToolbar];
 }
@@ -176,41 +191,62 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
+    
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         return;
     }
-
+    
     UIInterfaceOrientation toInterfaceOrientation = (size.height > size.width ? UIInterfaceOrientationPortrait
                                                      : UIInterfaceOrientationLandscapeLeft);
-
+    
     UICollectionViewFlowLayout *layout = [self collectionViewFlowLayoutForOrientation:toInterfaceOrientation];
-
+    
     //Update the AssetGridThumbnailSize:
     CGFloat scale = [UIScreen mainScreen].scale;
-    AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
-
+    NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+    if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+        if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+            // iOS 8.0.1 and above logic
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+        } else {
+            // iOS 8.0.0 and below logic
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
+        }
+        
+    }else{
+        AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+    }
+    
     [self resetCachedAssets];
-
+    
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-            //This is optional. Reload visible thumbnails:
-            for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
-                NSInteger currentTag = cell.tag;
-
-                [self.imageManager requestImageForAsset:cell.asset
-                                             targetSize:AssetGridThumbnailSize
-                                            contentMode:PHImageContentModeAspectFill
-                                                options:self.imageRequestOptions
-                                          resultHandler:^(UIImage *result, NSDictionary *info) {
-                                              // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                              if (cell.tag == currentTag) {
-                                                  [cell.imageView setImage:result];
-                                              }
-                                          }];
+        //This is optional. Reload visible thumbnails:
+        for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
+            NSInteger currentTag = cell.tag;
+            
+            
+            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:cell.asset
+                                                                      targetSize:AssetGridThumbnailSize
+                                                                     contentMode:PHImageContentModeAspectFill
+                                                                         options:self.imageRequestOptions
+                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
+                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                                           if (cell.tag == currentTag) {
+                                                                               [cell.imageView setImage:result];
+                                                                           }
+                                                                       });
+                                                                       
+                                                                   }];
+            if(requestID != cell.assetRequestID){
+                [cell cancelImageRequest];
+                cell.assetRequestID = requestID;
             }
-
-            [self.collectionView setCollectionViewLayout:layout animated:NO];
-        } completion:nil];
+            
+        }
+        
+        [self.collectionView setCollectionViewLayout:layout animated:NO];
+    } completion:nil];
 }
 
 #pragma mark - Setup
@@ -229,7 +265,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                                                                   style:UIBarButtonItemStyleDone
                                                                                  target:self.picker
                                                                                  action:@selector(finishPickingAssets:)];
-
+        
         self.navigationItem.rightBarButtonItem.enabled = (self.picker.autoDisableDoneButton ? self.picker.selectedAssets.count > 0 : TRUE);
     } else {
         NSString *cancelTitle = self.picker.customCancelButtonTitle ? self.picker.customCancelButtonTitle : NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel");
@@ -245,7 +281,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
             [self.navigationItem.rightBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateSelected];
         }
     }
-
+    
 }
 
 - (void)setupToolbar
@@ -319,57 +355,68 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
-                                                             forIndexPath:indexPath];
-
+    __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
+                                                                             forIndexPath:indexPath];
+    
     // Increment the cell's tag
     NSInteger currentTag = cell.tag + 1;
     cell.tag = currentTag;
-
+    
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+     {
+     NSLog(@"Image manager: Requesting FIT image for iPad");
+     [self.imageManager requestImageForAsset:asset
+     targetSize:AssetGridThumbnailSize
+     contentMode:PHImageContentModeAspectFit
+     options:self.imageRequestOptions
+     resultHandler:^(UIImage *result, NSDictionary *info) {
+     
+     // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+     if (cell.tag == currentTag) {
+     [cell.imageView setImage:result];
+     }
+     }];
+     }
+     else*/
+    
     {
-        NSLog(@"Image manager: Requesting FIT image for iPad");
-        [self.imageManager requestImageForAsset:asset
-                                     targetSize:AssetGridThumbnailSize
-                                    contentMode:PHImageContentModeAspectFit
-                                        options:self.imageRequestOptions
-                                  resultHandler:^(UIImage *result, NSDictionary *info) {
-
-                                      // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                      if (cell.tag == currentTag) {
-                                          [cell.imageView setImage:result];
-                                      }
-                                  }];
-    }
-    else*/
-    {
+        
         //NSLog(@"Image manager: Requesting FILL image for iPhone");
-        [self.imageManager requestImageForAsset:asset
-                                     targetSize:AssetGridThumbnailSize
-                                    contentMode:PHImageContentModeAspectFill
-                                        options:self.imageRequestOptions
-                                  resultHandler:^(UIImage *result, NSDictionary *info) {
-                                      // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                      if (cell.tag == currentTag) {
-                                          [cell.imageView setImage:result];
-                                      }
-                                  }];
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
+                                                                      targetSize:AssetGridThumbnailSize
+                                                                     contentMode:PHImageContentModeAspectFill
+                                                                         options:self.imageRequestOptions
+                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
+                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                                           if (cell.tag == currentTag) {
+                                                                               [cell.imageView setImage:result];
+                                                                           }
+                                                                       });
+                                                                       
+                                                                   }];
+            if(requestID != cell.assetRequestID){
+                [cell cancelImageRequest];
+                cell.assetRequestID = requestID;
+            }
+        });
     }
-
-
+    
+    
     [cell bind:asset];
-
+    
     cell.shouldShowSelection = self.picker.allowsMultipleSelection;
-
+    
     // Optional protocol to determine if some kind of assets can't be selected (pej long videos, etc...)
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldEnableAsset:)]) {
         cell.enabled = [self.picker.delegate assetsPickerController:self.picker shouldEnableAsset:asset];
     } else {
         cell.enabled = YES;
     }
-
+    
     // Setting `selected` property blocks further deselection. Have to call selectItemAtIndexPath too. ( ref: http://stackoverflow.com/a/17812116/1648333 )
     if ([self.picker.selectedAssets containsObject:asset]) {
         cell.selected = YES;
@@ -377,7 +424,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     } else {
         cell.selected = NO;
     }
-
+    
     return cell;
 }
 
@@ -387,9 +434,9 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-
+    
     if (!cell.isEnabled) {
         return NO;
     } else if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldSelectAsset:)]) {
@@ -402,9 +449,9 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     [self.picker selectAsset:asset];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
         [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
     }
@@ -413,7 +460,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
         return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
     } else {
@@ -424,9 +471,9 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     [self.picker deselectAsset:asset];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
         [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
     }
@@ -435,7 +482,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
         return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
     } else {
@@ -446,7 +493,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)]) {
         [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
     }
@@ -455,7 +502,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
-
+    
     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)]) {
         [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
     }
@@ -473,52 +520,130 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 
 #pragma mark - PHPhotoLibraryChangeObserver
-
-- (void)photoLibraryDidChange:(PHChange *)changeInstance
-{
-    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+- (void)photoLibraryDidChange:(PHChange *)changeInfo {
+    // Photos may call this method on a background queue;
+    // switch to the main queue to update the UI.
+    __weak __typeof(self) weakSelf = self;
+    PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
+    if (collectionChanges == nil) {
+        return;
+    }
+    weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
     dispatch_async(dispatch_get_main_queue(), ^{
-
-        // check if there are changes to the assets (insertions, deletions, updates)
-        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
-        if (collectionChanges) {
-
-            // get the new fetch result
-            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-
-            UICollectionView *collectionView = self.collectionView;
-
-            if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
-                // we need to reload all if the incremental diffs are not available
-                [collectionView reloadData];
-
-            } else {
-                // if we have incremental diffs, tell the collection view to animate insertions and deletions
-                [collectionView performBatchUpdates:^{
-                    NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
-                    if ([removedIndexes count]) {
-                        [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                    }
-                    NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
-                    if ([insertedIndexes count]) {
-                        [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                        if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
-                            for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
-                                [self collectionView:collectionView didSelectItemAtIndexPath:path];
-                            }
+        // Check for changes to the displayed album itself
+        // (its existence and metadata, not its member assets).
+        
+        // Check for changes to the list of assets (insertions, deletions, moves, or updates).
+        
+        
+        // Get the new fetch result for future change tracking.
+        
+        
+        if (collectionChanges.hasIncrementalChanges)  {
+            // Tell the collection view to animate insertions/deletions/moves
+            // and to refresh any cells that have changed content.
+            [weakSelf.collectionView performBatchUpdates:^{
+                typeof(self) strongSelf = weakSelf;
+                NSIndexSet *removed = collectionChanges.removedIndexes;
+                if (removed.count) {
+                    [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                }
+                NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                if (inserted.count) {
+                    [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                    //auto select
+                    if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                        for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                            [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
                         }
                     }
-                    NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
-                    if ([changedIndexes count]) {
-                        [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
-                    }
-                } completion:NULL];
-            }
-
-            [self resetCachedAssets];
+                }
+                NSIndexSet *changed = collectionChanges.changedIndexes;
+                if (changed.count) {
+                    [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                }
+                if (collectionChanges.hasMoves) {
+                    [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                        NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                        NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                        
+                        [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                    }];
+                }
+            } completion:nil];
+        } else {
+            // Detailed change information is not available;
+            // repopulate the UI from the current fetch result.
+            [weakSelf resetCachedAssets];
         }
+        
     });
 }
+
+- (NSArray *)indexPathsFromIndexSet:(NSIndexSet *)indexSet withSection:(int)section {
+    if (indexSet == nil) {
+        return nil;
+    }
+    NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
+    
+    [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        [indexPaths addObject:[NSIndexPath indexPathForItem:idx inSection:section]];
+    }];
+    
+    return indexPaths;
+}
+//- (void)photoLibraryDidChange:(PHChange *)changeInstance
+//{
+//    //http://crashes.to/s/0483c5ef912
+//    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+//    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//
+//        // check if there are changes to the assets (insertions, deletions, updates)
+//        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
+//        if (collectionChanges) {
+//
+//            // get the new fetch result
+//            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+//
+//            UICollectionView *collectionView = self.collectionView;
+//
+//            if(collectionView != nil){
+//                if (![collectionChanges hasIncrementalChanges] || [collectionChanges hasMoves]) {
+//                    // we need to reload all if the incremental diffs are not available
+//                    [collectionView reloadData];
+//
+//                } else {
+//                    // if we have incremental diffs, tell the collection view to animate insertions and deletions
+//                    [collectionView performBatchUpdates:^{
+//                        NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
+//                        if ([removedIndexes count]) {
+//                            [collectionView deleteItemsAtIndexPaths:[removedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                        }
+//                        NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
+//                        if ([insertedIndexes count]) {
+//                            [collectionView insertItemsAtIndexPaths:[insertedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                            if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
+//                                for (NSIndexPath *path in [insertedIndexes aapl_indexPathsFromIndexesWithSection:0]) {
+//                                    [self collectionView:collectionView didSelectItemAtIndexPath:path];
+//                                }
+//                            }
+//                        }
+//                        NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
+//                        if ([changedIndexes count]) {
+//                            [collectionView reloadItemsAtIndexPaths:[changedIndexes aapl_indexPathsFromIndexesWithSection:0]];
+//                        }
+//                    } completion:^(BOOL finished) {
+//                        [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+//                    }];
+//                }
+//            }
+//            [self resetCachedAssets];
+//        }else{
+//            [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+//        }
+//    });
+//}
 
 
 #pragma mark - UIScrollViewDelegate
@@ -532,6 +657,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 - (void)resetCachedAssets
 {
+    NSArray *visibleCells = self.collectionView.visibleCells;
+    [visibleCells enumerateObjectsUsingBlock:^(GMGridViewCell *cell, NSUInteger idx, BOOL * _Nonnull stop) {
+        [cell cancelImageRequest];
+    }];
+    
     [self.imageManager stopCachingImagesForAllAssets];
     self.previousPreheatRect = CGRectZero;
 }
@@ -540,42 +670,42 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 {
     BOOL isViewVisible = [self isViewLoaded] && [[self view] window] != nil;
     if (!isViewVisible) { return; }
-
+    
     // The preheat window is twice the height of the visible rect
     CGRect preheatRect = self.collectionView.bounds;
     preheatRect = CGRectInset(preheatRect, 0.0f, -0.5f * CGRectGetHeight(preheatRect));
-
+    
     // If scrolled by a "reasonable" amount...
     CGFloat delta = ABS(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect));
     if (delta > CGRectGetHeight(self.collectionView.bounds) / 3.0f) {
-
+        
         // Compute the assets to start caching and to stop caching.
         NSMutableArray *addedIndexPaths = [NSMutableArray array];
         NSMutableArray *removedIndexPaths = [NSMutableArray array];
-
+        
         [self computeDifferenceBetweenRect:self.previousPreheatRect
                                    andRect:preheatRect
                             removedHandler:^(CGRect removedRect) {
-                NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:removedRect];
-                [removedIndexPaths addObjectsFromArray:indexPaths];
-            } addedHandler:^(CGRect addedRect) {
-                NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:addedRect];
-                [addedIndexPaths addObjectsFromArray:indexPaths];
-            }];
-
+                                NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:removedRect];
+                                [removedIndexPaths addObjectsFromArray:indexPaths];
+                            } addedHandler:^(CGRect addedRect) {
+                                NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:addedRect];
+                                [addedIndexPaths addObjectsFromArray:indexPaths];
+                            }];
+        
         NSArray *assetsToStartCaching = [self assetsAtIndexPaths:addedIndexPaths];
         NSArray *assetsToStopCaching = [self assetsAtIndexPaths:removedIndexPaths];
-
+        
         [self.imageManager startCachingImagesForAssets:assetsToStartCaching
                                             targetSize:AssetGridThumbnailSize
                                            contentMode:PHImageContentModeAspectFill
                                                options:nil];
-
+        
         [self.imageManager stopCachingImagesForAssets:assetsToStopCaching
                                            targetSize:AssetGridThumbnailSize
                                           contentMode:PHImageContentModeAspectFill
                                               options:nil];
-
+        
         self.previousPreheatRect = preheatRect;
     }
 }
@@ -612,7 +742,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (NSArray *)assetsAtIndexPaths:(NSArray *)indexPaths
 {
     if (indexPaths.count == 0) { return nil; }
-
+    
     NSMutableArray *assets = [NSMutableArray arrayWithCapacity:indexPaths.count];
     for (NSIndexPath *indexPath in indexPaths) {
         PHAsset *asset = self.assetsFetchResults[indexPath.item];

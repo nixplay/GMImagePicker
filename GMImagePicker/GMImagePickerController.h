@@ -170,6 +170,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 @property (nonatomic) CGFloat pickerFontNormalSize;
 @property (nonatomic) CGFloat pickerFontHeaderSize;
 @property (nonatomic) UIStatusBarStyle pickerStatusBarStyle;
+@property (nonatomic) UIBarStyle barStyle;
 @property (nonatomic) BOOL useCustomFontForNavigationBar;
 
 /**
@@ -338,5 +339,9 @@ static CGSize const kPopoverContentSize = {480, 720};
 - (BOOL)shouldAutorotate;
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
+
+
+- (NSInteger)assetsPickerControllerColumnInPortrait;
+- (NSInteger)assetsPickerControllerColumnInLandscape;
 
 @end

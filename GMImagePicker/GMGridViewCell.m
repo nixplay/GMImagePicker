@@ -22,7 +22,8 @@ static UIColor *titleColor;
 static UIImage *checkedIcon;
 static UIColor *selectedColor;
 static UIColor *disabledColor;
-
+static UIColor *backgroundColor;
+@synthesize assetRequestID = _assetRequestID;
 + (void)initialize
 {
     titleFont       = [UIFont systemFontOfSize:12];
@@ -30,8 +31,10 @@ static UIColor *disabledColor;
     videoIcon       = [UIImage imageNamed:@"GMImagePickerVideo"];
     titleColor      = [UIColor whiteColor];
     checkedIcon     = [UIImage imageNamed:@"CTAssetsPickerChecked"];
+    backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0];
     selectedColor   = [UIColor colorWithWhite:1 alpha:0.3];
     disabledColor   = [UIColor colorWithWhite:1 alpha:0.9];
+    
 }
 
 - (void)awakeFromNib
@@ -49,11 +52,12 @@ static UIColor *disabledColor;
         self.enabled                = YES;
         
         CGFloat cellSize = self.contentView.bounds.size.width;
-        
+        self.backgroundColor = backgroundColor;
         // The image view
         _imageView = [UIImageView new];
         _imageView.frame = CGRectMake(0, 0, cellSize, cellSize);
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
+        _assetRequestID  = PHInvalidImageRequestID;
         /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         {
             _imageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -171,6 +175,15 @@ static UIColor *disabledColor;
     NSInteger minutes = (ti / 60) % 60;
     //NSInteger hours = (ti / 3600);
     return [NSString stringWithFormat:@"%02ld:%02ld", (long)minutes, (long)seconds];
+}
+
+- (void)cancelImageRequest {
+    
+    if (_assetRequestID != PHInvalidImageRequestID) {
+        [[PHImageManager defaultManager] cancelImageRequest:_assetRequestID];
+        _assetRequestID = PHInvalidImageRequestID;
+        
+    }
 }
 
 @end

@@ -44,8 +44,27 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        _colsInPortrait = 3;
-        _colsInLandscape = 5;
+        if([self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInPortrait)] && [self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInLandscape)]) {
+            _colsInPortrait =  [self.delegate assetsPickerControllerColumnInPortrait];
+            _colsInLandscape =  [self.delegate assetsPickerControllerColumnInLandscape];
+        } else {
+            NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+            if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+                if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                    // iOS 8.0.1 and above logic
+                    _colsInPortrait = 6;
+                    _colsInLandscape = 10;
+                } else {
+                    // iOS 8.0.0 and below logic
+                    _colsInPortrait = 4;
+                    _colsInLandscape = 5;
+                }
+                
+            }else{
+                _colsInPortrait = 3;
+                _colsInLandscape = 5;
+            }
+        }
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
@@ -87,6 +106,7 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
+        _barStyle = UIBarStyleDefault;
         [self setupNavigationController];
     }
     return self;
@@ -106,8 +126,28 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        _colsInPortrait = 3;
-        _colsInLandscape = 5;
+        if([self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInPortrait)] && [self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInLandscape)]) {
+            _colsInPortrait =  [self.delegate assetsPickerControllerColumnInPortrait];
+            _colsInLandscape =  [self.delegate assetsPickerControllerColumnInLandscape];
+        } else {
+            NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+            if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+                if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                    // iOS 8.0.1 and above logic
+                    _colsInPortrait = 6;
+                    _colsInLandscape = 10;
+                } else {
+                    // iOS 8.0.0 and below logic
+                    _colsInPortrait = 4;
+                    _colsInLandscape = 5;
+                }
+                
+            }else{
+                _colsInPortrait = 3;
+                _colsInLandscape = 5;
+            }
+        }
+        
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
@@ -145,9 +185,10 @@
         _toolbarTintColor = [UIColor darkTextColor];
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
+        _barStyle = UIBarStyleDefault;
         // Save to the album
         
-        [self setupNavigationController];
+
         
         
     }
@@ -168,6 +209,10 @@
     
     _navigationController.navigationBar.backgroundColor = _navigationBarBackgroundColor;
     _navigationController.navigationBar.tintColor = _navigationBarTintColor;
+    
+    _navigationController.navigationBar.barStyle = _barStyle;
+    _navigationController.navigationBar.barTintColor = _toolbarBarTintColor;
+    
     NSDictionary *attributes;
     if (_useCustomFontForNavigationBar) {
         attributes = @{NSForegroundColorAttributeName : _navigationBarTextColor,
@@ -239,16 +284,18 @@
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
     {
-        PHFetchOptions *options = [[PHFetchOptions alloc] init];
-        if(_allow_video){
-            _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            if(_allow_video){
+                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+            }
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
         }
-        options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
-        options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-        PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-        
-        [allFetchResultArray addObject:assetsFetchResult];
-        [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
     }
     
     albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
@@ -435,8 +482,12 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
-    picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+    if(_allow_video){
+        picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
+        picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+    }else{
+        picker.mediaTypes = @[(NSString *)kUTTypeImage];
+    }
     picker.allowsEditing = NO;
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
