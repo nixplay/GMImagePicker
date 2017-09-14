@@ -340,4 +340,8 @@ static CGSize const kPopoverContentSize = {480, 720};
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations;
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 
+
+- (NSInteger)assetsPickerControllerColumnInPortrait;
+- (NSInteger)assetsPickerControllerColumnInLandscape;
+
 @end

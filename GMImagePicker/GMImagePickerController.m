@@ -44,12 +44,26 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
-            _colsInPortrait = 6;
-            _colsInLandscape = 10;
-        }else{
-            _colsInPortrait = 3;
-            _colsInLandscape = 5;
+        if([self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInPortrait)] && [self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInLandscape)]) {
+            _colsInPortrait =  [self.delegate assetsPickerControllerColumnInPortrait];
+            _colsInLandscape =  [self.delegate assetsPickerControllerColumnInLandscape];
+        } else {
+            NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+            if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+                if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                    // iOS 8.0.1 and above logic
+                    _colsInPortrait = 6;
+                    _colsInLandscape = 10;
+                } else {
+                    // iOS 8.0.0 and below logic
+                    _colsInPortrait = 4;
+                    _colsInLandscape = 5;
+                }
+                
+            }else{
+                _colsInPortrait = 3;
+                _colsInLandscape = 5;
+            }
         }
         _minimumInteritemSpacing = 2.0;
         
@@ -112,13 +126,28 @@
         _showCameraButton = NO;
         
         // Grid configuration:
-        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
-            _colsInPortrait = 6;
-            _colsInLandscape = 10;
-        }else{
-            _colsInPortrait = 3;
-            _colsInLandscape = 5;
+        if([self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInPortrait)] && [self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInLandscape)]) {
+            _colsInPortrait =  [self.delegate assetsPickerControllerColumnInPortrait];
+            _colsInLandscape =  [self.delegate assetsPickerControllerColumnInLandscape];
+        } else {
+            NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+            if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+                if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                    // iOS 8.0.1 and above logic
+                    _colsInPortrait = 6;
+                    _colsInLandscape = 10;
+                } else {
+                    // iOS 8.0.0 and below logic
+                    _colsInPortrait = 4;
+                    _colsInLandscape = 5;
+                }
+                
+            }else{
+                _colsInPortrait = 3;
+                _colsInLandscape = 5;
+            }
         }
+        
         _minimumInteritemSpacing = 2.0;
         
         // Sample of how to select the collections you want to display:
@@ -159,7 +188,7 @@
         _barStyle = UIBarStyleDefault;
         // Save to the album
         
-        [self setupNavigationController];
+
         
         
     }

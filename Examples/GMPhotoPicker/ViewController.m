@@ -39,6 +39,7 @@
             
         } completionHandler:^(BOOL success, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
+                
                 GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil delegate:self];
                 picker.delegate = self;
                 picker.title = @"Custom title";
@@ -60,7 +61,7 @@
                 
                 picker.modalPresentationStyle = UIModalPresentationPopover;
                 
-                picker.mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+                picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
                 
                 //    picker.pickerBackgroundColor = [UIColor blackColor];
                 //    picker.pickerTextColor = [UIColor whiteColor];
@@ -153,6 +154,15 @@
 - (NSString*) controllerCustomCancelButtonTitle{
     return @"Nope";
 }
+
+
+- (NSInteger)assetsPickerControllerColumnInPortrait{
+    return 3;
+}
+- (NSInteger)assetsPickerControllerColumnInLandscape{
+    return 4;
+}
+
 
 
 //- (NSString*) controllerCustomNavigationBarPrompt{
