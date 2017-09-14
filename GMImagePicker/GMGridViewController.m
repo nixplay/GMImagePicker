@@ -102,7 +102,19 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         //Compute the thumbnail pixel size:
         CGFloat scale = [UIScreen mainScreen].scale;
         //NSLog(@"This is @%fx scale device", scale);
-        AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+        NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+        if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+            if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+                // iOS 8.0.1 and above logic
+                AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+            } else {
+                // iOS 8.0.0 and below logic
+                AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
+            }
+            
+        }else{
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+        }
         
         self.collectionView.allowsMultipleSelection = picker.allowsMultipleSelection;
         
@@ -191,7 +203,19 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     //Update the AssetGridThumbnailSize:
     CGFloat scale = [UIScreen mainScreen].scale;
-    AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+    NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
+    if([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
+        if ([[NSProcessInfo processInfo] isOperatingSystemAtLeastVersion:ios10_0_1]) {
+            // iOS 8.0.1 and above logic
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+        } else {
+            // iOS 8.0.0 and below logic
+            AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
+        }
+        
+    }else{
+        AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
+    }
     
     [self resetCachedAssets];
     
@@ -200,16 +224,25 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
             NSInteger currentTag = cell.tag;
             
-            [self.imageManager requestImageForAsset:cell.asset
-                                         targetSize:AssetGridThumbnailSize
-                                        contentMode:PHImageContentModeAspectFill
-                                            options:self.imageRequestOptions
-                                      resultHandler:^(UIImage *result, NSDictionary *info) {
-                                          // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                          if (cell.tag == currentTag) {
-                                              [cell.imageView setImage:result];
-                                          }
-                                      }];
+            
+            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:cell.asset
+                                                                      targetSize:AssetGridThumbnailSize
+                                                                     contentMode:PHImageContentModeAspectFill
+                                                                         options:self.imageRequestOptions
+                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
+                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                                           if (cell.tag == currentTag) {
+                                                                               [cell.imageView setImage:result];
+                                                                           }
+                                                                       });
+                                                                       
+                                                                   }];
+            if(requestID != cell.assetRequestID){
+                [cell cancelImageRequest];
+                cell.assetRequestID = requestID;
+            }
+            
         }
         
         [self.collectionView setCollectionViewLayout:layout animated:NO];
@@ -322,8 +355,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
-                                                                     forIndexPath:indexPath];
+    __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
+                                                                             forIndexPath:indexPath];
     
     // Increment the cell's tag
     NSInteger currentTag = cell.tag + 1;
@@ -347,25 +380,29 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
      }];
      }
      else*/
+    
     {
+        
         //NSLog(@"Image manager: Requesting FILL image for iPhone");
-        PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
-                                     targetSize:AssetGridThumbnailSize
-                                    contentMode:PHImageContentModeAspectFill
-                                        options:self.imageRequestOptions
-                                  resultHandler:^(UIImage *result, NSDictionary *info) {
-                                      // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                      dispatch_async(dispatch_get_main_queue(), ^{
-                                          if (cell.tag == currentTag) {
-                                              [cell.imageView setImage:result];
-                                          }
-                                      });
-                                      
-                                  }];
-        if(requestID != cell.assetRequestID){
-            [cell cancelImageRequest];
-            cell.assetRequestID = requestID;
-        }
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
+                                                                      targetSize:AssetGridThumbnailSize
+                                                                     contentMode:PHImageContentModeAspectFill
+                                                                         options:self.imageRequestOptions
+                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
+                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                                                       dispatch_async(dispatch_get_main_queue(), ^{
+                                                                           if (cell.tag == currentTag) {
+                                                                               [cell.imageView setImage:result];
+                                                                           }
+                                                                       });
+                                                                       
+                                                                   }];
+            if(requestID != cell.assetRequestID){
+                [cell cancelImageRequest];
+                cell.assetRequestID = requestID;
+            }
+        });
     }
     
     
@@ -487,54 +524,59 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     // Photos may call this method on a background queue;
     // switch to the main queue to update the UI.
     __weak __typeof(self) weakSelf = self;
+    PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
+    if (collectionChanges == nil) {
+        return;
+    }
+    weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
     dispatch_async(dispatch_get_main_queue(), ^{
         // Check for changes to the displayed album itself
         // (its existence and metadata, not its member assets).
         
         // Check for changes to the list of assets (insertions, deletions, moves, or updates).
-        PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
-        if (collectionChanges) {
-            // Get the new fetch result for future change tracking.
-            weakSelf.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
-            
-            if (collectionChanges.hasIncrementalChanges)  {
-                // Tell the collection view to animate insertions/deletions/moves
-                // and to refresh any cells that have changed content.
-                [weakSelf.collectionView performBatchUpdates:^{
-                    typeof(self) strongSelf = weakSelf;
-                    NSIndexSet *removed = collectionChanges.removedIndexes;
-                    if (removed.count) {
-                        [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
-                    }
-                    NSIndexSet *inserted = collectionChanges.insertedIndexes;
-                    if (inserted.count) {
-                        [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
-                        //auto select
-                        if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
-                            for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
-                                [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
-                            }
+        
+        
+        // Get the new fetch result for future change tracking.
+        
+        
+        if (collectionChanges.hasIncrementalChanges)  {
+            // Tell the collection view to animate insertions/deletions/moves
+            // and to refresh any cells that have changed content.
+            [weakSelf.collectionView performBatchUpdates:^{
+                typeof(self) strongSelf = weakSelf;
+                NSIndexSet *removed = collectionChanges.removedIndexes;
+                if (removed.count) {
+                    [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                }
+                NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                if (inserted.count) {
+                    [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                    //auto select
+                    if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                        for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                            [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
                         }
                     }
-                    NSIndexSet *changed = collectionChanges.changedIndexes;
-                    if (changed.count) {
-                        [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
-                    }
-                    if (collectionChanges.hasMoves) {
-                        [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                            NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
-                            NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                            
-                            [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-                        }];
-                    }
-                } completion:nil];
-            } else {
-                // Detailed change information is not available;
-                // repopulate the UI from the current fetch result.
-                [weakSelf resetCachedAssets];
-            }
+                }
+                NSIndexSet *changed = collectionChanges.changedIndexes;
+                if (changed.count) {
+                    [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                }
+                if (collectionChanges.hasMoves) {
+                    [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                        NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                        NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                        
+                        [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                    }];
+                }
+            } completion:nil];
+        } else {
+            // Detailed change information is not available;
+            // repopulate the UI from the current fetch result.
+            [weakSelf resetCachedAssets];
         }
+        
     });
 }
 
@@ -615,6 +657,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 - (void)resetCachedAssets
 {
+    NSArray *visibleCells = self.collectionView.visibleCells;
+    [visibleCells enumerateObjectsUsingBlock:^(GMGridViewCell *cell, NSUInteger idx, BOOL * _Nonnull stop) {
+        [cell cancelImageRequest];
+    }];
+    
     [self.imageManager stopCachingImagesForAllAssets];
     self.previousPreheatRect = CGRectZero;
 }

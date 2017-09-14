@@ -22,8 +22,8 @@ static UIColor *titleColor;
 static UIImage *checkedIcon;
 static UIColor *selectedColor;
 static UIColor *disabledColor;
-static PHImageRequestID assetRequestID;
-
+static UIColor *backgroundColor;
+@synthesize assetRequestID = _assetRequestID;
 + (void)initialize
 {
     titleFont       = [UIFont systemFontOfSize:12];
@@ -31,9 +31,10 @@ static PHImageRequestID assetRequestID;
     videoIcon       = [UIImage imageNamed:@"GMImagePickerVideo"];
     titleColor      = [UIColor whiteColor];
     checkedIcon     = [UIImage imageNamed:@"CTAssetsPickerChecked"];
+    backgroundColor = [UIColor colorWithWhite:0.9 alpha:1.0];
     selectedColor   = [UIColor colorWithWhite:1 alpha:0.3];
     disabledColor   = [UIColor colorWithWhite:1 alpha:0.9];
-    assetRequestID  = PHInvalidImageRequestID;
+    
 }
 
 - (void)awakeFromNib
@@ -51,11 +52,12 @@ static PHImageRequestID assetRequestID;
         self.enabled                = YES;
         
         CGFloat cellSize = self.contentView.bounds.size.width;
-        
+        self.backgroundColor = backgroundColor;
         // The image view
         _imageView = [UIImageView new];
         _imageView.frame = CGRectMake(0, 0, cellSize, cellSize);
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
+        _assetRequestID  = PHInvalidImageRequestID;
         /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         {
             _imageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -176,9 +178,11 @@ static PHImageRequestID assetRequestID;
 }
 
 - (void)cancelImageRequest {
-    if (assetRequestID != PHInvalidImageRequestID) {
-        [[PHImageManager defaultManager] cancelImageRequest:assetRequestID];
-        assetRequestID = PHInvalidImageRequestID;
+    
+    if (_assetRequestID != PHInvalidImageRequestID) {
+        [[PHImageManager defaultManager] cancelImageRequest:_assetRequestID];
+        _assetRequestID = PHInvalidImageRequestID;
+        
     }
 }
 
