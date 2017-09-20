@@ -309,18 +309,18 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     cell.tag = currentTag;
     
     // Set the label
-    cell.textLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize];
-    cell.textLabel.text = (self.collectionsFetchResultsTitles[indexPath.section])[indexPath.row];
-    cell.textLabel.textColor = self.picker.pickerTextColor;
+    ((GMAlbumsViewCell*)cell).titleLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize];
+    ((GMAlbumsViewCell*)cell).titleLabel.text = (self.collectionsFetchResultsTitles[indexPath.section])[indexPath.row];
+    ((GMAlbumsViewCell*)cell).titleLabel.textColor = self.picker.pickerTextColor;
     
     // Retrieve the pre-fetched assets for this album:
     PHFetchResult *assetsFetchResult = (self.collectionsFetchResultsAssets[indexPath.section])[indexPath.row];
     
     // Display the number of assets
     if (self.picker.displayAlbumsNumberOfAssets) {
-        cell.detailTextLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontNormalSize];
-        cell.detailTextLabel.text = [self tableCellSubtitle:assetsFetchResult];
-        cell.detailTextLabel.textColor = self.picker.pickerTextColor;
+        cell.infoLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontNormalSize];
+        cell.infoLabel.text = [self tableCellSubtitle:assetsFetchResult];
+        cell.infoLabel.textColor = self.picker.pickerTextColor;
     }
     
     // Set the 3 images (if exists):
@@ -394,7 +394,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     // Init the GMGridViewController
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:[self picker]];
     // Set the title
-    gridViewController.title = cell.textLabel.text;
+    gridViewController.title = ((GMAlbumsViewCell*)cell).titleLabel.text;
     // Use the prefetched assets!
     gridViewController.assetsFetchResults = [[_collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
