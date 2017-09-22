@@ -7,7 +7,7 @@
 //
 
 #import "GMGridViewCell.h"
-
+#import "Masonry.h"
 
 @interface GMGridViewCell ()
 @end
@@ -68,8 +68,14 @@ static UIColor *backgroundColor;
         }*/
         _imageView.clipsToBounds = YES;
         _imageView.translatesAutoresizingMaskIntoConstraints = NO;
-        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+//        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_imageView];
+        [_imageView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.width.equalTo(_imageView.superview.mas_width);
+            make.height.equalTo(_imageView.superview.mas_height);
+            make.centerX.equalTo(_imageView.superview.mas_centerX);
+            make.centerY.equalTo(_imageView.superview.mas_centerY);
+        }];
         
         
         // The video gradient, label & icon

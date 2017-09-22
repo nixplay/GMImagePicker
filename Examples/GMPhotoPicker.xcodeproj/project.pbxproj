@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0FFFD67058DA8A379E17EE39 /* libPods-GMPhotoPickerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */; };
 		B31E08651A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084C1A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E08661A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084F1A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E08671A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E08521A0C45BC000D7841 /* GMImagePicker.strings */; };
@@ -34,6 +35,7 @@
 		B3A2F8B119D18A3700A59BE4 /* GMGridViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3A2F8AB19D18A3700A59BE4 /* GMGridViewController.m */; };
 		B3A2F8B219D18A3700A59BE4 /* GMImagePickerController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3A2F8AD19D18A3700A59BE4 /* GMImagePickerController.m */; };
 		D93E0B2E1BE378F6001DA8EC /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D93E0B2D1BE378F6001DA8EC /* MobileCoreServices.framework */; };
+		FC6F46878F3C0AD50859607E /* libPods-GMPhotoPicker.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CBB153843A7BBE531FFB4FD7 /* libPods-GMPhotoPicker.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +49,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		09E0676A85C8504222CB8528 /* Pods-GMPhotoPicker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPicker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker.debug.xcconfig"; sourceTree = "<group>"; };
+		248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GMPhotoPickerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D7651E4B481A1BBEAC1EC0B /* Pods-GMPhotoPicker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPicker.release.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker.release.xcconfig"; sourceTree = "<group>"; };
+		33A34883FEEDAD96B9E12139 /* Pods-GMPhotoPickerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPickerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests.release.xcconfig"; sourceTree = "<group>"; };
+		A71439E475292DF32D7BFE16 /* Pods-GMPhotoPickerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPickerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B31E084D1A0C45BC000D7841 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08501A0C45BC000D7841 /* ca */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ca; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08531A0C45BC000D7841 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = GMImagePicker.strings; sourceTree = "<group>"; };
@@ -84,6 +91,7 @@
 		B3A2F8AB19D18A3700A59BE4 /* GMGridViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMGridViewController.m; sourceTree = "<group>"; };
 		B3A2F8AC19D18A3700A59BE4 /* GMImagePickerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GMImagePickerController.h; sourceTree = "<group>"; };
 		B3A2F8AD19D18A3700A59BE4 /* GMImagePickerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GMImagePickerController.m; sourceTree = "<group>"; };
+		CBB153843A7BBE531FFB4FD7 /* libPods-GMPhotoPicker.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GMPhotoPicker.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D93E0B2D1BE378F6001DA8EC /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -93,6 +101,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D93E0B2E1BE378F6001DA8EC /* MobileCoreServices.framework in Frameworks */,
+				FC6F46878F3C0AD50859607E /* libPods-GMPhotoPicker.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,12 +109,33 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0FFFD67058DA8A379E17EE39 /* libPods-GMPhotoPickerTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		517B5067968BB7E2F35825AC /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				09E0676A85C8504222CB8528 /* Pods-GMPhotoPicker.debug.xcconfig */,
+				2D7651E4B481A1BBEAC1EC0B /* Pods-GMPhotoPicker.release.xcconfig */,
+				A71439E475292DF32D7BFE16 /* Pods-GMPhotoPickerTests.debug.xcconfig */,
+				33A34883FEEDAD96B9E12139 /* Pods-GMPhotoPickerTests.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+		8E3666FCC9F05566C9E13A54 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CBB153843A7BBE531FFB4FD7 /* libPods-GMPhotoPicker.a */,
+				248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		B31E084B1A0C45BC000D7841 /* Base.lproj */ = {
 			isa = PBXGroup;
 			children = (
@@ -177,6 +207,8 @@
 				B37D577619CA3B3A007F64BD /* GMPhotoPicker */,
 				B37D579019CA3B3A007F64BD /* GMPhotoPickerTests */,
 				B37D577519CA3B3A007F64BD /* Products */,
+				517B5067968BB7E2F35825AC /* Pods */,
+				8E3666FCC9F05566C9E13A54 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -270,9 +302,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B37D579719CA3B3A007F64BD /* Build configuration list for PBXNativeTarget "GMPhotoPicker" */;
 			buildPhases = (
+				01FE15F142B400454D519A11 /* [CP] Check Pods Manifest.lock */,
 				B37D577019CA3B3A007F64BD /* Sources */,
 				B37D577119CA3B3A007F64BD /* Frameworks */,
 				B37D577219CA3B3A007F64BD /* Resources */,
+				34EDB26DFC95B061C4520507 /* [CP] Embed Pods Frameworks */,
+				A486E8B40851B6488CA18B84 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -287,9 +322,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B37D579A19CA3B3A007F64BD /* Build configuration list for PBXNativeTarget "GMPhotoPickerTests" */;
 			buildPhases = (
+				A1015D9F00103B038A01BBAC /* [CP] Check Pods Manifest.lock */,
 				B37D578919CA3B3A007F64BD /* Sources */,
 				B37D578A19CA3B3A007F64BD /* Frameworks */,
 				B37D578B19CA3B3A007F64BD /* Resources */,
+				CB6557A38B0403C748030877 /* [CP] Embed Pods Frameworks */,
+				1770DA8150EB9D5C011F9243 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -378,6 +416,105 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		01FE15F142B400454D519A11 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GMPhotoPicker-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1770DA8150EB9D5C011F9243 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		34EDB26DFC95B061C4520507 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1015D9F00103B038A01BBAC /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-GMPhotoPickerTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A486E8B40851B6488CA18B84 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CB6557A38B0403C748030877 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B37D577019CA3B3A007F64BD /* Sources */ = {
@@ -577,6 +714,7 @@
 		};
 		B37D579819CA3B3A007F64BD /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 09E0676A85C8504222CB8528 /* Pods-GMPhotoPicker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -589,6 +727,7 @@
 		};
 		B37D579919CA3B3A007F64BD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2D7651E4B481A1BBEAC1EC0B /* Pods-GMPhotoPicker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -601,6 +740,7 @@
 		};
 		B37D579B19CA3B3A007F64BD /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A71439E475292DF32D7BFE16 /* Pods-GMPhotoPickerTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
@@ -620,6 +760,7 @@
 		};
 		B37D579C19CA3B3A007F64BD /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 33A34883FEEDAD96B9E12139 /* Pods-GMPhotoPickerTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				FRAMEWORK_SEARCH_PATHS = (
