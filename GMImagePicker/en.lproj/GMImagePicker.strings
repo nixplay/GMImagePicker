@@ -1,4 +1,4 @@
-﻿
+
 /* Cancel */
 "picker.navigation.cancel-button" = "Cancel";
 
@@ -28,7 +28,8 @@
 
 /* My Photo Stream */
 "picker.table.my-photo-stream-header" = "MY PHOTO STREAM";
-
+/* My Photo Stream */
+"picker.table.synced-album-header" = "SYNCED ALBUM";
 /* Cloud Shared */
 "picker.table.cloud-shared-header" = "CLOUD SHARED";
 
