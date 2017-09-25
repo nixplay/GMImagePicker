@@ -68,10 +68,35 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     CGFloat screenHeight;
     UICollectionViewFlowLayout *portraitLayout;
     UICollectionViewFlowLayout *landscapeLayout;
+    // Store margins for current setup
+    CGFloat _margin, _gutter, _marginL, _gutterL, _columns, _columnsL;
 }
 
 -(id)initWithPicker:(GMImagePickerController *)picker
 {
+    
+    _columns = 4, _columnsL = 4;
+    _margin = 0, _gutter = 1;
+    _marginL = 0, _gutterL = 1;
+    
+    // For pixel perfection...
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        // iPad
+        _columns = 6, _columnsL = 8;
+        _margin = 1, _gutter = 2;
+        _marginL = 1, _gutterL = 2;
+    } else if ([UIScreen mainScreen].bounds.size.height == 480) {
+        // iPhone 3.5 inch
+        _columns = 3, _columnsL = 4;
+        _margin = 0, _gutter = 1;
+        _marginL = 1, _gutterL = 2;
+    } else {
+        // iPhone 4 inch
+        _columns = 3, _columnsL = 5;
+        _margin = 0, _gutter = 1;
+        _marginL = 0, _gutterL = 2;
+    }
+    
     //Custom init. The picker contains custom information to create the FlowLayout
     self.picker = picker;
     
@@ -465,8 +490,8 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
-    CGFloat margin = 1;//[self getMargin];
-    CGFloat gutter = 1;//[self getGutter];
+    CGFloat margin = [self getMargin];
+    CGFloat gutter = [self getGutter];
     CGFloat columns = [self getColumns];
     
     if(@available(iOS 11, *)){
@@ -478,19 +503,45 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     }
 }
 
--(CGFloat) getColumns{
-    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
-        if(self.picker != nil){
-            return self.picker.colsInPortrait;
-        }
-    } else {
-        if(self.picker != nil){
-            return self.picker.colsInLandscape;
-        }
-    }
-    return 4;
-    
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return [self getGutter];
 }
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return [self getGutter];
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    CGFloat margin = [self getMargin];
+    return UIEdgeInsetsMake(margin, margin, margin, margin);
+}
+
+
+
+- (CGFloat)getMargin {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _margin;
+    } else {
+        return _marginL;
+    }
+}
+
+- (CGFloat)getGutter {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _gutter;
+    } else {
+        return _gutterL;
+    }
+}
+
+- (CGFloat)getColumns {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _columns;
+    } else {
+        return _columnsL;
+    }
+}
+
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
