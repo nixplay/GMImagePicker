@@ -178,7 +178,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     [self resetCachedAssets];
     
-    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    
     
     if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)])
     {
@@ -192,8 +192,14 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     [self setupButtons];
     [self setupToolbar];
+    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
 }
-
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+}
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
@@ -605,6 +611,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 
 #pragma mark - PHPhotoLibraryChangeObserver
+//http://crashes.to/s/0483c5ef912
 - (void)photoLibraryDidChange:(PHChange *)changeInfo {
     // Photos may call this method on a background queue;
     // switch to the main queue to update the UI.
@@ -627,35 +634,40 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         if (collectionChanges.hasIncrementalChanges)  {
             // Tell the collection view to animate insertions/deletions/moves
             // and to refresh any cells that have changed content.
-            [weakSelf.collectionView performBatchUpdates:^{
-                typeof(self) strongSelf = weakSelf;
-                NSIndexSet *removed = collectionChanges.removedIndexes;
-                if (removed.count) {
-                    [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
-                }
-                NSIndexSet *inserted = collectionChanges.insertedIndexes;
-                if (inserted.count) {
-                    [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
-                    //auto select
-                    if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
-                        for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
-                            [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
+            @try {
+                [weakSelf.collectionView performBatchUpdates:^{
+                    typeof(self) strongSelf = weakSelf;
+                    NSIndexSet *removed = collectionChanges.removedIndexes;
+                    if (removed.count) {
+                        [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                    }
+                    NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                    if (inserted.count) {
+                        [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                        //auto select
+                        if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                            for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                                [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
+                            }
                         }
                     }
-                }
-                NSIndexSet *changed = collectionChanges.changedIndexes;
-                if (changed.count) {
-                    [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
-                }
-                if (collectionChanges.hasMoves) {
-                    [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                        NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
-                        NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                        
-                        [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-                    }];
-                }
-            } completion:nil];
+                    NSIndexSet *changed = collectionChanges.changedIndexes;
+                    if (changed.count) {
+                        [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                    }
+                    if (collectionChanges.hasMoves) {
+                        [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                            NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                            NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                            
+                            [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                        }];
+                    }
+                } completion:nil];
+            }@catch (NSException *exception) {
+                [weakSelf.collectionView reloadData];
+            }
+                
         } else {
             // Detailed change information is not available;
             // repopulate the UI from the current fetch result.
@@ -679,7 +691,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 }
 //- (void)photoLibraryDidChange:(PHChange *)changeInstance
 //{
-//    //http://crashes.to/s/0483c5ef912
+//
 //    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
 //    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
 //    dispatch_async(dispatch_get_main_queue(), ^{
