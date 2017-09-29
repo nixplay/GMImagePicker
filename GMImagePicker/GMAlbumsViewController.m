@@ -97,12 +97,15 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
     PHFetchResult *myPhotoStreamAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
     PHFetchResult *cloudSharedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
+    PHFetchResult *syncedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum options:nil];
     
-    self.collectionsFetchResults = @[myPhotoStreamAlbums, smartAlbums, cloudSharedAlbums,topLevelUserCollections];
+    self.collectionsFetchResults = @[topLevelUserCollections, myPhotoStreamAlbums, cloudSharedAlbums, smartAlbums,  syncedAlbums];
+    
     self.collectionsLocalizedTitles = @[NSLocalizedStringFromTableInBundle(@"picker.table.my-photo-stream-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"My Photo Stream"),
                                         NSLocalizedStringFromTableInBundle(@"picker.table.smart-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Smart Albums"),
                                         NSLocalizedStringFromTableInBundle(@"picker.table.cloud-shared-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cloud Shared"),
-                                        NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums")];
+                                        NSLocalizedStringFromTableInBundle(@"picker.table.user-albums-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Albums"),
+                                        NSLocalizedStringFromTableInBundle(@"picker.table.synced-album-header",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Synced Album")];
     
     [self updateFetchResults];
     
@@ -140,10 +143,12 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     self.collectionsFetchResultsTitles=nil;
     
     //Fetch PHAssetCollections:
-    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:0];
-    PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:1];
+//    self.collectionsFetchResults = @[topLevelUserCollections, myPhotoStreamAlbums, cloudSharedAlbums, smartAlbums,  syncedAlbums];
+    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:0];
+    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:1];
     PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:2];
-    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:3];
+    PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:3];
+    PHFetchResult *syncedAlbum = [self.collectionsFetchResults objectAtIndex:4 ];
     
     //All album: Sorted by descending creation date.
     NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
@@ -180,6 +185,29 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         }
     }
     
+    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in myPhotoStream)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
+                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
+            }
+
+        }
+    }
+
     
     //Smart albums: Sorted by descending creation date.
     NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
@@ -208,55 +236,55 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         }
     }
     
-    
-    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
-//    for(PHCollection *collection in myPhotoStream)
-//    {
-//        if ([collection isKindOfClass:[PHAssetCollection class]])
-//        {
-//            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-//            
-//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-//            
-//            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
-//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-//            
-//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-//            if(assetsFetchResult.count>0)
-//            {
-//                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
-//                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
-//            }
-//            
-//        }
-//    }
-    
     NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
     NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
-//    for(PHCollection *collection in cloudShared)
-//    {
-//        if ([collection isKindOfClass:[PHAssetCollection class]])
-//        {
-//            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
-//            
-//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-//            
-//            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
-//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-//            
-//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-//            if(assetsFetchResult.count>0)
-//            {
-//                [cloudSharedFetchResultArray addObject:assetsFetchResult];
-//                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
-//            }
-//            
-//        }
-//    }
+    for(PHCollection *collection in cloudShared)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [cloudSharedFetchResultArray addObject:assetsFetchResult];
+                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
     
-    self.collectionsFetchResultsAssets= @[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray];
-    self.collectionsFetchResultsTitles= @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel];
+    
+    NSMutableArray *syncedAlbumFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *syncedAlbumFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in syncedAlbum)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [syncedAlbumFetchResultArray addObject:assetsFetchResult];
+                [syncedAlbumFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    
+    self.collectionsFetchResultsAssets= @[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray,syncedAlbumFetchResultArray];
+    self.collectionsFetchResultsTitles= @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel,syncedAlbumFetchResultLabel];
 }
 
 
@@ -309,18 +337,18 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     cell.tag = currentTag;
     
     // Set the label
-    cell.textLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize];
-    cell.textLabel.text = (self.collectionsFetchResultsTitles[indexPath.section])[indexPath.row];
-    cell.textLabel.textColor = self.picker.pickerTextColor;
+    ((GMAlbumsViewCell*)cell).titleLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize];
+    ((GMAlbumsViewCell*)cell).titleLabel.text = (self.collectionsFetchResultsTitles[indexPath.section])[indexPath.row];
+    ((GMAlbumsViewCell*)cell).titleLabel.textColor = self.picker.pickerTextColor;
     
     // Retrieve the pre-fetched assets for this album:
     PHFetchResult *assetsFetchResult = (self.collectionsFetchResultsAssets[indexPath.section])[indexPath.row];
     
     // Display the number of assets
     if (self.picker.displayAlbumsNumberOfAssets) {
-        cell.detailTextLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontNormalSize];
-        cell.detailTextLabel.text = [self tableCellSubtitle:assetsFetchResult];
-        cell.detailTextLabel.textColor = self.picker.pickerTextColor;
+        cell.infoLabel.font = [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontNormalSize];
+        cell.infoLabel.text = [self tableCellSubtitle:assetsFetchResult];
+        cell.infoLabel.textColor = self.picker.pickerTextColor;
     }
     
     // Set the 3 images (if exists):
@@ -394,7 +422,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     // Init the GMGridViewController
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:[self picker]];
     // Set the title
-    gridViewController.title = cell.textLabel.text;
+    gridViewController.title = ((GMAlbumsViewCell*)cell).titleLabel.text;
     // Use the prefetched assets!
     gridViewController.assetsFetchResults = [[_collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     

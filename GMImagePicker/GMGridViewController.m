@@ -68,10 +68,35 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     CGFloat screenHeight;
     UICollectionViewFlowLayout *portraitLayout;
     UICollectionViewFlowLayout *landscapeLayout;
+    // Store margins for current setup
+    CGFloat _margin, _gutter, _marginL, _gutterL, _columns, _columnsL;
 }
 
 -(id)initWithPicker:(GMImagePickerController *)picker
 {
+    
+    _columns = 4, _columnsL = 4;
+    _margin = 0, _gutter = 1;
+    _marginL = 0, _gutterL = 1;
+    
+    // For pixel perfection...
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
+        // iPad
+        _columns = 6, _columnsL = 8;
+        _margin = 1, _gutter = 2;
+        _marginL = 1, _gutterL = 2;
+    } else if ([UIScreen mainScreen].bounds.size.height == 480) {
+        // iPhone 3.5 inch
+        _columns = 3, _columnsL = 4;
+        _margin = 0, _gutter = 1;
+        _marginL = 1, _gutterL = 2;
+    } else {
+        // iPhone 4 inch
+        _columns = 3, _columnsL = 5;
+        _margin = 0, _gutter = 1;
+        _marginL = 0, _gutterL = 2;
+    }
+    
     //Custom init. The picker contains custom information to create the FlowLayout
     self.picker = picker;
     
@@ -153,7 +178,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     [self resetCachedAssets];
     
-    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    
     
     if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)])
     {
@@ -167,8 +192,14 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     [self setupButtons];
     [self setupToolbar];
+    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
 }
-
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+}
 - (void)viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
@@ -291,6 +322,13 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 
 #pragma mark - Collection View Layout
+- (void)viewSafeAreaInsetsDidChange {
+    [super viewSafeAreaInsetsDidChange];
+    UIEdgeInsets contentInset = self.collectionView.contentInset;
+    contentInset.left = self.view.safeAreaInsets.left;
+    contentInset.right = self.view.safeAreaInsets.right;
+    self.collectionView.contentInset = contentInset;
+}
 
 - (UICollectionViewFlowLayout *)collectionViewFlowLayoutForOrientation:(UIInterfaceOrientation)orientation
 {
@@ -457,6 +495,59 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     }
 }
 
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath {
+    CGFloat margin = [self getMargin];
+    CGFloat gutter = [self getGutter];
+    CGFloat columns = [self getColumns];
+    
+    if(@available(iOS 11, *)){
+        CGFloat value = floorf((((self.view.bounds.size.width-self.view.safeAreaInsets.left-self.view.safeAreaInsets.right) - (columns - 1) * gutter - 2 * margin) / columns));
+        return CGSizeMake(value, value);
+    }else{
+        CGFloat value = floorf(((self.view.bounds.size.width - (columns - 1) * gutter - 2 * margin) / columns));
+        return CGSizeMake(value, value);
+    }
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumInteritemSpacingForSectionAtIndex:(NSInteger)section {
+    return [self getGutter];
+}
+
+- (CGFloat)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout minimumLineSpacingForSectionAtIndex:(NSInteger)section {
+    return [self getGutter];
+}
+
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout*)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+    CGFloat margin = [self getMargin];
+    return UIEdgeInsetsMake(margin, margin, margin, margin);
+}
+
+
+
+- (CGFloat)getMargin {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _margin;
+    } else {
+        return _marginL;
+    }
+}
+
+- (CGFloat)getGutter {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _gutter;
+    } else {
+        return _gutterL;
+    }
+}
+
+- (CGFloat)getColumns {
+    if ((UIInterfaceOrientationIsPortrait([[UIApplication sharedApplication] statusBarOrientation]))) {
+        return _columns;
+    } else {
+        return _columnsL;
+    }
+}
+
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
     PHAsset *asset = self.assetsFetchResults[indexPath.item];
@@ -520,6 +611,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 
 #pragma mark - PHPhotoLibraryChangeObserver
+//http://crashes.to/s/0483c5ef912
 - (void)photoLibraryDidChange:(PHChange *)changeInfo {
     // Photos may call this method on a background queue;
     // switch to the main queue to update the UI.
@@ -542,35 +634,40 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
         if (collectionChanges.hasIncrementalChanges)  {
             // Tell the collection view to animate insertions/deletions/moves
             // and to refresh any cells that have changed content.
-            [weakSelf.collectionView performBatchUpdates:^{
-                typeof(self) strongSelf = weakSelf;
-                NSIndexSet *removed = collectionChanges.removedIndexes;
-                if (removed.count) {
-                    [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
-                }
-                NSIndexSet *inserted = collectionChanges.insertedIndexes;
-                if (inserted.count) {
-                    [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
-                    //auto select
-                    if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
-                        for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
-                            [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
+            @try {
+                [weakSelf.collectionView performBatchUpdates:^{
+                    typeof(self) strongSelf = weakSelf;
+                    NSIndexSet *removed = collectionChanges.removedIndexes;
+                    if (removed.count) {
+                        [strongSelf.collectionView deleteItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:removed withSection:0]];
+                    }
+                    NSIndexSet *inserted = collectionChanges.insertedIndexes;
+                    if (inserted.count) {
+                        [strongSelf.collectionView insertItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:inserted withSection:0]];
+                        //auto select
+                        if (strongSelf.picker.showCameraButton && strongSelf.picker.autoSelectCameraImages) {
+                            for (NSIndexPath *path in [inserted aapl_indexPathsFromIndexesWithSection:0]) {
+                                [strongSelf collectionView:strongSelf.collectionView didSelectItemAtIndexPath:path];
+                            }
                         }
                     }
-                }
-                NSIndexSet *changed = collectionChanges.changedIndexes;
-                if (changed.count) {
-                    [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
-                }
-                if (collectionChanges.hasMoves) {
-                    [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                        NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
-                        NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                        
-                        [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-                    }];
-                }
-            } completion:nil];
+                    NSIndexSet *changed = collectionChanges.changedIndexes;
+                    if (changed.count) {
+                        [strongSelf.collectionView reloadItemsAtIndexPaths:[strongSelf indexPathsFromIndexSet:changed withSection:0]];
+                    }
+                    if (collectionChanges.hasMoves) {
+                        [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                            NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                            NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                            
+                            [strongSelf.collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                        }];
+                    }
+                } completion:nil];
+            }@catch (NSException *exception) {
+                [weakSelf.collectionView reloadData];
+            }
+                
         } else {
             // Detailed change information is not available;
             // repopulate the UI from the current fetch result.
@@ -594,7 +691,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 }
 //- (void)photoLibraryDidChange:(PHChange *)changeInstance
 //{
-//    //http://crashes.to/s/0483c5ef912
+//
 //    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
 //    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
 //    dispatch_async(dispatch_get_main_queue(), ^{
