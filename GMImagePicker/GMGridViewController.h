@@ -12,7 +12,7 @@
 @import Photos;
 
 
-@interface GMGridViewController : UICollectionViewController
+@interface GMGridViewController : UICollectionViewController 
 
 @property (strong) PHFetchResult *assetsFetchResults;
 
