@@ -56,7 +56,7 @@
 @property (strong) PHCachingImageManager *imageManager;
 @property (strong) PHImageRequestOptions *imageRequestOptions;
 @property CGRect previousPreheatRect;
-
+@property dispatch_semaphore_t phPhotoLibChageMutex;
 @end
 
 static CGSize AssetGridThumbnailSize;
@@ -74,7 +74,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 
 -(id)initWithPicker:(GMImagePickerController *)picker
 {
-    
+    self.phPhotoLibChageMutex = dispatch_semaphore_create(1);
     _columns = 4, _columnsL = 4;
     _margin = 0, _gutter = 1;
     _marginL = 0, _gutterL = 1;
@@ -606,7 +606,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
     NSInteger count = self.assetsFetchResults.count;
-    NSLog(@"numberOfItemsInSection self.assetsFetchResults.count %lu",(unsigned long)self.assetsFetchResults.count);
+//    NSLog(@"numberOfItemsInSection self.assetsFetchResults.count %lu",(unsigned long)self.assetsFetchResults.count);
     return count;
 }
 
@@ -616,88 +616,103 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 //ref : https://github.com/hackiftekhar/IQScreenRuler/blob/master/ScreenRuler/ViewControllers/Screenshot%20Picker%20Flow/SRScreenshotCollectionViewController.m
 -(void)photoLibraryDidChange:(PHChange *)changeInstance
 {
-    PHFetchResultChangeDetails *changes = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
-    
-    if (changes)
-    {
-        __weak typeof(self) weakSelf = self;
+    dispatch_semaphore_wait(self.phPhotoLibChageMutex, DISPATCH_TIME_FOREVER);
+    dispatch_async(dispatch_get_main_queue(), ^{
         
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
+        if (collectionChanges) {
             
-            PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:weakSelf.assetsFetchResults];
-            if (collectionChanges) {
+            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+            
+            UICollectionView *collectionView = self.collectionView;
+            NSArray *removedPaths;
+            NSArray *insertedPaths;
+            NSArray *changedPaths;
+            
+            if ([collectionChanges hasIncrementalChanges]) {
+                NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
+                removedPaths = [self indexPathsFromIndexSet:removedIndexes withSection:0];
                 
-                weakSelf.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+                NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
+                insertedPaths = [self indexPathsFromIndexSet:insertedIndexes withSection:0];
                 
-                UICollectionView *collectionView = weakSelf.collectionView;
-                NSArray *removedPaths;
-                NSArray *insertedPaths;
-                NSArray *changedPaths;
+                NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
+                changedPaths = [self indexPathsFromIndexSet:changedIndexes withSection:0];
                 
-                if ([collectionChanges hasIncrementalChanges]) {
-                    NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
-                    removedPaths = [weakSelf indexPathsFromIndexSet:removedIndexes withSection:0];
-                    
-                    NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
-                    insertedPaths = [weakSelf indexPathsFromIndexSet:insertedIndexes withSection:0];
-                    
-                    NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
-                    changedPaths = [weakSelf indexPathsFromIndexSet:changedIndexes withSection:0];
-                    
-                    BOOL shouldReload = NO;
-                    
-                    if (changedPaths != nil && removedPaths != nil) {
-                        for (NSIndexPath *changedPath in changedPaths) {
-                            if ([removedPaths containsObject:changedPath]) {
-                                shouldReload = YES;
-                                break;
-                            }
+                BOOL shouldReload = NO;
+                
+                if (changedPaths != nil && removedPaths != nil) {
+                    for (NSIndexPath *changedPath in changedPaths) {
+                        if ([removedPaths containsObject:changedPath]) {
+                            shouldReload = YES;
+                            break;
                         }
                     }
-                    
-                    if (removedPaths.lastObject && ((NSIndexPath *)removedPaths.lastObject).item >= weakSelf.assetsFetchResults.count) {
-                        shouldReload = YES;
-                    }
-                    
-                    if (shouldReload) {
-                        [collectionView reloadData];
-                        
-                    } else {
-                        [collectionView performBatchUpdates:^{
-                            
-                            [collectionView.collectionViewLayout invalidateLayout];
-                            
-                            if (removedPaths) {
-                                [collectionView deleteItemsAtIndexPaths:removedPaths];
-                            }
-                            
-                            if (insertedPaths) {
-                                [collectionView insertItemsAtIndexPaths:insertedPaths];
-                            }
-                            
-                            if (changedPaths) {
-                                [collectionView reloadItemsAtIndexPaths:changedPaths];
-                            }
-                            
-                            if ([collectionChanges hasMoves]) {
-                                [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
-                                    NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
-                                    NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
-                                    [collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
-                                }];
-                            }
-                            
-                        } completion:^(BOOL finished) {
-                        }];
-                    }
-                    
-                    [weakSelf resetCachedAssets];
-                } else {
-                    [collectionView reloadData];
                 }
+                
+                if (removedPaths.lastObject && ((NSIndexPath *)removedPaths.lastObject).item >= self.assetsFetchResults.count) {
+                    shouldReload = YES;
+                }
+                
+                if (shouldReload) {
+                    [collectionView reloadData];
+                    
+                    dispatch_semaphore_signal(self.phPhotoLibChageMutex);
+                } else {
+                    [collectionView performBatchUpdates:^{
+                        self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+                        NSLog(@"[collectionView numberOfItemsInSection:0] %ld",(long)[collectionView numberOfItemsInSection:0]) ;
+                        if (removedPaths != nil) {
+                            NSLog(@"[collectionView deleteItemsAtIndexPaths:%@]", removedPaths);
+                            [collectionView deleteItemsAtIndexPaths:removedPaths];
+                        }
+                        
+                        if (insertedPaths != nil) {
+                            NSLog(@"[collectionView insertItemsAtIndexPaths:%@]", insertedPaths);
+                            [collectionView insertItemsAtIndexPaths:insertedPaths];
+                            if (self.picker.showCameraButton && self.picker.autoSelectCameraImages) {
+                                for (NSIndexPath *path in insertedPaths) {
+                                    [self collectionView:self.collectionView didSelectItemAtIndexPath:path];
+                                }
+                            }
+                        }
+                        
+                        if (changedPaths != nil) {
+                            NSLog(@"[collectionView reloadItemsAtIndexPaths:%@]", changedPaths);
+                            if(changedPaths.count>1){
+                                [collectionView reloadData];
+                            }else{
+                              [collectionView reloadItemsAtIndexPaths:changedPaths];
+                            }
+                        }
+                        
+                        if ([collectionChanges hasMoves]) {
+                            [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
+                                NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
+                                NSIndexPath *toIndexPath = [NSIndexPath indexPathForItem:toIndex inSection:0];
+                                [collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+                            }];
+                        }
+                        
+                    } completion:^(BOOL finished) {
+                        if(finished){
+                            [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                        }
+                        [self updateCachedAssets];
+                        dispatch_semaphore_signal(self.phPhotoLibChageMutex);
+                    }];
+                }
+                
+                [self resetCachedAssets];
+            } else {
+                [collectionView reloadData];
+                dispatch_semaphore_signal(self.phPhotoLibChageMutex);
             }
-        }];
-    }
+        }else{
+            dispatch_semaphore_signal(self.phPhotoLibChageMutex);
+        }
+    });
+
 }
 /*- (void)photoLibraryDidChange:(PHChange *)changeInfo {
     // Photos may call this method on a background queue;
@@ -705,14 +720,14 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     dispatch_async(dispatch_get_main_queue(), ^{
         
-        PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:self.assetsFetchResults];
+        PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:_assetsFetchResults];
         if (collectionChanges == nil) {
             return ;
         }
         // Get the new fetch result for future change tracking.
-        self.assetsFetchResults = collectionChanges.fetchResultAfterChanges;
+        _assetsFetchResults = collectionChanges.fetchResultAfterChanges;
         
-        NSLog(@"photoLibraryDidChange self.assetsFetchResults.count %lu",(unsigned long)self.assetsFetchResults.count);
+        NSLog(@"photoLibraryDidChange _assetsFetchResults.count %lu",(unsigned long)_assetsFetchResults.count);
         // Check for changes to the displayed album itself
         // (its existence and metadata, not its member assets).
         
@@ -776,6 +791,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
         [indexPaths addObject:[NSIndexPath indexPathForItem:idx inSection:section]];
+        
     }];
     
     return indexPaths;
@@ -788,11 +804,11 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
 //    dispatch_async(dispatch_get_main_queue(), ^{
 //
 //        // check if there are changes to the assets (insertions, deletions, updates)
-//        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:self.assetsFetchResults];
+//        PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:_assetsFetchResults];
 //        if (collectionChanges) {
 //
 //            // get the new fetch result
-//            self.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
+//            _assetsFetchResults = [collectionChanges fetchResultAfterChanges];
 //
 //            UICollectionView *collectionView = self.collectionView;
 //
@@ -933,11 +949,10 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     
     NSMutableArray *assets = [NSMutableArray arrayWithCapacity:indexPaths.count];
     for (NSIndexPath *indexPath in indexPaths) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.item];
+        PHAsset *asset = _assetsFetchResults[indexPath.item];
         [assets addObject:asset];
     }
     return assets;
 }
-
 
 @end
