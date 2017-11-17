@@ -59,16 +59,16 @@ static UIColor *backgroundColor;
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
         _assetRequestID  = PHInvalidImageRequestID;
         /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-         {
-         _imageView.contentMode = UIViewContentModeScaleAspectFit;
-         }
-         else
-         {
-         _imageView.contentMode = UIViewContentModeScaleAspectFill;
-         }*/
+        {
+            _imageView.contentMode = UIViewContentModeScaleAspectFit;
+        }
+        else
+        {
+            _imageView.contentMode = UIViewContentModeScaleAspectFill;
+        }*/
         _imageView.clipsToBounds = YES;
         _imageView.translatesAutoresizingMaskIntoConstraints = NO;
-        //        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+//        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_imageView];
         [_imageView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.width.equalTo(_imageView.superview.mas_width);
@@ -109,10 +109,7 @@ static UIColor *backgroundColor;
         _videoIcon.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_videoIcon];
         
-        [_videoIcon mas_makeConstraints:^(MASConstraintMaker *make) {
-            make.left.equalTo(_videoIcon.superview.mas_left).with.offset(padding.left);
-            make.bottom.equalTo(_videoIcon.superview.mas_bottom).with.offset(padding.bottom);
-        }];
+        
         
         _videoIcon.hidden = YES;
         
@@ -130,6 +127,12 @@ static UIColor *backgroundColor;
         [_videoDuration mas_makeConstraints:^(MASConstraintMaker *make) {
             make.right.equalTo(_videoDuration.superview.mas_right).with.offset(padding.right);;
             make.bottom.equalTo(_videoDuration.superview.mas_bottom).with.offset(padding.bottom);;
+        }];
+        
+        [_videoIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(_videoIcon.superview.mas_left).with.offset(padding.left);
+            make.centerY.equalTo(_videoDuration.mas_centerY);
+            make.height.mas_equalTo(titleHeight);
         }];
         
         // Selection overlay & icon
@@ -152,10 +155,10 @@ static UIColor *backgroundColor;
         _selectedButton.userInteractionEnabled = NO;
         [self addSubview:_selectedButton];
     }
-    
+
     // Note: the views above are created in case this is toggled per cell, on the fly, etc.!
     self.shouldShowSelection = YES;
-    
+
     return self;
 }
 
@@ -213,4 +216,3 @@ static UIColor *backgroundColor;
 }
 
 @end
-
