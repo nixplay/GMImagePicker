@@ -59,16 +59,16 @@ static UIColor *backgroundColor;
         _imageView.contentMode = UIViewContentModeScaleAspectFill;
         _assetRequestID  = PHInvalidImageRequestID;
         /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-        {
-            _imageView.contentMode = UIViewContentModeScaleAspectFit;
-        }
-        else
-        {
-            _imageView.contentMode = UIViewContentModeScaleAspectFill;
-        }*/
+         {
+         _imageView.contentMode = UIViewContentModeScaleAspectFit;
+         }
+         else
+         {
+         _imageView.contentMode = UIViewContentModeScaleAspectFill;
+         }*/
         _imageView.clipsToBounds = YES;
         _imageView.translatesAutoresizingMaskIntoConstraints = NO;
-//        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+        //        _imageView.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_imageView];
         [_imageView mas_makeConstraints:^(MASConstraintMaker *make) {
             make.width.equalTo(_imageView.superview.mas_width);
@@ -80,6 +80,7 @@ static UIColor *backgroundColor;
         
         // The video gradient, label & icon
         float x_offset = 4.0f;
+        UIEdgeInsets padding = UIEdgeInsetsMake(x_offset, x_offset, -x_offset, -x_offset);
         UIColor *topGradient = [UIColor colorWithRed:0.00 green:0.00 blue:0.00 alpha:0.0];
         UIColor *botGradient = [UIColor colorWithRed:0.00 green:0.00 blue:0.00 alpha:0.8];
         _gradientView = [[UIView alloc] initWithFrame: CGRectMake(0.0f, self.bounds.size.height-titleHeight, self.bounds.size.width, titleHeight)];
@@ -90,6 +91,14 @@ static UIColor *backgroundColor;
         _gradientView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
         _gradientView.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:_gradientView];
+        
+        [_gradientView mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(_gradientView.superview.mas_left);
+            make.bottom.equalTo(_gradientView.superview.mas_bottom);
+            make.right.equalTo(_gradientView.superview.mas_right);
+            make.width.mas_equalTo(self.bounds.size.width);
+            make.height.mas_equalTo(titleHeight);
+        }];
         _gradientView.hidden = YES;
         
         _videoIcon = [UIImageView new];
@@ -99,6 +108,12 @@ static UIColor *backgroundColor;
         _videoIcon.translatesAutoresizingMaskIntoConstraints = NO;
         _videoIcon.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_videoIcon];
+        
+        [_videoIcon mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.left.equalTo(_videoIcon.superview.mas_left).with.offset(padding.left);
+            make.bottom.equalTo(_videoIcon.superview.mas_bottom).with.offset(padding.bottom);
+        }];
+        
         _videoIcon.hidden = YES;
         
         _videoDuration = [UILabel new];
@@ -111,6 +126,11 @@ static UIColor *backgroundColor;
         _videoDuration.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_videoDuration];
         _videoDuration.hidden = YES;
+        
+        [_videoDuration mas_makeConstraints:^(MASConstraintMaker *make) {
+            make.right.equalTo(_videoDuration.superview.mas_right).with.offset(padding.right);;
+            make.bottom.equalTo(_videoDuration.superview.mas_bottom).with.offset(padding.bottom);;
+        }];
         
         // Selection overlay & icon
         _coverView = [[UIView alloc] initWithFrame:self.bounds];
@@ -132,10 +152,10 @@ static UIColor *backgroundColor;
         _selectedButton.userInteractionEnabled = NO;
         [self addSubview:_selectedButton];
     }
-
+    
     // Note: the views above are created in case this is toggled per cell, on the fly, etc.!
     self.shouldShowSelection = YES;
-
+    
     return self;
 }
 
@@ -193,3 +213,4 @@ static UIColor *backgroundColor;
 }
 
 @end
+
