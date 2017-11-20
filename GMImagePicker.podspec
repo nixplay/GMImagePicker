@@ -20,8 +20,8 @@ Pod::Spec.new do |s|
 	s.summary      = "A Photo and Video picker similar to UIImagePicker supporting multiple selections and UI customizations."
 
 	s.description  = "GMImagePicker is a tiny and fast UIImagePicker replacement supporting video picking, multiple selections and UI customizations. It is based in the new PhotoKit framework and returns an array of PHAssets so only works for iOS 8+"
-	s.homepage     = "https://github.com/guillermomuntaner/GMImagePicker"
-	s.screenshots  = "https://github.com/guillermomuntaner/GMImagePicker/raw/master/GMImagePickerDemo.gif"
+	s.homepage     = "https://github.com/nixplay/GMImagePicker"
+	s.screenshots  = "https://github.com/nixplay/GMImagePicker/raw/master/GMImagePickerDemo.gif"
 
 
 	# ―――  Spec License  ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -32,10 +32,10 @@ Pod::Spec.new do |s|
 	s.social_media_url   = "https://twitter.com/guillermomp87"
 
 	# ――― Platform Specifics ――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-	s.platform     = :ios, "8.0"
+	s.platform     = :ios, "9.0"
 
 	# ――― Source Location ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
-	s.source       = { :git => "https://github.com/guillermomuntaner/GMImagePicker.git", :tag => "0.0.2" }
+	s.source       = { :git => "https://github.com/nixplay/GMImagePicker.git", :tag => "0.2.0" }
 
 	# ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
 	s.source_files  = "GMImagePicker", "GMImagePicker/*.{h,m}"
