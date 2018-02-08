@@ -177,7 +177,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 @property (nonatomic) UIStatusBarStyle pickerStatusBarStyle;
 @property (nonatomic) UIBarStyle barStyle;
 @property (nonatomic) BOOL useCustomFontForNavigationBar;
-
+@property (nonatomic) NSTimeInterval videoMaximumDuration;
 /**
  * A reference to the navigation controller used to manage the whole picking process
  */

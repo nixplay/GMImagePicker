@@ -22,6 +22,7 @@
     if (self = [super init])
     {
         self.delegate = delegate;
+        self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
         PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
@@ -482,6 +483,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    picker.videoMaximumDuration = self.videoMaximumDuration;
     if(_allow_video){
         picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
         picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
