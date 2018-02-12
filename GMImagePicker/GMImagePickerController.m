@@ -277,7 +277,9 @@
     
     GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
     
-    
+    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
+        albumsViewController.title = [self.delegate controllerTitle];
+    }
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
     gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
     
