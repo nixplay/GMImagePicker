@@ -476,7 +476,6 @@
                                                               [alert dismissViewControllerAnimated:YES completion:nil];
                                                           }];
         [alert addAction:okAction];
-        [picker presentViewController:alert animated:YES completion:nil];
         
         return;
     }
@@ -619,7 +618,6 @@
                                                               [alert dismissViewControllerAnimated:YES completion:nil];
                                                           }];
         [alert addAction:okAction];
-        [picker presentViewController:alert animated:YES completion:nil];
     }
     
     // Note: The image view will auto refresh as the photo's are being observed in the other VCs
