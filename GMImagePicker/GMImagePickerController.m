@@ -276,7 +276,6 @@
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     
     GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
-    
     if([self.delegate respondsToSelector:@selector(controllerTitle)]){
         albumsViewController.title = [self.delegate controllerTitle];
     }
@@ -489,7 +488,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    picker.videoMaximumDuration = self.videoMaximumDuration;
+//    picker.videoMaximumDuration = self.videoMaximumDuration;
     if(_allow_video){
         picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
         picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
