@@ -22,6 +22,7 @@
     if (self = [super init])
     {
         self.delegate = delegate;
+        self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
         PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
@@ -275,7 +276,6 @@
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     
     GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
-    
     if([self.delegate respondsToSelector:@selector(controllerTitle)]){
         albumsViewController.title = [self.delegate controllerTitle];
     }
@@ -467,12 +467,16 @@
 - (void)cameraButtonPressed:(UIBarButtonItem *)button
 {
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"No Camera!"
-                                                        message:@"Sorry, this device does not have a camera."
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
+        
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Camera!"
+                                                                       message:@"Sorry, this device does not have a camera."
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction * okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil)
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * _Nonnull action) {
+                                                              [alert dismissViewControllerAnimated:YES completion:nil];
+                                                          }];
+        [alert addAction:okAction];
         
         return;
     }
@@ -484,6 +488,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+//    picker.videoMaximumDuration = self.videoMaximumDuration;
     if(_allow_video){
         picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
         picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
@@ -604,12 +609,16 @@
 -(void)image:(UIImage *)image finishedSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
 {
     if (error) {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Image Not Saved"
-                                                        message:@"Sorry, unable to save the new image!"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
+
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Image Not Saved"
+                                                                       message:@"Sorry, this device does not have a camera."
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction * okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"OK", nil)
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * _Nonnull action) {
+                                                              [alert dismissViewControllerAnimated:YES completion:nil];
+                                                          }];
+        [alert addAction:okAction];
     }
     
     // Note: The image view will auto refresh as the photo's are being observed in the other VCs
