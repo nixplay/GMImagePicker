@@ -5,7 +5,10 @@
 //  Created by Guillermo Muntaner Perelló on 19/09/14.
 //  Copyright (c) 2014 Guillermo Muntaner Perelló. All rights reserved.
 //
-
+// James Kong disable slomo video
+// temperary not support slomo video
+// https://stackoverflow.com/questions/31939082/nspredicate-to-exclude-slow-motion-videos-from-phfetchresults
+// https://stackoverflow.com/questions/6004620/configuring-an-nspredicate-with-multiple-conditions
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
 #import "GMGridViewCell.h"
@@ -155,7 +158,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     {
         if(![self.picker.mediaTypes isEqual:[NSNull null]] && self.picker != nil){
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND (mediaSubtype != %d)", self.picker.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate ];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
             [allFetchResultArray addObject:assetsFetchResult];
@@ -172,7 +175,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
         {
             if(![self.picker.mediaTypes isEqual:[NSNull null]] && self.picker != nil){
                 PHFetchOptions *options = [[PHFetchOptions alloc] init];
-                options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+                options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND (mediaSubtype != %d)", self.picker.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate ];
                 PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
                 
                 //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
@@ -221,7 +224,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                 if(self.picker.customSmartCollections && [self.picker.customSmartCollections containsObject:@(assetCollection.assetCollectionSubtype)])
                 {
                     PHFetchOptions *options = [[PHFetchOptions alloc] init];
-                    options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.picker.mediaTypes];
+                    options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND (mediaSubtype != %d)", self.picker.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate ];
                     options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
                     
                     PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];

@@ -155,7 +155,7 @@
         _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
                                     @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
                                     @(PHAssetCollectionSubtypeSmartAlbumVideos),
-                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
                                     @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
                                     @(PHAssetCollectionSubtypeSmartAlbumBursts),
                                     @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
@@ -291,7 +291,7 @@
             if(_allow_video){
                 _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
             }
-            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", self.mediaTypes];
+            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND (mediaSubtype != %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate ];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
             
