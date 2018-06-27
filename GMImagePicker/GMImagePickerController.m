@@ -187,11 +187,7 @@
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
         _barStyle = UIBarStyleDefault;
-        // Save to the album
-        
-
-        
-        
+        [self setupNavigationController];
     }
     return self;
 }
@@ -391,7 +387,7 @@
         return;
     }
     
-    UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
+    UINavigationController *nav = (UINavigationController *) self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
         NSUInteger index = 1;
         if (_showCameraButton) {
@@ -488,7 +484,7 @@
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-//    picker.videoMaximumDuration = self.videoMaximumDuration;
+    //    picker.videoMaximumDuration = self.videoMaximumDuration;
     if(_allow_video){
         picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
         picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
@@ -496,7 +492,7 @@
         picker.mediaTypes = @[(NSString *)kUTTypeImage];
     }
     picker.allowsEditing = self.allowsEditingCameraImages;
-
+    
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
     
@@ -609,7 +605,7 @@
 -(void)image:(UIImage *)image finishedSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
 {
     if (error) {
-
+        
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Image Not Saved"
                                                                        message:@"Sorry, this device does not have a camera."
                                                                 preferredStyle:UIAlertControllerStyleAlert];
