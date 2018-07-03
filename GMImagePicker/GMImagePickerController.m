@@ -24,6 +24,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 @property (strong,atomic) NSArray *collectionsFetchResultsAssets;
 @property (strong,atomic) NSArray *collectionsFetchResultsTitles;
 @property (strong) PHCachingImageManager *imageManager;
+@property (assign) NSInteger selectedRow;
 
 @end
 
@@ -616,10 +617,17 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 }
 
 - (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForComponent:(NSInteger)component {
-    return [[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")
+    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow][0]
                                            attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightLight],
                                                         NSForegroundColorAttributeName: [UIColor darkGrayColor]}];
 }
+- (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForSelectedComponent:(NSInteger)component {
+    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow][0]
+                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:16 weight:UIFontWeightRegular],
+                                                        NSForegroundColorAttributeName: self.view.tintColor}];
+    
+}
+
 - (UIView *)dropdownMenu:(MKDropdownMenu *)dropdownMenu viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
     static NSString *CellIdentifier = @"Cell";
     GMAlbumsViewCell *cell = (GMAlbumsViewCell*)view;
@@ -747,8 +755,10 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     GMGridViewController *gridViewController = (GMGridViewController *)self.navigationController.childViewControllers[0];
     gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row][0];
     [gridViewController reloadData];
+    self.selectedRow = row;
     delay(0.15, ^{
         [dropdownMenu closeAllComponentsAnimated:YES];
+        [dropdownMenu reloadAllComponents];
     });
 }
 
