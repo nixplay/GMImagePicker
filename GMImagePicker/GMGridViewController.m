@@ -955,4 +955,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
     return assets;
 }
 
+-(void)reloadData{
+    [self.collectionView reloadData];
+}
 @end

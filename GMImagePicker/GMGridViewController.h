@@ -16,6 +16,7 @@
 
 @property (strong) PHFetchResult *assetsFetchResults;
 
+
 -(id)initWithPicker:(GMImagePickerController *)picker;
-    
+-(void)reloadData;
 @end

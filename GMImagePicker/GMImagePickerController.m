@@ -10,13 +10,38 @@
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
 #import "GMGridViewController.h"
+#import "GMAlbumsViewCell.h"
+#import "MKDropdownMenu.h"
 @import Photos;
 
-@interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
+static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delay * NSEC_PER_SEC)), dispatch_get_main_queue(), block);
+}
+
+@interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate, MKDropdownMenuDataSource, MKDropdownMenuDelegate, PHPhotoLibraryChangeObserver>
+@property (strong, nonatomic) MKDropdownMenu *navBarMenu;
+@property (strong) NSArray *collectionsFetchResults;
+@property (strong,atomic) NSArray *collectionsFetchResultsAssets;
+@property (strong,atomic) NSArray *collectionsFetchResultsTitles;
+@property (strong) PHCachingImageManager *imageManager;
 
 @end
 
 @implementation GMImagePickerController
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
+    
+    self.imageManager = [[PHCachingImageManager alloc] init];
+    
+}
+- (void)dealloc
+{
+    [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
+}
+
 - (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets delegate: (id<GMImagePickerControllerDelegate>) delegate
 {
     if (self = [super init])
@@ -275,39 +300,40 @@
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     
-    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
-    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
-        albumsViewController.title = [self.delegate controllerTitle];
-    }
+//    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+//    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
+//        albumsViewController.title = [self.delegate controllerTitle];
+//    }
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
-    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
+//    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
     
     //All album: Sorted by descending creation date.
-    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
-    {
-        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
-            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            if(_allow_video){
-                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
-            }
-            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
-            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-            
-            [allFetchResultArray addObject:assetsFetchResult];
-            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
-        }
-    }
+//    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+//    {
+//        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
+//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+//            if(_allow_video){
+//                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+//            }
+//            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+//
+//            [allFetchResultArray addObject:assetsFetchResult];
+//            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+//        }
+//    }
     
-    albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
-    albumsViewController.collectionsFetchResultsTitles= @[allFetchResultLabel];
+//    self.collectionsFetchResultsAssets= @[allFetchResultArray];
+//    self.collectionsFetchResultsTitles= @[allFetchResultLabel];
+//
+    [self updateFetchResults];
+    gridViewController.assetsFetchResults = [[self.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
     
-    gridViewController.assetsFetchResults = [[albumsViewController.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
-    
-    
-    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+//    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:gridViewController];
     _navigationController.delegate = self;
     
     
@@ -323,7 +349,407 @@
     
     
     // Push GMGridViewController
-    [_navigationController pushViewController:gridViewController animated:YES];
+//    [_navigationController pushViewController:gridViewController animated:YES];
+    
+    self.navBarMenu = [[MKDropdownMenu alloc] initWithFrame:CGRectMake(0, 0, 200, 44)];
+    self.navBarMenu.dataSource = self;
+    self.navBarMenu.delegate = self;
+    
+    // Make background light instead of dark when presenting the dropdown
+    self.navBarMenu.backgroundDimmingOpacity = -0.67;
+    
+    // Set custom disclosure indicator image
+    UIImage *indicator = [UIImage imageNamed:@"indicator"];
+    self.navBarMenu.disclosureIndicatorImage = indicator;
+    
+    // Add an arrow between the menu header and the dropdown
+    UIImageView *spacer = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"triangle"]];
+    
+    // Prevent the arrow image from stretching
+    spacer.contentMode = UIViewContentModeCenter;
+    
+    self.navBarMenu.spacerView = spacer;
+    
+    // Offset the arrow to align with the disclosure indicator
+    self.navBarMenu.spacerViewOffset = UIOffsetMake(self.navBarMenu.bounds.size.width/2 - indicator.size.width/2 - 8, 1);
+    
+    // Hide top row separator to blend with the arrow
+    self.navBarMenu.dropdownShowsTopRowSeparator = NO;
+    
+    self.navBarMenu.dropdownBouncesScroll = NO;
+    
+    self.navBarMenu.rowSeparatorColor = [UIColor colorWithWhite:1.0 alpha:0.2];
+    self.navBarMenu.rowTextAlignment = NSTextAlignmentCenter;
+    
+    // Round all corners (by default only bottom corners are rounded)
+    self.navBarMenu.dropdownRoundedCorners = UIRectCornerAllCorners;
+    
+    // Let the dropdown take the whole width of the screen with 10pt insets
+    self.navBarMenu.useFullScreenWidth = YES;
+    self.navBarMenu.fullScreenInsetLeft = 10;
+    self.navBarMenu.fullScreenInsetRight = 10;
+    gridViewController.navigationItem.titleView = self.navBarMenu;
+}
+#pragma mark - PHPhotoLibraryChangeObserver
+
+- (void)photoLibraryDidChange:(PHChange *)changeInstance
+{
+    // Call might come on any background queue. Re-dispatch to the main queue to handle it.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        
+        NSMutableArray *updatedCollectionsFetchResults = nil;
+        
+        for (PHFetchResult *collectionsFetchResult in self.collectionsFetchResults) {
+            PHFetchResultChangeDetails *changeDetails = [changeInstance changeDetailsForFetchResult:collectionsFetchResult];
+            if (changeDetails) {
+                if (!updatedCollectionsFetchResults) {
+                    updatedCollectionsFetchResults = [self.collectionsFetchResults mutableCopy];
+                }
+                [updatedCollectionsFetchResults replaceObjectAtIndex:[self.collectionsFetchResults indexOfObject:collectionsFetchResult] withObject:[changeDetails fetchResultAfterChanges]];
+            }
+        }
+        
+        // This only affects to changes in albums level (add/remove/edit album)
+        if (updatedCollectionsFetchResults) {
+            self.collectionsFetchResults = updatedCollectionsFetchResults;
+            [self updateFetchResults];
+//            [self.tableView reloadData];
+        }
+        
+        // However, we want to update if photos are added, so the counts of items & thumbnails are updated too.
+        // Maybe some checks could be done here , but for now is OKey.
+        
+        
+    });
+}
+-(void)updateFetchResults
+{
+    // Fetch PHAssetCollections:
+    PHFetchResult *topLevelUserCollections = [PHCollectionList fetchTopLevelUserCollectionsWithOptions:nil];
+    PHFetchResult *smartAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeSmartAlbum subtype:PHAssetCollectionSubtypeAlbumRegular options:nil];
+    PHFetchResult *myPhotoStream = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumMyPhotoStream options:nil];
+    PHFetchResult *cloudShared = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumCloudShared options:nil];
+    PHFetchResult *syncedAlbums = [PHAssetCollection fetchAssetCollectionsWithType:PHAssetCollectionTypeAlbum subtype:PHAssetCollectionSubtypeAlbumSyncedAlbum options:nil];
+    
+    self.collectionsFetchResults = @[topLevelUserCollections, myPhotoStream, cloudShared, smartAlbums,  syncedAlbums];
+    //What I do here is fetch both the albums list and the assets of each album.
+    //This way I have acces to the number of items in each album, I can load the 3
+    //thumbnails directly and I can pass the fetched result to the gridViewController.
+    
+    NSMutableArray *newCollectionsFetchResultsAssets = [NSMutableArray array];
+    NSMutableArray *newCollectionsFetchResultsTitles = [NSMutableArray array];
+    
+    self.collectionsFetchResultsAssets = nil;
+    self.collectionsFetchResultsTitles = nil;
+    
+    //Fetch PHAssetCollections:
+    //    self.collectionsFetchResults = @[topLevelUserCollections, myPhotoStreamAlbums, cloudSharedAlbums, smartAlbums,  syncedAlbums];
+//    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:0];
+//    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:1];
+//    PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:2];
+//    PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:3];
+//    PHFetchResult *syncedAlbum = [self.collectionsFetchResults objectAtIndex:4 ];
+//
+    //All album: Sorted by descending creation date.
+    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+    {
+        if(![self.mediaTypes isEqual:[NSNull null]] ){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+        }
+    }
+    
+    //User albums:
+    NSMutableArray *userFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *userFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in topLevelUserCollections)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            if(![self.mediaTypes isEqual:[NSNull null]] ){
+                PHFetchOptions *options = [[PHFetchOptions alloc] init];
+                options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+                PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+                
+                //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
+                
+                PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+                [userFetchResultArray addObject:assetsFetchResult];
+                [userFetchResultLabel addObject:collection.localizedTitle];
+            }
+        }
+    }
+    
+    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in myPhotoStream)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
+                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    
+    
+    //Smart albums: Sorted by descending creation date.
+    NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *smartFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in smartAlbums)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            if(![self.mediaTypes isEqual:[NSNull null]] ){
+                //Smart collections are PHAssetCollectionType=2;
+                if(self.customSmartCollections && [self.customSmartCollections containsObject:@(assetCollection.assetCollectionSubtype)])
+                {
+                    PHFetchOptions *options = [[PHFetchOptions alloc] init];
+                    options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+                    options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+                    
+                    PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+                    if(assetsFetchResult.count>0)
+                    {
+                        [smartFetchResultArray addObject:assetsFetchResult];
+                        [smartFetchResultLabel addObject:collection.localizedTitle];
+                    }
+                }
+            }
+        }
+    }
+    
+    NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in cloudShared)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [cloudSharedFetchResultArray addObject:assetsFetchResult];
+                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    
+    
+    NSMutableArray *syncedAlbumFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *syncedAlbumFetchResultLabel = [[NSMutableArray alloc] init];
+    for(PHCollection *collection in syncedAlbums)
+    {
+        if ([collection isKindOfClass:[PHAssetCollection class]])
+        {
+            PHAssetCollection *assetCollection = (PHAssetCollection *)collection;
+            
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            
+            options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
+            if(assetsFetchResult.count>0)
+            {
+                [syncedAlbumFetchResultArray addObject:assetsFetchResult];
+                [syncedAlbumFetchResultLabel addObject:collection.localizedTitle];
+            }
+            
+        }
+    }
+    if([allFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:allFetchResultArray];
+    if([myPhotoStreamFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:myPhotoStreamFetchResultArray];
+    if([smartFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:smartFetchResultArray];
+    if([cloudSharedFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:cloudSharedFetchResultArray];
+    if([userFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:userFetchResultArray];
+    if([syncedAlbumFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:syncedAlbumFetchResultArray];
+    self.collectionsFetchResultsAssets = [NSArray arrayWithArray:newCollectionsFetchResultsAssets]; //@[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray,syncedAlbumFetchResultArray];
+    
+    if([allFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:allFetchResultLabel];
+    if([myPhotoStreamFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:myPhotoStreamFetchResultLabel];
+    if([smartFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:smartFetchResultLabel];
+    if([cloudSharedFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:cloudSharedFetchResultLabel];
+    if([userFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:userFetchResultLabel];
+    if([syncedAlbumFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:syncedAlbumFetchResultLabel];
+    self.collectionsFetchResultsTitles = [NSArray arrayWithArray:newCollectionsFetchResultsTitles];//  @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel,syncedAlbumFetchResultLabel];
+}
+
+#pragma mark - MKDropdownMenuDataSource
+
+- (NSInteger)numberOfComponentsInDropdownMenu:(MKDropdownMenu *)dropdownMenu {
+    return 1;//self.collectionsFetchResultsAssets.count;
+}
+
+- (NSInteger)dropdownMenu:(MKDropdownMenu *)dropdownMenu numberOfRowsInComponent:(NSInteger)component {
+    return [self.collectionsFetchResultsAssets count];
+}
+
+#pragma mark - MKDropdownMenuDelegate
+
+- (CGFloat)dropdownMenu:(MKDropdownMenu *)dropdownMenu rowHeightForComponent:(NSInteger)component {
+    return kAlbumRowHeight;
+}
+
+- (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForComponent:(NSInteger)component {
+    return [[NSAttributedString alloc] initWithString:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")
+                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightLight],
+                                                        NSForegroundColorAttributeName: [UIColor darkGrayColor]}];
+}
+- (UIView *)dropdownMenu:(MKDropdownMenu *)dropdownMenu viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
+    static NSString *CellIdentifier = @"Cell";
+    GMAlbumsViewCell *cell = (GMAlbumsViewCell*)view;
+//    if (cell == nil || ![cell isKindOfClass:[GMAlbumsViewCell class]]) {
+//        cell = [[GMAlbumsViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+//        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+//    }
+//    GMAlbumsViewCell *cell = [view dequeueReusableCellWithIdentifier:CellIdentifier];
+    if (cell == nil) {
+        cell = [[GMAlbumsViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    }
+    
+    // Increment the cell's tag
+    NSInteger currentTag = cell.tag + 1;
+    cell.tag = currentTag;
+    
+    // Set the label
+    ((GMAlbumsViewCell*)cell).titleLabel.font = [UIFont fontWithName:self.pickerFontName size:self.pickerFontHeaderSize];
+    ((GMAlbumsViewCell*)cell).titleLabel.text = self.collectionsFetchResultsTitles[row][0];
+    ((GMAlbumsViewCell*)cell).titleLabel.textColor = self.pickerTextColor;
+    
+    // Retrieve the pre-fetched assets for this album:
+    PHFetchResult *assetsFetchResult = (self.collectionsFetchResultsAssets[row])[0];
+    
+    // Display the number of assets
+    if (self.displayAlbumsNumberOfAssets) {
+        cell.infoLabel.font = [UIFont fontWithName:self.pickerFontName size:self.pickerFontNormalSize];
+        cell.infoLabel.text = [NSString stringWithFormat:@"%ld", (long)[assetsFetchResult count]];
+        cell.infoLabel.textColor = self.pickerTextColor;
+    }
+    
+    // Set the 3 images (if exists):
+    if ([assetsFetchResult count] > 0) {
+        CGFloat scale = [UIScreen mainScreen].scale;
+        
+        //Compute the thumbnail pixel size:
+        CGSize tableCellThumbnailSize1 = CGSizeMake(kAlbumThumbnailSize1.width*scale, kAlbumThumbnailSize1.height*scale);
+        PHAsset *asset = assetsFetchResult[0];
+        [cell setVideoLayout:(asset.mediaType==PHAssetMediaTypeVideo)];
+        [self.imageManager requestImageForAsset:asset
+                                     targetSize:tableCellThumbnailSize1
+                                    contentMode:PHImageContentModeAspectFill
+                                        options:nil
+                                  resultHandler:^(UIImage *result, NSDictionary *info) {
+                                      if (cell.tag == currentTag) {
+                                          cell.imageView1.image = result;
+                                      }
+                                  }];
+        
+        // Second & third images:
+        // TODO: Only preload the 3pixels height visible frame!
+        if ([assetsFetchResult count] > 1) {
+            //Compute the thumbnail pixel size:
+            CGSize tableCellThumbnailSize2 = CGSizeMake(kAlbumThumbnailSize2.width*scale, kAlbumThumbnailSize2.height*scale);
+            PHAsset *asset = assetsFetchResult[1];
+            [self.imageManager requestImageForAsset:asset
+                                         targetSize:tableCellThumbnailSize2
+                                        contentMode:PHImageContentModeAspectFill
+                                            options:nil
+                                      resultHandler:^(UIImage *result, NSDictionary *info) {
+                                          if (cell.tag == currentTag) {
+                                              cell.imageView2.image = result;
+                                          }
+                                      }];
+        } else {
+            cell.imageView2.image = nil;
+        }
+        
+        if ([assetsFetchResult count] > 2) {
+            CGSize tableCellThumbnailSize3 = CGSizeMake(kAlbumThumbnailSize3.width*scale, kAlbumThumbnailSize3.height*scale);
+            PHAsset *asset = assetsFetchResult[2];
+            [self.imageManager requestImageForAsset:asset
+                                         targetSize:tableCellThumbnailSize3
+                                        contentMode:PHImageContentModeAspectFill
+                                            options:nil
+                                      resultHandler:^(UIImage *result, NSDictionary *info) {
+                                          if (cell.tag == currentTag) {
+                                              cell.imageView3.image = result;
+                                          }
+                                      }];
+        } else {
+            cell.imageView3.image = nil;
+        }
+    } else {
+        [cell setVideoLayout:NO];
+        cell.imageView3.image = [UIImage imageNamed:@"GMEmptyFolder"];
+        cell.imageView2.image = [UIImage imageNamed:@"GMEmptyFolder"];
+        cell.imageView1.image = [UIImage imageNamed:@"GMEmptyFolder"];
+    }
+    
+    return cell;
+}
+//- (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForRow:(NSInteger)row forComponent:(NSInteger)component {
+//    NSMutableAttributedString *string =
+//    [[NSMutableAttributedString alloc] initWithString: [NSString stringWithFormat:@"Color %zd: ", row + 1]
+//                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:20 weight:UIFontWeightLight],
+//                                                        NSForegroundColorAttributeName: [UIColor darkGrayColor]}];
+//    [string appendAttributedString:
+//     [[NSAttributedString alloc] initWithString:@""
+//                                     attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:20 weight:UIFontWeightMedium],
+//                                                  NSForegroundColorAttributeName: [UIColor darkGrayColor]}]];
+//    return string;
+//}
+
+//- (UIColor *)dropdownMenu:(MKDropdownMenu *)dropdownMenu backgroundColorForRow:(NSInteger)row forComponent:(NSInteger)component {
+//    return UIColorWithHexString(self.colors[row]);
+//}
+
+- (UIColor *)dropdownMenu:(MKDropdownMenu *)dropdownMenu backgroundColorForHighlightedRowsInComponent:(NSInteger)component {
+    return [UIColor colorWithWhite:0.0 alpha:0.5];
+}
+
+
+- (void)dropdownMenu:(MKDropdownMenu *)dropdownMenu didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
+//    NSString *colorString = self.colors[row];
+//    self.textLabel.text = colorString;
+//
+//    UIColor *color = UIColorWithHexString(colorString);
+//    self.view.backgroundColor = color;
+//    self.childViewController.shapeView.strokeColor = color;
+//
+    
+    
+    GMGridViewController *gridViewController = (GMGridViewController *)self.navigationController.childViewControllers[0];
+    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row][0];
+    [gridViewController reloadData];
+    delay(0.15, ^{
+        [dropdownMenu closeAllComponentsAnimated:YES];
+    });
 }
 
 #pragma mark - UIAlertViewDelegate

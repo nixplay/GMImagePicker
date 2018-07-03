@@ -42,7 +42,7 @@
                 
                 GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil delegate:self];
                 picker.delegate = self;
-                picker.title = @"Custom title";
+//                picker.title = @"Custom title";
                 
                 picker.customDoneButtonTitle = @"Finished";
                 picker.customCancelButtonTitle = @"Nope";
@@ -61,7 +61,7 @@
                 
                 picker.modalPresentationStyle = UIModalPresentationPopover;
                 
-                picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
+                picker.mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
                 
                 //    picker.pickerBackgroundColor = [UIColor blackColor];
                 //    picker.pickerTextColor = [UIColor whiteColor];
@@ -142,9 +142,9 @@
     return YES;
 }
 
-- (NSString*) controllerTitle{
-    return @"Custom title";
-}
+//- (NSString*) controllerTitle{
+//    return @"Custom title";
+//}
 
 - (NSString*) controllerCustomDoneButtonTitle{
     return @"Finished";
