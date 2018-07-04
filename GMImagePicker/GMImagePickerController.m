@@ -134,7 +134,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         
         _pickerStatusBarStyle = UIStatusBarStyleDefault;
         _barStyle = UIBarStyleDefault;
-        [self setupNavigationController];
+        
     }
     return self;
 }
@@ -811,7 +811,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 - (void)updateDoneButton
 {
-    if (!self.allowsMultipleSelection) {
+    if (!self.allowsMultipleSelection || self.disableRightTopDoneButton) {
         return;
     }
     
@@ -973,19 +973,27 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraButtonPressed:)];
 }
 
+- (UIBarButtonItem *)doneButtonItem
+{
+    return [[UIBarButtonItem alloc] initWithTitle:@"Done" style:UIBarButtonItemStyleDone target:self action:@selector(finishPickingAssets:)];
+}
+
 - (NSArray *)toolbarItems
 {
     UIBarButtonItem *camera = [self cameraButtonItem];
     UIBarButtonItem *title  = [self titleButtonItem];
     UIBarButtonItem *space  = [self spaceButtonItem];
+    UIBarButtonItem *done  = [self doneButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
-    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) ) {
+    
+    if (_showCameraButton) {//&& ([[self.navigationController childViewControllers] count] > 1) ) {
         [items addObject:camera];
     }
     [items addObject:space];
     [items addObject:title];
     [items addObject:space];
+    [items addObject:done];
     
     return [NSArray arrayWithArray:items];
 }

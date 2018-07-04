@@ -62,28 +62,28 @@
                 picker.modalPresentationStyle = UIModalPresentationPopover;
                 
                 picker.mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
-                
-                //    picker.pickerBackgroundColor = [UIColor blackColor];
-                //    picker.pickerTextColor = [UIColor whiteColor];
-                //    picker.toolbarBarTintColor = [UIColor darkGrayColor];
-                //    picker.toolbarTextColor = [UIColor whiteColor];
-                //    picker.toolbarTintColor = [UIColor redColor];
-                //    picker.navigationBarBackgroundColor = [UIColor blackColor];
-                //    picker.navigationBarTextColor = [UIColor whiteColor];
-                //    picker.navigationBarTintColor = [UIColor redColor];
-                //    picker.pickerFontName = @"Verdana";
-                //    picker.pickerBoldFontName = @"Verdana-Bold";
-                //    picker.pickerFontNormalSize = 14.f;
-                //    picker.pickerFontHeaderSize = 17.0f;
-                //    picker.pickerStatusBarStyle = UIStatusBarStyleLightContent;
-                //    picker.useCustomFontForNavigationBar = YES;
+                picker.disableRightTopDoneButton = YES;
+                picker.pickerBackgroundColor = [UIColor blackColor];
+                picker.pickerTextColor = [UIColor darkGrayColor];
+                picker.toolbarBarTintColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
+                picker.toolbarTextColor = [UIColor darkGrayColor];
+                picker.toolbarTintColor = [UIColor redColor];
+                picker.navigationBarBackgroundColor = [UIColor blackColor];
+                picker.navigationBarTextColor = [UIColor darkGrayColor];
+                picker.navigationBarTintColor = [UIColor redColor];
+                picker.pickerFontName = @"Verdana";
+                picker.pickerBoldFontName = @"Verdana-Bold";
+                picker.pickerFontNormalSize = 14.f;
+                picker.pickerFontHeaderSize = 17.0f;
+                picker.pickerStatusBarStyle = UIStatusBarStyleLightContent;
+                picker.useCustomFontForNavigationBar = YES;
                 
                 UIPopoverPresentationController *popPC = picker.popoverPresentationController;
                 popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
                 popPC.sourceView = _gmImagePickerButton;
                 popPC.sourceRect = _gmImagePickerButton.bounds;
                 //    popPC.backgroundColor = [UIColor blackColor];
-                
+                [picker setupNavigationController];
                 [self showViewController:picker sender:nil];
             });
         }];

@@ -103,6 +103,9 @@ static CGSize const kPopoverContentSize = {480, 720};
  *  the VC is closed on selection so the Done button is neither displayed or used. Default is YES.
  */
 @property (nonatomic, assign) BOOL allowsMultipleSelection;
+/**
+ */
+@property (nonatomic, assign) BOOL disableRightTopDoneButton;
 
 /**
  * In the case where allowsMultipleSelection = NO, set this to YES to have the user confirm their selection. Default is NO.
@@ -194,7 +197,7 @@ static CGSize const kPopoverContentSize = {480, 720};
  */
 - (void)dismiss:(id)sender;
 - (void)finishPickingAssets:(id)sender;
-
+- (void)setupNavigationController;
 @end
 
 
