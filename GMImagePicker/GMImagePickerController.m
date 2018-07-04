@@ -330,7 +330,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 //    self.collectionsFetchResultsTitles= @[allFetchResultLabel];
 //
     [self updateFetchResults];
-    gridViewController.assetsFetchResults = [[self.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.section];
     
     
 //    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
@@ -452,22 +452,22 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 //    PHFetchResult *syncedAlbum = [self.collectionsFetchResults objectAtIndex:4 ];
 //
     //All album: Sorted by descending creation date.
-    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
     {
         if(![self.mediaTypes isEqual:[NSNull null]] ){
             PHFetchOptions *options = [[PHFetchOptions alloc] init];
             options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-            [allFetchResultArray addObject:assetsFetchResult];
-            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+            [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+            [newCollectionsFetchResultsTitles addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
         }
     }
     
     //User albums:
-    NSMutableArray *userFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *userFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *userFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *userFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in topLevelUserCollections)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -480,14 +480,14 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
                 //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
                 
                 PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-                [userFetchResultArray addObject:assetsFetchResult];
-                [userFetchResultLabel addObject:collection.localizedTitle];
+                [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+                [newCollectionsFetchResultsTitles addObject:collection.localizedTitle];
             }
         }
     }
     
-    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in myPhotoStream)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -502,8 +502,8 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
             if(assetsFetchResult.count>0)
             {
-                [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
-                [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
+                [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+                [newCollectionsFetchResultsTitles addObject:collection.localizedTitle];
             }
             
         }
@@ -511,8 +511,8 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     
     //Smart albums: Sorted by descending creation date.
-    NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *smartFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *smartFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in smartAlbums)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -529,16 +529,16 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
                     PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
                     if(assetsFetchResult.count>0)
                     {
-                        [smartFetchResultArray addObject:assetsFetchResult];
-                        [smartFetchResultLabel addObject:collection.localizedTitle];
+                        [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+                        [newCollectionsFetchResultsTitles addObject:collection.localizedTitle];
                     }
                 }
             }
         }
     }
     
-    NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in cloudShared)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -553,16 +553,16 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
             if(assetsFetchResult.count>0)
             {
-                [cloudSharedFetchResultArray addObject:assetsFetchResult];
-                [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
+                [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+                [newCollectionsFetchResultsTitles addObject:collection.localizedTitle];
             }
             
         }
     }
     
     
-    NSMutableArray *syncedAlbumFetchResultArray = [[NSMutableArray alloc] init];
-    NSMutableArray *syncedAlbumFetchResultLabel = [[NSMutableArray alloc] init];
+//    NSMutableArray *syncedAlbumFetchResultArray = [[NSMutableArray alloc] init];
+//    NSMutableArray *syncedAlbumFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in syncedAlbums)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -577,26 +577,26 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
             if(assetsFetchResult.count>0)
             {
-                [syncedAlbumFetchResultArray addObject:assetsFetchResult];
-                [syncedAlbumFetchResultLabel addObject:collection.localizedTitle];
+                [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+                [newCollectionsFetchResultsTitles addObject:collection.localizedTitle];
             }
             
         }
     }
-    if([allFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:allFetchResultArray];
-    if([myPhotoStreamFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:myPhotoStreamFetchResultArray];
-    if([smartFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:smartFetchResultArray];
-    if([cloudSharedFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:cloudSharedFetchResultArray];
-    if([userFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:userFetchResultArray];
-    if([syncedAlbumFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:syncedAlbumFetchResultArray];
+//    if([allFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:allFetchResultArray];
+//    if([myPhotoStreamFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:myPhotoStreamFetchResultArray];
+//    if([smartFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:smartFetchResultArray];
+//    if([cloudSharedFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:cloudSharedFetchResultArray];
+//    if([userFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:userFetchResultArray];
+//    if([syncedAlbumFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:syncedAlbumFetchResultArray];
     self.collectionsFetchResultsAssets = [NSArray arrayWithArray:newCollectionsFetchResultsAssets]; //@[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray,syncedAlbumFetchResultArray];
     
-    if([allFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:allFetchResultLabel];
-    if([myPhotoStreamFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:myPhotoStreamFetchResultLabel];
-    if([smartFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:smartFetchResultLabel];
-    if([cloudSharedFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:cloudSharedFetchResultLabel];
-    if([userFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:userFetchResultLabel];
-    if([syncedAlbumFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:syncedAlbumFetchResultLabel];
+//    if([allFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:allFetchResultLabel];
+//    if([myPhotoStreamFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:myPhotoStreamFetchResultLabel];
+//    if([smartFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:smartFetchResultLabel];
+//    if([cloudSharedFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:cloudSharedFetchResultLabel];
+//    if([userFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:userFetchResultLabel];
+//    if([syncedAlbumFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:syncedAlbumFetchResultLabel];
     self.collectionsFetchResultsTitles = [NSArray arrayWithArray:newCollectionsFetchResultsTitles];//  @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel,syncedAlbumFetchResultLabel];
 }
 
@@ -617,12 +617,12 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 }
 
 - (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForComponent:(NSInteger)component {
-    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow][0]
+    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow]
                                            attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightLight],
                                                         NSForegroundColorAttributeName: [UIColor darkGrayColor]}];
 }
 - (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForSelectedComponent:(NSInteger)component {
-    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow][0]
+    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow]
                                            attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:16 weight:UIFontWeightRegular],
                                                         NSForegroundColorAttributeName: self.view.tintColor}];
     
@@ -647,11 +647,11 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     // Set the label
     ((GMAlbumsViewCell*)cell).titleLabel.font = [UIFont fontWithName:self.pickerFontName size:self.pickerFontHeaderSize];
-    ((GMAlbumsViewCell*)cell).titleLabel.text = self.collectionsFetchResultsTitles[row][0];
+    ((GMAlbumsViewCell*)cell).titleLabel.text = self.collectionsFetchResultsTitles[row];
     ((GMAlbumsViewCell*)cell).titleLabel.textColor = self.pickerTextColor;
     
     // Retrieve the pre-fetched assets for this album:
-    PHFetchResult *assetsFetchResult = (self.collectionsFetchResultsAssets[row])[0];
+    PHFetchResult *assetsFetchResult = (self.collectionsFetchResultsAssets[row]);
     
     // Display the number of assets
     if (self.displayAlbumsNumberOfAssets) {
@@ -753,7 +753,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     
     GMGridViewController *gridViewController = (GMGridViewController *)self.navigationController.childViewControllers[0];
-    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row][0];
+    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row];
     [gridViewController reloadData];
     self.selectedRow = row;
     delay(0.15, ^{
