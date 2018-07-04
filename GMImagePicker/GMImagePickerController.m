@@ -94,14 +94,6 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         }
         _minimumInteritemSpacing = 2.0;
         
-        // Sample of how to select the collections you want to display:
-        //        _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumVideos),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumBursts),
-        //                                    @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
         _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
                                     @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
                                     @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
@@ -258,83 +250,87 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 
 #pragma mark - Setup Navigation Controller
+// legacy example code DO NOT DELETE!!!!
+/*
+- (void)setupNavigationController
+{
+    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+    _navigationController.delegate = self;
+    
+    _navigationController.navigationBar.translucent = YES;
+    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    _navigationController.navigationBar.shadowImage = [UIImage new];
+    
+    [_navigationController willMoveToParentViewController:self];
+    [_navigationController.view setFrame:self.view.frame];
+    [self.view addSubview:_navigationController.view];
+    [self addChildViewController:_navigationController];
+    [_navigationController didMoveToParentViewController:self];
+    
+    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
+        if([self.delegate respondsToSelector:@selector(controllerTitle)])
+            self.title = [self.delegate controllerTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
+            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
+            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
+            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
+        
+        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+        //        // Check if the user has access to photos
+        //        if (authStatus == PHAuthorizationStatusAuthorized) {
+        //            if([self.delegate shouldSelectAllAlbumCell]){
+        //                [albumsViewController selectAllAlbumsCell];
+        //            }
+        //        }
+    }
+}
+*/
 
-//- (void)setupNavigationController
-//{
-//    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
-//    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
-//    _navigationController.delegate = self;
-//    
-//    _navigationController.navigationBar.translucent = YES;
-//    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-//    _navigationController.navigationBar.shadowImage = [UIImage new];
-//    
-//    [_navigationController willMoveToParentViewController:self];
-//    [_navigationController.view setFrame:self.view.frame];
-//    [self.view addSubview:_navigationController.view];
-//    [self addChildViewController:_navigationController];
-//    [_navigationController didMoveToParentViewController:self];
-//    
-//    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
-//        if([self.delegate respondsToSelector:@selector(controllerTitle)])
-//            self.title = [self.delegate controllerTitle];
-//        
-//        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
-//            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
-//        
-//        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
-//            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
-//        
-//        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
-//            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
-//        
-//        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
-//        //        // Check if the user has access to photos
-//        //        if (authStatus == PHAuthorizationStatusAuthorized) {
-//        //            if([self.delegate shouldSelectAllAlbumCell]){
-//        //                [albumsViewController selectAllAlbumsCell];
-//        //            }
-//        //        }
-//    }
-//}
+// legacy example code DO NOT DELETE!!!!
+/*
 - (void)setupNavigationController
 {
     NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     
-//    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
-//    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
-//        albumsViewController.title = [self.delegate controllerTitle];
-//    }
+    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
+        albumsViewController.title = [self.delegate controllerTitle];
+    }
     GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
-//    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
+    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
     
     //All album: Sorted by descending creation date.
-//    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
-//    {
-//        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
-//            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-//            if(_allow_video){
-//                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
-//            }
-//            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
-//            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-//            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-//
-//            [allFetchResultArray addObject:assetsFetchResult];
-//            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
-//        }
-//    }
+    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+    {
+        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            if(_allow_video){
+                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+            }
+            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+        }
+    }
     
-//    self.collectionsFetchResultsAssets= @[allFetchResultArray];
-//    self.collectionsFetchResultsTitles= @[allFetchResultLabel];
-//
-    [self updateFetchResults];
-    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.section];
+    albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
+    albumsViewController.collectionsFetchResultsTitles= @[allFetchResultLabel];
     
     
-//    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
-    _navigationController = [[UINavigationController alloc] initWithRootViewController:gridViewController];
+    gridViewController.assetsFetchResults = [[albumsViewController.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    
+    
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
     _navigationController.delegate = self;
     
     
@@ -350,8 +346,33 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     
     // Push GMGridViewController
-//    [_navigationController pushViewController:gridViewController animated:YES];
+    [_navigationController pushViewController:gridViewController animated:YES];
+}
+*/
+
+- (void)setupNavigationController
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
     
+    // create grid view controller first
+    GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
+    
+    // update from photo library
+    [self updateFetchResults];
+    
+    // assign all photos
+    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.section];
+
+    // setup navigation controller
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:gridViewController];
+    _navigationController.delegate = self;
+    [_navigationController willMoveToParentViewController:self];
+    [_navigationController.view setFrame:self.view.frame];
+    [self.view addSubview:_navigationController.view];
+    [self addChildViewController:_navigationController];
+    [_navigationController didMoveToParentViewController:self];
+
+    // setup dropdown menu
     self.navBarMenu = [[MKDropdownMenu alloc] initWithFrame:CGRectMake(0, 0, 200, 44)];
     self.navBarMenu.dataSource = self;
     self.navBarMenu.delegate = self;
@@ -389,6 +410,8 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     self.navBarMenu.useFullScreenWidth = YES;
     self.navBarMenu.fullScreenInsetLeft = 10;
     self.navBarMenu.fullScreenInsetRight = 10;
+    
+    // assing dropdown menu to navigationbar
     gridViewController.navigationItem.titleView = self.navBarMenu;
 }
 #pragma mark - PHPhotoLibraryChangeObserver
@@ -442,32 +465,17 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     self.collectionsFetchResultsAssets = nil;
     self.collectionsFetchResultsTitles = nil;
-    
-    //Fetch PHAssetCollections:
-    //    self.collectionsFetchResults = @[topLevelUserCollections, myPhotoStreamAlbums, cloudSharedAlbums, smartAlbums,  syncedAlbums];
-//    PHFetchResult *topLevelUserCollections = [self.collectionsFetchResults objectAtIndex:0];
-//    PHFetchResult *myPhotoStream = [self.collectionsFetchResults objectAtIndex:1];
-//    PHFetchResult *cloudShared = [self.collectionsFetchResults objectAtIndex:2];
-//    PHFetchResult *smartAlbums = [self.collectionsFetchResults objectAtIndex:3];
-//    PHFetchResult *syncedAlbum = [self.collectionsFetchResults objectAtIndex:4 ];
-//
-    //All album: Sorted by descending creation date.
-//    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
-    {
-        if(![self.mediaTypes isEqual:[NSNull null]] ){
-            PHFetchOptions *options = [[PHFetchOptions alloc] init];
-            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
-            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
-            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
-            [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
-            [newCollectionsFetchResultsTitles addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
-        }
+
+    if(![self.mediaTypes isEqual:[NSNull null]] ){
+        PHFetchOptions *options = [[PHFetchOptions alloc] init];
+        options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+        options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+        PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+        [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
+        [newCollectionsFetchResultsTitles addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
     }
-    
+
     //User albums:
-//    NSMutableArray *userFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *userFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in topLevelUserCollections)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -486,8 +494,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         }
     }
     
-//    NSMutableArray *myPhotoStreamFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *myPhotoStreamFetchResultLabel = [[NSMutableArray alloc] init];
+    // photo stream
     for(PHCollection *collection in myPhotoStream)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -511,8 +518,6 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     
     //Smart albums: Sorted by descending creation date.
-//    NSMutableArray *smartFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *smartFetchResultLabel = [[NSMutableArray alloc] init];
     for(PHCollection *collection in smartAlbums)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -537,8 +542,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         }
     }
     
-//    NSMutableArray *cloudSharedFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *cloudSharedFetchResultLabel = [[NSMutableArray alloc] init];
+    // cloud share
     for(PHCollection *collection in cloudShared)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -561,8 +565,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     }
     
     
-//    NSMutableArray *syncedAlbumFetchResultArray = [[NSMutableArray alloc] init];
-//    NSMutableArray *syncedAlbumFetchResultLabel = [[NSMutableArray alloc] init];
+    // itune sync albums
     for(PHCollection *collection in syncedAlbums)
     {
         if ([collection isKindOfClass:[PHAssetCollection class]])
@@ -583,31 +586,18 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
             
         }
     }
-//    if([allFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:allFetchResultArray];
-//    if([myPhotoStreamFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:myPhotoStreamFetchResultArray];
-//    if([smartFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:smartFetchResultArray];
-//    if([cloudSharedFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:cloudSharedFetchResultArray];
-//    if([userFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:userFetchResultArray];
-//    if([syncedAlbumFetchResultArray count ]>0)[newCollectionsFetchResultsAssets addObject:syncedAlbumFetchResultArray];
-    self.collectionsFetchResultsAssets = [NSArray arrayWithArray:newCollectionsFetchResultsAssets]; //@[allFetchResultArray,myPhotoStreamFetchResultArray,smartFetchResultArray,cloudSharedFetchResultArray,userFetchResultArray,syncedAlbumFetchResultArray];
-    
-//    if([allFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:allFetchResultLabel];
-//    if([myPhotoStreamFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:myPhotoStreamFetchResultLabel];
-//    if([smartFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:smartFetchResultLabel];
-//    if([cloudSharedFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:cloudSharedFetchResultLabel];
-//    if([userFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:userFetchResultLabel];
-//    if([syncedAlbumFetchResultLabel count ]>0)[newCollectionsFetchResultsTitles addObject:syncedAlbumFetchResultLabel];
-    self.collectionsFetchResultsTitles = [NSArray arrayWithArray:newCollectionsFetchResultsTitles];//  @[allFetchResultLabel,myPhotoStreamFetchResultLabel,smartFetchResultLabel,cloudSharedFetchResultLabel,userFetchResultLabel,syncedAlbumFetchResultLabel];
+    self.collectionsFetchResultsAssets = [NSArray arrayWithArray:newCollectionsFetchResultsAssets];
+    self.collectionsFetchResultsTitles = [NSArray arrayWithArray:newCollectionsFetchResultsTitles];
 }
 
 #pragma mark - MKDropdownMenuDataSource
 
 - (NSInteger)numberOfComponentsInDropdownMenu:(MKDropdownMenu *)dropdownMenu {
-    return 1;//self.collectionsFetchResultsAssets.count;
+    return 1; // only use single component so far
 }
 
 - (NSInteger)dropdownMenu:(MKDropdownMenu *)dropdownMenu numberOfRowsInComponent:(NSInteger)component {
-    return [self.collectionsFetchResultsAssets count];
+    return [self.collectionsFetchResultsAssets count]; // list all album
 }
 
 #pragma mark - MKDropdownMenuDelegate
@@ -621,21 +611,18 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
                                            attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:18 weight:UIFontWeightLight],
                                                         NSForegroundColorAttributeName: [UIColor darkGrayColor]}];
 }
-- (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForSelectedComponent:(NSInteger)component {
-    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow]
-                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:16 weight:UIFontWeightRegular],
-                                                        NSForegroundColorAttributeName: self.view.tintColor}];
-    
-}
+// if you want more ui style
+//- (NSAttributedString *)dropdownMenu:(MKDropdownMenu *)dropdownMenu attributedTitleForSelectedComponent:(NSInteger)component {
+//    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow]
+//                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:16 weight:UIFontWeightRegular],
+//                                                        NSForegroundColorAttributeName: self.view.tintColor}];
+//    
+//}
 
 - (UIView *)dropdownMenu:(MKDropdownMenu *)dropdownMenu viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
     static NSString *CellIdentifier = @"Cell";
     GMAlbumsViewCell *cell = (GMAlbumsViewCell*)view;
-//    if (cell == nil || ![cell isKindOfClass:[GMAlbumsViewCell class]]) {
-//        cell = [[GMAlbumsViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
-//        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
-//    }
-//    GMAlbumsViewCell *cell = [view dequeueReusableCellWithIdentifier:CellIdentifier];
+
     if (cell == nil) {
         cell = [[GMAlbumsViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -743,15 +730,6 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 
 - (void)dropdownMenu:(MKDropdownMenu *)dropdownMenu didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
-//    NSString *colorString = self.colors[row];
-//    self.textLabel.text = colorString;
-//
-//    UIColor *color = UIColorWithHexString(colorString);
-//    self.view.backgroundColor = color;
-//    self.childViewController.shapeView.strokeColor = color;
-//
-    
-    
     GMGridViewController *gridViewController = (GMGridViewController *)self.navigationController.childViewControllers[0];
     gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row];
     [gridViewController reloadData];
@@ -837,6 +815,11 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateDisabled];
         [[viewController.toolbarItems objectAtIndex:index] setTitle:[self toolbarTitle]];
         [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0 && !self.showCameraButton) animated:YES];
+        // the fifth toolbar item
+        if(viewController.toolbarItems.count > 4){
+            index+=2;
+            [[viewController.toolbarItems objectAtIndex:index] setEnabled:(self.selectedAssets.count > 0)];
+        }
     }
 }
 
