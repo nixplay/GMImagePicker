@@ -25,11 +25,20 @@
         self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
-        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
+        PHFetchOptions *options = [[PHFetchOptions alloc] init];
+        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:options];
+        NSLog(@"GMImagePickerController ----------------------");
         
         for (PHAsset *asset in fetchResult) {
             [_selectedAssets addObject: asset];
         }
+        //sort by preSelectedAssets
+        [_selectedAssets sortUsingComparator:^NSComparisonResult(PHAsset *asset1, PHAsset *asset2) {
+            return [@([preSelectedAssets indexOfObject:asset1.localIdentifier]) compare:@([preSelectedAssets indexOfObject:asset2.localIdentifier])];
+        }];
+        
+        NSLog(@"_selectedAssets %@", _selectedAssets);
+        
         
         // _selectedAssets = [fetchResult copy];
         _allow_video = allow_v;
