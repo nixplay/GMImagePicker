@@ -27,8 +27,6 @@
         
         PHFetchOptions *options = [[PHFetchOptions alloc] init];
         PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:options];
-        NSLog(@"GMImagePickerController ----------------------");
-        
         for (PHAsset *asset in fetchResult) {
             [_selectedAssets addObject: asset];
         }
@@ -36,8 +34,6 @@
         [_selectedAssets sortUsingComparator:^NSComparisonResult(PHAsset *asset1, PHAsset *asset2) {
             return [@([preSelectedAssets indexOfObject:asset1.localIdentifier]) compare:@([preSelectedAssets indexOfObject:asset2.localIdentifier])];
         }];
-        
-        NSLog(@"_selectedAssets %@", _selectedAssets);
         
         
         // _selectedAssets = [fetchResult copy];
