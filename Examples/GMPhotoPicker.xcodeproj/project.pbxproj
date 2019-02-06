@@ -28,7 +28,6 @@
 		B37D578519CA3B3A007F64BD /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B37D578419CA3B3A007F64BD /* Images.xcassets */; };
 		B37D579419CA3B3A007F64BD /* GMPhotoPickerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = B37D579319CA3B3A007F64BD /* GMPhotoPickerTests.m */; };
 		B37D579F19CA44AF007F64BD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B37D578119CA3B3A007F64BD /* Main.storyboard */; };
-		B37D57A019CA44B3007F64BD /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B37D579219CA3B3A007F64BD /* Info.plist */; };
 		B3A2F8AE19D18A3700A59BE4 /* GMAlbumsViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B3A2F8A519D18A3700A59BE4 /* GMAlbumsViewCell.m */; };
 		B3A2F8AF19D18A3700A59BE4 /* GMAlbumsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = B3A2F8A719D18A3700A59BE4 /* GMAlbumsViewController.m */; };
 		B3A2F8B019D18A3700A59BE4 /* GMGridViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = B3A2F8A919D18A3700A59BE4 /* GMGridViewCell.m */; };
@@ -390,7 +389,6 @@
 			files = (
 				B321E46F19D19A5B0021FE16 /* GMSelected@2x.png in Resources */,
 				B31E086A1A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
-				B37D57A019CA44B3007F64BD /* Info.plist in Resources */,
 				B321E46E19D19A5B0021FE16 /* GMSelected.png in Resources */,
 				B321E47419D1A5FD0021FE16 /* GMEmptyFolder@1x.png in Resources */,
 				B31E086C1A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
