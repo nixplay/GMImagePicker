@@ -296,7 +296,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                                                                   style:UIBarButtonItemStyleDone
                                                                                  target:self.picker
                                                                                  action:@selector(finishPickingAssets:)];
-        
+        self.navigationItem.rightBarButtonItem.accessibilityIdentifier = @"done";
         self.navigationItem.rightBarButtonItem.enabled = (self.picker.autoDisableDoneButton ? self.picker.selectedAssets.count > 0 : TRUE);
     } else {
         NSString *cancelTitle = self.picker.customCancelButtonTitle ? self.picker.customCancelButtonTitle : NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel");
@@ -304,6 +304,7 @@ NSString * const GMGridViewCellIdentifier = @"GMGridViewCellIdentifier";
                                                                                   style:UIBarButtonItemStyleDone
                                                                                  target:self.picker
                                                                                  action:@selector(dismiss:)];
+        self.navigationItem.rightBarButtonItem.accessibilityIdentifier = @"cancel";
     }
     if (self.picker.useCustomFontForNavigationBar) {
         if (self.picker.useCustomFontForNavigationBar) {
