@@ -466,33 +466,36 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
 
 - (void)photoLibraryDidChange:(PHChange *)changeInstance
 {
+    __weak typeof(self) weakSelf = self;
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
     // Call might come on any background queue. Re-dispatch to the main queue to handle it.
-    dispatch_async(dispatch_get_main_queue(), ^{
+    
         
         NSMutableArray *updatedCollectionsFetchResults = nil;
         
-        for (PHFetchResult *collectionsFetchResult in self.collectionsFetchResults) {
+        for (PHFetchResult *collectionsFetchResult in weakSelf.collectionsFetchResults) {
             PHFetchResultChangeDetails *changeDetails = [changeInstance changeDetailsForFetchResult:collectionsFetchResult];
             if (changeDetails) {
                 if (!updatedCollectionsFetchResults) {
-                    updatedCollectionsFetchResults = [self.collectionsFetchResults mutableCopy];
+                    updatedCollectionsFetchResults = [weakSelf.collectionsFetchResults mutableCopy];
                 }
-                [updatedCollectionsFetchResults replaceObjectAtIndex:[self.collectionsFetchResults indexOfObject:collectionsFetchResult] withObject:[changeDetails fetchResultAfterChanges]];
+                [updatedCollectionsFetchResults replaceObjectAtIndex:[weakSelf.collectionsFetchResults indexOfObject:collectionsFetchResult] withObject:[changeDetails fetchResultAfterChanges]];
             }
         }
         
         // This only affects to changes in albums level (add/remove/edit album)
         if (updatedCollectionsFetchResults) {
-            self.collectionsFetchResults = updatedCollectionsFetchResults;
-            [self updateFetchResults];
-            [self.tableView reloadData];
+            weakSelf.collectionsFetchResults = updatedCollectionsFetchResults;
+            [weakSelf updateFetchResults];
+            [weakSelf.tableView reloadData];
         }
         
         // However, we want to update if photos are added, so the counts of items & thumbnails are updated too.
         // Maybe some checks could be done here , but for now is OKey.
         
         
-    });
+    }];
 }
 
 
