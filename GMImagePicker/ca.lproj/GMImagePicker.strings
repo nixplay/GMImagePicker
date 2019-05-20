@@ -1,4 +1,4 @@
-﻿/* Cancel */
+/* Cancel */
 "picker.navigation.cancel-button" = "Cancel·lar";
 
 /* Done */
@@ -31,3 +31,11 @@
 /* Albums */
 "picker.table.user-albums-header" = "COL·LECCIONS";
 
+/* Action (button) permission - mic */
+"picker.action.permission.microphone" = "Enable Microphone Access";
+
+/* Action (button) permission - camera */
+"picker.action.permission.camera" = "Enable Camera Access";
+
+/* Action (title) permission */
+"picker.action.permission.title" = "Share to Nixplay";
