@@ -719,9 +719,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             
                             if (insertedPaths != nil) {
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
-                                if (weakSelf.picker.autoSelectCameraImages) {
-                                    [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
-                                }
+                                [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
                             }
                             
                             if (changedPaths != nil) {
