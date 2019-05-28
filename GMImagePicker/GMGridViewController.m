@@ -53,6 +53,7 @@
 @interface GMGridViewController () <PHPhotoLibraryChangeObserver>
 
 @property (nonatomic, weak) GMImagePickerController *picker;
+@property (nonatomic, weak) NSString *albumLabel;
 @property (strong) PHCachingImageManager *imageManager;
 @property (strong) PHImageRequestOptions *imageRequestOptions;
 @property CGRect previousPreheatRect;
@@ -180,12 +181,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     
     [self resetCachedAssets];
     
-    
-    
     if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)])
     {
         self.edgesForExtendedLayout = UIRectEdgeNone;
     }
+
+    self.albumLabel = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -269,7 +270,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                                                                [cell.imageView setImage:result];
                                                                            }
                                                                        });
-                                                                       
+
                                                                    }];
             if(requestID != cell.assetRequestID){
                 if ([cell isKindOfClass:[GMGridViewCell class]]) {
@@ -398,9 +399,92 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row-1 inSection:0];
-        
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row-1 inSection:0];
+
+            __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
+                                                                                     forIndexPath:newIndexPath];
+
+            // Increment the cell's tag
+            NSInteger currentTag = cell.tag + 1;
+            cell.tag = currentTag;
+
+            PHAsset *asset = self.assetsFetchResults[newIndexPath.row];
+
+            {
+                dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+                    PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
+                                                                              targetSize:AssetGridThumbnailSize
+                                                                             contentMode:PHImageContentModeAspectFill
+                                                                                 options:self.imageRequestOptions
+                                                                           resultHandler:^(UIImage *result, NSDictionary *info) {
+                                                                               // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+                                                                               dispatch_async(dispatch_get_main_queue(), ^{
+                                                                                   if (cell.tag == currentTag) {
+                                                                                       [cell.imageView setImage:result];
+                                                                                   }
+                                                                               });
+
+                                                                           }];
+                    if(requestID != cell.assetRequestID){
+                        if ([cell isKindOfClass:[GMGridViewCell class]]) {
+                            [cell cancelImageRequest];
+                        }
+                        cell.assetRequestID = requestID;
+                    }
+                });
+            }
+
+            [cell bind:asset];
+
+            cell.shouldShowSelection = self.picker.allowsMultipleSelection;
+
+            // Optional protocol to determine if some kind of assets can't be selected (pej long videos, etc...)
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldEnableAsset:)]) {
+                cell.enabled = [self.picker.delegate assetsPickerController:self.picker shouldEnableAsset:asset];
+            } else {
+                cell.enabled = YES;
+            }
+
+            // Setting `selected` property blocks further deselection. Have to call selectItemAtIndexPath too. ( ref: http://stackoverflow.com/a/17812116/1648333 )
+            if ([self.picker.selectedAssets containsObject:asset]) {
+                cell.selected = YES;
+                [collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+            } else {
+                cell.selected = NO;
+            }
+            return cell;
+        } else {
+            UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CameraCellIdentifier forIndexPath:indexPath];
+
+            if ([cell subviews].count == 1) {
+                cell.backgroundColor = [UIColor whiteColor];
+
+                UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+                UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
+
+                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -12, cell.bounds.size.width, cell.bounds.size.height)];
+                toolBar.barTintColor = [UIColor whiteColor];
+                toolBar.backgroundColor = [UIColor whiteColor];
+                [toolBar setItems:@[itemSpace, item, itemSpace]];
+                [cell addSubview:toolBar];
+
+                UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, (cell.bounds.size.height/2), cell.bounds.size.width, 24)];
+                label.font = [UIFont systemFontOfSize:12];
+                label.textColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
+                label.textAlignment = NSTextAlignmentCenter;
+                label.contentMode = UIViewContentModeCenter;
+                label.text = NSLocalizedStringFromTableInBundle(@"picker.navigation.camera-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Camera");
+
+                [cell addSubview:label];
+            }
+
+            return cell;
+        }
+    } else {
+        NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:0];
+
         __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
                                                                                  forIndexPath:newIndexPath];
 
@@ -410,25 +494,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
         PHAsset *asset = self.assetsFetchResults[newIndexPath.row];
 
-        /*if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
-         {
-         NSLog(@"Image manager: Requesting FIT image for iPad");
-         [self.imageManager requestImageForAsset:asset
-         targetSize:AssetGridThumbnailSize
-         contentMode:PHImageContentModeAspectFit
-         options:self.imageRequestOptions
-         resultHandler:^(UIImage *result, NSDictionary *info) {
-
-         // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-         if (cell.tag == currentTag) {
-         [cell.imageView setImage:result];
-         }
-         }];
-         }
-         else*/
-
         {
-            //NSLog(@"Image manager: Requesting FILL image for iPhone");
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
                                                                           targetSize:AssetGridThumbnailSize
@@ -471,33 +537,8 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             cell.selected = NO;
         }
         return cell;
-    } else {
-        UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CameraCellIdentifier forIndexPath:indexPath];
-
-        if ([cell subviews].count == 1) {
-            cell.backgroundColor = [UIColor whiteColor];
-
-            UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-            UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
-
-            UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -12, cell.bounds.size.width, cell.bounds.size.height)];
-            toolBar.barTintColor = [UIColor whiteColor];
-            toolBar.backgroundColor = [UIColor whiteColor];
-            [toolBar setItems:@[itemSpace, item, itemSpace]];
-            [cell addSubview:toolBar];
-
-            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, (cell.bounds.size.height/2), cell.bounds.size.width, 24)];
-            label.font = [UIFont systemFontOfSize:12];
-            label.textColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
-            label.textAlignment = NSTextAlignmentCenter;
-            label.contentMode = UIViewContentModeCenter;
-            label.text = NSLocalizedStringFromTableInBundle(@"picker.navigation.camera-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Camera");
-
-            [cell addSubview:label];
-        }
-
-        return cell;
     }
+
 }
 
 #pragma mark - Camera
@@ -510,8 +551,20 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
+
+            if (!cell.isEnabled) {
+                return NO;
+            } else if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldSelectAsset:)]) {
+                return [self.picker.delegate assetsPickerController:self.picker shouldSelectAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
 
@@ -526,11 +579,19 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            [self.picker selectAsset:asset];
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         [self.picker selectAsset:asset];
-
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
         }
@@ -592,8 +653,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
+                return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
             return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
@@ -604,11 +673,17 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+            [self.picker deselectAsset:asset];
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
         [self.picker deselectAsset:asset];
-
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
         }
@@ -617,8 +692,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
+                return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
             return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
@@ -629,8 +712,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
@@ -640,8 +731,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row) {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+    if ([self.title isEqualToString:self.albumLabel]) {
+        if (indexPath.row) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
+            }
+        }
+    } else {
+        PHAsset *asset = self.assetsFetchResults[indexPath.row];
 
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
@@ -655,7 +754,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    NSInteger count = self.assetsFetchResults.count + 1;
+    NSInteger count = self.assetsFetchResults.count + (([self.title isEqualToString:self.albumLabel]) ? 1 : 0);
     return count;
 }
 
@@ -994,8 +1093,13 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     
     NSMutableArray *assets = [NSMutableArray arrayWithCapacity:indexPaths.count];
     for (NSIndexPath *indexPath in indexPaths) {
-        if (indexPath.row) {
-            PHAsset *asset = _assetsFetchResults[indexPath.row-1];
+        if ([self.title isEqualToString:self.albumLabel]) {
+            if (indexPath.row) {
+                PHAsset *asset = _assetsFetchResults[indexPath.row-1];
+                [assets addObject:asset];
+            }
+        } else {
+            PHAsset *asset = _assetsFetchResults[indexPath.row];
             [assets addObject:asset];
         }
     }
