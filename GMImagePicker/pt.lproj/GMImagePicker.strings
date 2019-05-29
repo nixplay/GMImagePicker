@@ -4,6 +4,9 @@
 /* Done */
 "picker.navigation.done-button" = "OK";
 
+/* Camera */
+"picker.navigation.camera-button" = "Camera";
+
 /* Navigation bar default title */
 "picker.navigation.title" = "GMImagePicker";
 
