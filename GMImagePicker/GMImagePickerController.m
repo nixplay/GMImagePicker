@@ -178,7 +178,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         _customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumFavorites),
                                     @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
                                     @(PHAssetCollectionSubtypeSmartAlbumVideos),
-                                    //                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
+//                                    @(PHAssetCollectionSubtypeSmartAlbumSlomoVideos),
                                     @(PHAssetCollectionSubtypeSmartAlbumTimelapses),
                                     @(PHAssetCollectionSubtypeSmartAlbumBursts),
                                     @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
@@ -212,7 +212,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         _barStyle = UIBarStyleDefault;
         // Save to the album
         
-        
+
         
         
     }
@@ -257,103 +257,103 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 #pragma mark - Setup Navigation Controller
 // legacy example code DO NOT DELETE!!!!
 /*
- - (void)setupNavigationController
- {
- GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
- _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
- _navigationController.delegate = self;
- 
- _navigationController.navigationBar.translucent = YES;
- [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
- _navigationController.navigationBar.shadowImage = [UIImage new];
- 
- [_navigationController willMoveToParentViewController:self];
- [_navigationController.view setFrame:self.view.frame];
- [self.view addSubview:_navigationController.view];
- [self addChildViewController:_navigationController];
- [_navigationController didMoveToParentViewController:self];
- 
- if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
- if([self.delegate respondsToSelector:@selector(controllerTitle)])
- self.title = [self.delegate controllerTitle];
- 
- if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
- self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
- 
- if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
- self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
- 
- if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
- self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
- 
- //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
- //        // Check if the user has access to photos
- //        if (authStatus == PHAuthorizationStatusAuthorized) {
- //            if([self.delegate shouldSelectAllAlbumCell]){
- //                [albumsViewController selectAllAlbumsCell];
- //            }
- //        }
- }
- }
- */
+- (void)setupNavigationController
+{
+    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+    _navigationController.delegate = self;
+    
+    _navigationController.navigationBar.translucent = YES;
+    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    _navigationController.navigationBar.shadowImage = [UIImage new];
+    
+    [_navigationController willMoveToParentViewController:self];
+    [_navigationController.view setFrame:self.view.frame];
+    [self.view addSubview:_navigationController.view];
+    [self addChildViewController:_navigationController];
+    [_navigationController didMoveToParentViewController:self];
+    
+    if([self.delegate respondsToSelector:@selector(shouldSelectAllAlbumCell)]){
+        if([self.delegate respondsToSelector:@selector(controllerTitle)])
+            self.title = [self.delegate controllerTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomDoneButtonTitle)])
+            self.customDoneButtonTitle = [self.delegate controllerCustomDoneButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomCancelButtonTitle)])
+            self.customCancelButtonTitle = [self.delegate controllerCustomCancelButtonTitle];
+        
+        if([self.delegate respondsToSelector:@selector(controllerCustomNavigationBarPrompt)])
+            self.customNavigationBarPrompt = [self.delegate controllerCustomNavigationBarPrompt];
+        
+        //        PHAuthorizationStatus authStatus = [PHPhotoLibrary authorizationStatus];
+        //        // Check if the user has access to photos
+        //        if (authStatus == PHAuthorizationStatusAuthorized) {
+        //            if([self.delegate shouldSelectAllAlbumCell]){
+        //                [albumsViewController selectAllAlbumsCell];
+        //            }
+        //        }
+    }
+}
+*/
 
 // legacy example code DO NOT DELETE!!!!
 /*
- - (void)setupNavigationController
- {
- NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
- 
- GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
- if([self.delegate respondsToSelector:@selector(controllerTitle)]){
- albumsViewController.title = [self.delegate controllerTitle];
- }
- GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
- gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
- 
- //All album: Sorted by descending creation date.
- NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
- NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
- {
- if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
- PHFetchOptions *options = [[PHFetchOptions alloc] init];
- if(_allow_video){
- _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
- }
- options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
- options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
- PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
- 
- [allFetchResultArray addObject:assetsFetchResult];
- [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
- }
- }
- 
- albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
- albumsViewController.collectionsFetchResultsTitles= @[allFetchResultLabel];
- 
- 
- gridViewController.assetsFetchResults = [[albumsViewController.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
- 
- 
- _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
- _navigationController.delegate = self;
- 
- 
- //    _navigationController.navigationBar.translucent = YES;
- //    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
- //    _navigationController.navigationBar.shadowImage = [UIImage new];
- 
- [_navigationController willMoveToParentViewController:self];
- [_navigationController.view setFrame:self.view.frame];
- [self.view addSubview:_navigationController.view];
- [self addChildViewController:_navigationController];
- [_navigationController didMoveToParentViewController:self];
- 
- 
- // Push GMGridViewController
- [_navigationController pushViewController:gridViewController animated:YES];
- }
- */
+- (void)setupNavigationController
+{
+    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
+    
+    GMAlbumsViewController *albumsViewController = [[GMAlbumsViewController alloc] init];
+    if([self.delegate respondsToSelector:@selector(controllerTitle)]){
+        albumsViewController.title = [self.delegate controllerTitle];
+    }
+    GMGridViewController *gridViewController = [[GMGridViewController alloc] initWithPicker:self];
+    gridViewController.title = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
+    
+    //All album: Sorted by descending creation date.
+    NSMutableArray *allFetchResultArray = [[NSMutableArray alloc] init];
+    NSMutableArray *allFetchResultLabel = [[NSMutableArray alloc] init];
+    {
+        if(![self.mediaTypes isEqual:[NSNull null]] && self != nil){
+            PHFetchOptions *options = [[PHFetchOptions alloc] init];
+            if(_allow_video){
+                _mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
+            }
+            options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
+            
+            [allFetchResultArray addObject:assetsFetchResult];
+            [allFetchResultLabel addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
+        }
+    }
+    
+    albumsViewController.collectionsFetchResultsAssets= @[allFetchResultArray];
+    albumsViewController.collectionsFetchResultsTitles= @[allFetchResultLabel];
+    
+    
+    gridViewController.assetsFetchResults = [[albumsViewController.collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
+    
+    
+    _navigationController = [[UINavigationController alloc] initWithRootViewController:albumsViewController];
+    _navigationController.delegate = self;
+    
+    
+    //    _navigationController.navigationBar.translucent = YES;
+    //    [_navigationController.navigationBar setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
+    //    _navigationController.navigationBar.shadowImage = [UIImage new];
+    
+    [_navigationController willMoveToParentViewController:self];
+    [_navigationController.view setFrame:self.view.frame];
+    [self.view addSubview:_navigationController.view];
+    [self addChildViewController:_navigationController];
+    [_navigationController didMoveToParentViewController:self];
+    
+    
+    // Push GMGridViewController
+    [_navigationController pushViewController:gridViewController animated:YES];
+}
+*/
 
 - (void)setupNavigationController
 {
@@ -366,9 +366,10 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     [self updateFetchResults];
     
     // assign all photos
+    // we use lable to identifier camera should show in grid
     gridViewController.title = _showCameraButton ? [self.collectionsFetchResultsTitles objectAtIndex:indexPath.row] : @"";
     gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.row];
-    
+
     // setup navigation controller
     _navigationController = [[UINavigationController alloc] initWithRootViewController:gridViewController];
     _navigationController.delegate = self;
@@ -377,7 +378,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     [self.view addSubview:_navigationController.view];
     [self addChildViewController:_navigationController];
     [_navigationController didMoveToParentViewController:self];
-    
+
     // setup dropdown menu
     self.navBarMenu = [[MKDropdownMenu alloc] initWithFrame:CGRectMake(0, 0, 200, 44)];
     self.navBarMenu.dataSource = self;
@@ -443,7 +444,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         if (updatedCollectionsFetchResults) {
             self.collectionsFetchResults = updatedCollectionsFetchResults;
             [self updateFetchResults];
-            //            [self.tableView reloadData];
+//            [self.tableView reloadData];
         }
         
         // However, we want to update if photos are added, so the counts of items & thumbnails are updated too.
@@ -471,7 +472,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     self.collectionsFetchResultsAssets = nil;
     self.collectionsFetchResultsTitles = nil;
-    
+
     if(![self.mediaTypes isEqual:[NSNull null]] ){
         PHFetchOptions *options = [[PHFetchOptions alloc] init];
         options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
@@ -480,7 +481,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         [newCollectionsFetchResultsAssets addObject:assetsFetchResult];
         [newCollectionsFetchResultsTitles addObject:NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos")];
     }
-    
+
     //User albums:
     for(PHCollection *collection in topLevelUserCollections)
     {
@@ -622,13 +623,13 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 //    return [[NSAttributedString alloc] initWithString: self.collectionsFetchResultsTitles[self.selectedRow]
 //                                           attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:16 weight:UIFontWeightRegular],
 //                                                        NSForegroundColorAttributeName: self.view.tintColor}];
-//
+//    
 //}
 
 - (UIView *)dropdownMenu:(MKDropdownMenu *)dropdownMenu viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view {
     static NSString *CellIdentifier = @"Cell";
     GMAlbumsViewCell *cell = (GMAlbumsViewCell*)view;
-    
+
     if (cell == nil) {
         cell = [[GMAlbumsViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:CellIdentifier];
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -815,13 +816,14 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
         for (UIViewController *viewController in nav.viewControllers) {
             NSUInteger index = 1;
-            if (_showCameraButton) {
-                index++;
-            }
+//            if (_showCameraButton) {
+//                index++;
+//            }
             [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateNormal];
             [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateDisabled];
             [[viewController.toolbarItems objectAtIndex:index] setTitle:[self toolbarTitle]];
-            [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0 && !self.showCameraButton) animated:YES];
+//            [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0 && !self.showCameraButton) animated:YES];
+            [viewController.navigationController setToolbarHidden:(self.selectedAssets.count) animated:YES];
             // the fifth toolbar item
             if(viewController.toolbarItems.count > 4){
                 index+=2;
@@ -896,13 +898,13 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     // This verify camera and microphone access scenario
     AVAuthorizationStatus cameraStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
     if(cameraStatus == AVAuthorizationStatusDenied){
-        
+
         [self showDialog:NSLocalizedStringFromTableInBundle(@"NSCameraUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSCameraUsageDescription"])
           isEnableCamera:NO];
-        
+
         return;
     } else if (cameraStatus == AVAuthorizationStatusNotDetermined) {
-        
+
         [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
             if (!granted) {
                 [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
@@ -919,10 +921,10 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
                 }];
             }
         }];
-        
+
         return;
     } else if (cameraStatus == AVAuthorizationStatusAuthorized) {
-        
+
         [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
             if (!granted) {
                 [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
@@ -931,7 +933,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
             }
         }];
     }
-    
+
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Camera!"
@@ -954,7 +956,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    //    picker.videoMaximumDuration = self.videoMaximumDuration;
+//    picker.videoMaximumDuration = self.videoMaximumDuration;
     if(_allow_video){
         picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
         picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
@@ -962,7 +964,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         picker.mediaTypes = @[(NSString *)kUTTypeImage];
     }
     picker.allowsEditing = self.allowsEditingCameraImages;
-    
+
     picker.delegate = self;
     picker.modalPresentationStyle = UIModalPresentationPopover;
     
@@ -998,10 +1000,10 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 }
 
-- (UIBarButtonItem *)cameraButtonItem
-{
-    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraButtonPressed:)];
-}
+//- (UIBarButtonItem *)cameraButtonItem
+//{
+//    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraButtonPressed:)];
+//}
 
 - (UIBarButtonItem *)doneButtonItem
 {
@@ -1010,16 +1012,16 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 - (NSArray *)toolbarItems
 {
-    UIBarButtonItem *camera = [self cameraButtonItem];
+//    UIBarButtonItem *camera = [self cameraButtonItem];
     UIBarButtonItem *title  = [self titleButtonItem];
     UIBarButtonItem *space  = [self spaceButtonItem];
     UIBarButtonItem *done  = [self doneButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
     
-    if (_showCameraButton) {//&& ([[self.navigationController childViewControllers] count] > 1) ) {
-        [items addObject:camera];
-    }
+//    if (_showCameraButton) {//&& ([[self.navigationController childViewControllers] count] > 1) ) {
+//        [items addObject:camera];
+//    }
     [items addObject:space];
     [items addObject:title];
     [items addObject:space];
@@ -1083,7 +1085,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 -(void)image:(UIImage *)image finishedSavingWithError:(NSError *)error contextInfo:(void *)contextInfo
 {
     if (error) {
-        
+
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Image Not Saved"
                                                                        message:@"Sorry, this device does not have a camera."
                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -1127,45 +1129,45 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 #pragma mark - Permission
 
 - (void)showDialog:(NSString*)description isEnableCamera:(BOOL)isEnableCamera {
-    
+
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Share to Nixplay")
                                                                    message:description
                                                             preferredStyle:UIAlertControllerStyleAlert];
-    
+
     if (!isEnableCamera) {
         UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.camera",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Camera Access")
-                                                          style:UIAlertActionStyleDefault
-                                                        handler:^(UIAlertAction * _Nonnull action) {
-                                                            [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                                                        }];
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                                                                  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                              }];
         [alert addAction:action];
     }
-    
+
     AVAudioSessionRecordPermission audioPermission = [[AVAudioSession sharedInstance] recordPermission];
     if (audioPermission == AVAudioSessionRecordPermissionUndetermined || audioPermission == AVAudioSessionRecordPermissionDenied) {
         UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.microphone",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Microphone Access")
-                                                          style:UIAlertActionStyleDefault
-                                                        handler:^(UIAlertAction * _Nonnull action) {
-                                                            if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
-                                                                [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-                                                                    if (!granted) {
-                                                                        [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
-                                                                    }
-                                                                }];
-                                                            } else {
-                                                                [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                                                            }
-                                                        }];
+                                                               style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction * _Nonnull action) {
+                                                                 if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
+                                                                     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                                                                         if (!granted) {
+                                                                             [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
+                                                                         }
+                                                                     }];
+                                                                 } else {
+                                                                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                 }
+                                                             }];
         [alert addAction:action];
     }
-    
+
     UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel")
                                                             style:UIAlertActionStyleDefault
                                                           handler:^(UIAlertAction * _Nonnull action) {
                                                               [alert dismissViewControllerAnimated:YES completion:nil];
                                                           }];
     [alert addAction:cancelAction];
-    
+
     [self presentViewController:alert animated:YES completion:nil];
 }
 
