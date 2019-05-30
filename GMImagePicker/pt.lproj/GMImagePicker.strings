@@ -1,8 +1,11 @@
-﻿/* Cancel */
+/* Cancel */
 "picker.navigation.cancel-button" = "Cancelar";
 
 /* Done */
 "picker.navigation.done-button" = "OK";
+
+/* Camera */
+"picker.navigation.camera-button" = "Camera";
 
 /* Navigation bar default title */
 "picker.navigation.title" = "GMImagePicker";
@@ -31,3 +34,11 @@
 /* Albums */
 "picker.table.user-albums-header" = "COLECÇÕES";
 
+/* Action (button) permission - mic */
+"picker.action.permission.microphone" = "Enable Microphone Access";
+
+/* Action (button) permission - camera */
+"picker.action.permission.camera" = "Enable Camera Access";
+
+/* Action (title) permission */
+"picker.action.permission.title" = "Share to Nixplay";

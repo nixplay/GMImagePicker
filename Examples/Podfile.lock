@@ -1,0 +1,20 @@
+PODS:
+  - Masonry (1.1.0)
+  - MKDropdownMenu (1.4)
+
+DEPENDENCIES:
+  - Masonry
+  - MKDropdownMenu
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Masonry
+    - MKDropdownMenu
+
+SPEC CHECKSUMS:
+  Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  MKDropdownMenu: 269df4a41d21a1db684ce8bc709befe419fc5bae
+
+PODFILE CHECKSUM: cbf1c632a946c5a4d5809929758df56206e20f7d
+
+COCOAPODS: 1.6.1

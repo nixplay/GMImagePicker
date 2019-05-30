@@ -51,11 +51,16 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
         self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
-        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:nil];
-        
+        PHFetchOptions *options = [[PHFetchOptions alloc] init];
+        PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:options];
         for (PHAsset *asset in fetchResult) {
             [_selectedAssets addObject: asset];
         }
+        //sort by preSelectedAssets
+        [_selectedAssets sortUsingComparator:^NSComparisonResult(PHAsset *asset1, PHAsset *asset2) {
+            return [@([preSelectedAssets indexOfObject:asset1.localIdentifier]) compare:@([preSelectedAssets indexOfObject:asset2.localIdentifier])];
+        }];
+        
         
         // _selectedAssets = [fetchResult copy];
         _allow_video = allow_v;
@@ -885,6 +890,45 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 - (void)cameraButtonPressed:(UIBarButtonItem *)button
 {
+    // This verify camera and microphone access scenario
+    AVAuthorizationStatus cameraStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    if(cameraStatus == AVAuthorizationStatusDenied){
+
+        [self showDialog:NSLocalizedStringFromTableInBundle(@"NSCameraUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSCameraUsageDescription"])
+          isEnableCamera:NO];
+
+        return;
+    } else if (cameraStatus == AVAuthorizationStatusNotDetermined) {
+
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            if (!granted) {
+                [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                  isEnableCamera:NO];
+            } else {
+                [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                    if (!granted) {
+                        [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                          isEnableCamera:YES];
+                        return;
+                    } else {
+                        [self cameraButtonPressed:nil];
+                    }
+                }];
+            }
+        }];
+
+        return;
+    } else if (cameraStatus == AVAuthorizationStatusAuthorized) {
+
+        [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+            if (!granted) {
+                [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                  isEnableCamera:YES];
+                return;
+            }
+        }];
+    }
+
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Camera!"
@@ -1076,4 +1120,50 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
     
 }
+
+#pragma mark - Permission
+
+- (void)showDialog:(NSString*)description isEnableCamera:(BOOL)isEnableCamera {
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Share to Nixplay")
+                                                                   message:description
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+
+    if (!isEnableCamera) {
+        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.camera",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Camera Access")
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                                                                  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                              }];
+        [alert addAction:action];
+    }
+
+    AVAudioSessionRecordPermission audioPermission = [[AVAudioSession sharedInstance] recordPermission];
+    if (audioPermission == AVAudioSessionRecordPermissionUndetermined || audioPermission == AVAudioSessionRecordPermissionDenied) {
+        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.microphone",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Microphone Access")
+                                                               style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction * _Nonnull action) {
+                                                                 if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
+                                                                     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                                                                         if (!granted) {
+                                                                             [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
+                                                                         }
+                                                                     }];
+                                                                 } else {
+                                                                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                 }
+                                                             }];
+        [alert addAction:action];
+    }
+
+    UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel")
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * _Nonnull action) {
+                                                              [alert dismissViewControllerAnimated:YES completion:nil];
+                                                          }];
+    [alert addAction:cancelAction];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 @end
