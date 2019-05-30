@@ -80,7 +80,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     _columns = 4, _columnsL = 4;
     _margin = 0, _gutter = 1;
     _marginL = 0, _gutterL = 1;
-
+    
     // For pixel perfection...
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         // iPad
@@ -98,10 +98,10 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         _margin = 0, _gutter = 1;
         _marginL = 0, _gutterL = 2;
     }
-
+    
     //Custom init. The picker contains custom information to create the FlowLayout
     self.picker = picker;
-
+    
     //Ipad popover is not affected by rotation!
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
     {
@@ -121,8 +121,8 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             screenHeight = CGRectGetHeight(picker.view.bounds);
         }
     }
-
-
+    
+    
     UICollectionViewFlowLayout *layout = [self collectionViewFlowLayoutForOrientation:[UIApplication sharedApplication].statusBarOrientation];
     if (self = [super initWithCollectionViewLayout:layout])
     {
@@ -138,20 +138,20 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 // iOS 8.0.0 and below logic
                 AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
             }
-
+            
         }else{
             AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
         }
-
+        
         self.collectionView.allowsMultipleSelection = picker.allowsMultipleSelection;
-
+        
         [self.collectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:CameraCellIdentifier];
         [self.collectionView registerClass:GMGridViewCell.class
                 forCellWithReuseIdentifier:GMGridViewCellIdentifier];
-
+        
         self.preferredContentSize = kPopoverContentSize;
     }
-
+    
     return self;
 }
 
@@ -159,16 +159,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 {
     [super viewDidLoad];
     [self setupViews];
-
+    
     // Navigation bar customization
     if (self.picker.customNavigationBarPrompt) {
         self.navigationItem.prompt = self.picker.customNavigationBarPrompt;
     }
-
+    
     self.imageManager = [[PHCachingImageManager alloc] init];
     // This keeps memory usage to a sensible size when working with large photo collections.
     self.imageManager.allowsCachingHighQualityImages = NO;
-
+    
     // The same applies to our PHImageRequestOptions.
     // PHImageRequestOptionsDeliveryModeOpportunistic is a good compromise: it provides a lower quality image quickly
     // and then a higher quality image later, without excessive memory usage.
@@ -177,22 +177,22 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
     self.imageRequestOptions.synchronous = NO;
     self.imageRequestOptions.networkAccessAllowed = YES;
-
-
+    
+    
     [self resetCachedAssets];
-
+    
     if ([self respondsToSelector:@selector(setEdgesForExtendedLayout:)])
     {
         self.edgesForExtendedLayout = UIRectEdgeNone;
     }
-
+    
     self.albumLabel = NSLocalizedStringFromTableInBundle(@"picker.table.all-photos-label",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"All photos");
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-
+    
     [self setupButtons];
     [self setupToolbar];
     [[PHPhotoLibrary sharedPhotoLibrary] registerChangeObserver:self];
@@ -200,7 +200,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 - (void)viewWillDisappear:(BOOL)animated
 {
     [super viewWillDisappear:animated];
-
+    
     [[PHPhotoLibrary sharedPhotoLibrary] unregisterChangeObserver:self];
 }
 - (void)viewDidAppear:(BOOL)animated
@@ -225,16 +225,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-
+    
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         return;
     }
-
+    
     UIInterfaceOrientation toInterfaceOrientation = (size.height > size.width ? UIInterfaceOrientationPortrait
                                                      : UIInterfaceOrientationLandscapeLeft);
-
+    
     UICollectionViewFlowLayout *layout = [self collectionViewFlowLayoutForOrientation:toInterfaceOrientation];
-
+    
     //Update the AssetGridThumbnailSize:
     CGFloat scale = [UIScreen mainScreen].scale;
     NSOperatingSystemVersion ios10_0_1 = (NSOperatingSystemVersion){10, 0, 1};
@@ -246,19 +246,19 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             // iOS 8.0.0 and below logic
             AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale*0.5, layout.itemSize.height * scale*0.5);
         }
-
+        
     }else{
         AssetGridThumbnailSize = CGSizeMake(layout.itemSize.width * scale, layout.itemSize.height * scale);
     }
-
+    
     [self resetCachedAssets];
-
+    
     [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
         //This is optional. Reload visible thumbnails:
         for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
             NSInteger currentTag = cell.tag;
-
-
+            
+            
             PHImageRequestID requestID=  [self.imageManager requestImageForAsset:cell.asset
                                                                       targetSize:AssetGridThumbnailSize
                                                                      contentMode:PHImageContentModeAspectFill
@@ -270,7 +270,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                                                                [cell.imageView setImage:result];
                                                                            }
                                                                        });
-
+                                                                       
                                                                    }];
             if(requestID != cell.assetRequestID){
                 if ([cell isKindOfClass:[GMGridViewCell class]]) {
@@ -278,9 +278,9 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 }
                 cell.assetRequestID = requestID;
             }
-
+            
         }
-
+        
         [self.collectionView setCollectionViewLayout:layout animated:NO];
     } completion:nil];
 }
@@ -313,14 +313,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     }
     if (self.picker.useCustomFontForNavigationBar) {
         if (self.picker.useCustomFontForNavigationBar) {
-            if (self.picker.useCustomFontForNavigationBar) {
-                NSDictionary* barButtonItemAttributes = @{NSFontAttributeName: [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize]};
-                [self.navigationItem.rightBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateNormal];
-                [self.navigationItem.rightBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateSelected];
-            }
+            NSDictionary* barButtonItemAttributes = @{NSFontAttributeName: [UIFont fontWithName:self.picker.pickerFontName size:self.picker.pickerFontHeaderSize]};
+            [self.navigationItem.rightBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateNormal];
+            [self.navigationItem.rightBarButtonItem setTitleTextAttributes:barButtonItemAttributes forState:UIControlStateSelected];
         }
     }
-
+    
 }
 
 - (void)setupToolbar
@@ -404,16 +402,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row-1 inSection:0];
-
+            
             __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
                                                                                      forIndexPath:newIndexPath];
-
+            
             // Increment the cell's tag
             NSInteger currentTag = cell.tag + 1;
             cell.tag = currentTag;
-
+            
             PHAsset *asset = self.assetsFetchResults[newIndexPath.row];
-
+            
             {
                 dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                     PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
@@ -427,7 +425,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                                                                        [cell.imageView setImage:result];
                                                                                    }
                                                                                });
-
+                                                                               
                                                                            }];
                     if(requestID != cell.assetRequestID){
                         if ([cell isKindOfClass:[GMGridViewCell class]]) {
@@ -437,18 +435,18 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     }
                 });
             }
-
+            
             [cell bind:asset];
-
+            
             cell.shouldShowSelection = self.picker.allowsMultipleSelection;
-
+            
             // Optional protocol to determine if some kind of assets can't be selected (pej long videos, etc...)
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldEnableAsset:)]) {
                 cell.enabled = [self.picker.delegate assetsPickerController:self.picker shouldEnableAsset:asset];
             } else {
                 cell.enabled = YES;
             }
-
+            
             // Setting `selected` property blocks further deselection. Have to call selectItemAtIndexPath too. ( ref: http://stackoverflow.com/a/17812116/1648333 )
             if ([self.picker.selectedAssets containsObject:asset]) {
                 cell.selected = YES;
@@ -459,43 +457,43 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             return cell;
         } else {
             UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CameraCellIdentifier forIndexPath:indexPath];
-
+            
             if ([cell subviews].count == 1) {
                 cell.backgroundColor = [UIColor whiteColor];
-
+                
                 UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
-
+                
                 UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -12, cell.bounds.size.width, cell.bounds.size.height)];
                 toolBar.barTintColor = [UIColor whiteColor];
                 toolBar.backgroundColor = [UIColor whiteColor];
                 [toolBar setItems:@[itemSpace, item, itemSpace]];
                 [cell addSubview:toolBar];
-
+                
                 UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, (cell.bounds.size.height/2), cell.bounds.size.width, 24)];
                 label.font = [UIFont systemFontOfSize:12];
                 label.textColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
                 label.textAlignment = NSTextAlignmentCenter;
                 label.contentMode = UIViewContentModeCenter;
                 label.text = NSLocalizedStringFromTableInBundle(@"picker.navigation.camera-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Camera");
-
+                
                 [cell addSubview:label];
             }
-
+            
             return cell;
         }
     } else {
         NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:0];
-
+        
         __block GMGridViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:GMGridViewCellIdentifier
                                                                                  forIndexPath:newIndexPath];
-
+        
         // Increment the cell's tag
         NSInteger currentTag = cell.tag + 1;
         cell.tag = currentTag;
-
+        
         PHAsset *asset = self.assetsFetchResults[newIndexPath.row];
-
+        
         {
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
                 PHImageRequestID requestID=  [self.imageManager requestImageForAsset:asset
@@ -509,7 +507,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                                                                    [cell.imageView setImage:result];
                                                                                }
                                                                            });
-
+                                                                           
                                                                        }];
                 if(requestID != cell.assetRequestID){
                     if ([cell isKindOfClass:[GMGridViewCell class]]) {
@@ -519,18 +517,18 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 }
             });
         }
-
+        
         [cell bind:asset];
-
+        
         cell.shouldShowSelection = self.picker.allowsMultipleSelection;
-
+        
         // Optional protocol to determine if some kind of assets can't be selected (pej long videos, etc...)
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldEnableAsset:)]) {
             cell.enabled = [self.picker.delegate assetsPickerController:self.picker shouldEnableAsset:asset];
         } else {
             cell.enabled = YES;
         }
-
+        
         // Setting `selected` property blocks further deselection. Have to call selectItemAtIndexPath too. ( ref: http://stackoverflow.com/a/17812116/1648333 )
         if ([self.picker.selectedAssets containsObject:asset]) {
             cell.selected = YES;
@@ -540,7 +538,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
         return cell;
     }
-
+    
 }
 
 #pragma mark - Camera
@@ -556,9 +554,9 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-
+            
             if (!cell.isEnabled) {
                 return NO;
             } else if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldSelectAsset:)]) {
@@ -567,9 +565,9 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         GMGridViewCell *cell = (GMGridViewCell *)[collectionView cellForItemAtIndexPath:indexPath];
-
+        
         if (!cell.isEnabled) {
             return NO;
         } else if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldSelectAsset:)]) {
@@ -584,7 +582,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             [self.picker selectAsset:asset];
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
                 [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
@@ -592,7 +590,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         [self.picker selectAsset:asset];
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
@@ -604,7 +602,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     CGFloat margin = [self getMargin];
     CGFloat gutter = [self getGutter];
     CGFloat columns = [self getColumns];
-
+    
     if(@available(iOS 11, *)){
         CGFloat value = floorf((((self.view.bounds.size.width-self.view.safeAreaInsets.left-self.view.safeAreaInsets.right) - (columns - 1) * gutter - 2 * margin) / columns));
         return CGSizeMake(value, value);
@@ -658,14 +656,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
                 return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
             }
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
             return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
         }
@@ -697,14 +695,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
                 return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
             }
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
             return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
         }
@@ -717,14 +715,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)]) {
                 [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
             }
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didHighlightAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didHighlightAsset:asset];
         }
@@ -736,14 +734,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel]) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)]) {
                 [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
             }
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
+        
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didUnhighlightAsset:)]) {
             [self.picker.delegate assetsPickerController:self.picker didUnhighlightAsset:asset];
         }
@@ -770,31 +768,31 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if (changes)
     {
         __weak typeof(self) weakSelf = self;
-
+        
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-
+            
             PHFetchResultChangeDetails *collectionChanges = [changeInstance changeDetailsForFetchResult:weakSelf.assetsFetchResults];
             if (collectionChanges) {
-
+                
                 weakSelf.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
-
+                
                 UICollectionView *collectionView = weakSelf.collectionView;
                 NSArray *removedPaths;
                 NSArray *insertedPaths;
                 NSArray *changedPaths;
-
+                
                 if ([collectionChanges hasIncrementalChanges]) {
                     NSIndexSet *removedIndexes = [collectionChanges removedIndexes];
                     removedPaths = [weakSelf indexPathsFromIndexSet:removedIndexes withSection:0];
-
+                    
                     NSIndexSet *insertedIndexes = [collectionChanges insertedIndexes];
                     insertedPaths = [weakSelf indexPathsFromIndexSet:insertedIndexes withSection:0];
-
+                    
                     NSIndexSet *changedIndexes = [collectionChanges changedIndexes];
                     changedPaths = [weakSelf indexPathsFromIndexSet:changedIndexes withSection:0];
-
+                    
                     BOOL shouldReload = NO;
-
+                    
                     if (changedPaths != nil && removedPaths != nil) {
                         for (NSIndexPath *changedPath in changedPaths) {
                             if ([removedPaths containsObject:changedPath]) {
@@ -803,26 +801,26 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             }
                         }
                     }
-
+                    
                     if (removedPaths.lastObject && ((NSIndexPath *)removedPaths.lastObject).item >= weakSelf.assetsFetchResults.count) {
                         shouldReload = YES;
                     }
-
+                    
                     if (shouldReload) {
                         [collectionView reloadData];
-
+                        
                     } else {
                         [collectionView performBatchUpdates:^{
                             weakSelf.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
                             if (removedPaths != nil) {
                                 [collectionView deleteItemsAtIndexPaths:removedPaths];
                             }
-
+                            
                             if (insertedPaths != nil) {
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
                                 [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
                             }
-
+                            
                             if (changedPaths != nil) {
                                 if(changedPaths.count>1){
                                     [collectionView reloadData];
@@ -830,7 +828,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                     [collectionView reloadItemsAtIndexPaths:changedPaths];
                                 }
                             }
-
+                            
                             if ([collectionChanges hasMoves]) {
                                 [collectionChanges enumerateMovesWithBlock:^(NSUInteger fromIndex, NSUInteger toIndex) {
                                     NSIndexPath *fromIndexPath = [NSIndexPath indexPathForItem:fromIndex inSection:0];
@@ -838,7 +836,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                     [collectionView moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
                                 }];
                             }
-
+                            
                         } completion:^(BOOL finished) {
                             if(finished){
                                 [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
@@ -847,46 +845,46 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             dispatch_semaphore_signal(weakSelf.phPhotoLibChageMutex);
                         }];
                     }
-
+                    
                     [weakSelf resetCachedAssets];
                 } else {
                     [collectionView reloadData];
                 }
             }
-
+            
         }];
     }
-
+    
 }
 /*- (void)photoLibraryDidChange:(PHChange *)changeInfo {
  // Photos may call this method on a background queue;
  // switch to the main queue to update the UI.
-
+ 
  dispatch_async(dispatch_get_main_queue(), ^{
-
+ 
  PHFetchResultChangeDetails *collectionChanges = [changeInfo changeDetailsForFetchResult:_assetsFetchResults];
  if (collectionChanges == nil) {
  return ;
  }
  // Get the new fetch result for future change tracking.
  _assetsFetchResults = collectionChanges.fetchResultAfterChanges;
-
+ 
  NSLog(@"photoLibraryDidChange _assetsFetchResults.count %lu",(unsigned long)_assetsFetchResults.count);
  // Check for changes to the displayed album itself
  // (its existence and metadata, not its member assets).
-
+ 
  // Check for changes to the list of assets (insertions, deletions, moves, or updates).
-
-
+ 
+ 
  // Get the new fetch result for future change tracking.
-
-
+ 
+ 
  if (collectionChanges.hasIncrementalChanges)  {
  // Tell the collection view to animate insertions/deletions/moves
  // and to refresh any cells that have changed content.
-
+ 
  [self.collectionView performBatchUpdates:^{
-
+ 
  NSIndexSet *removed = collectionChanges.removedIndexes;
  if (removed.count) {
  [self.collectionView deleteItemsAtIndexPaths:[self indexPathsFromIndexSet:removed withSection:0]];
@@ -913,17 +911,17 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
  }];
  }
  } completion:nil];
-
-
+ 
+ 
  } else {
  // Detailed change information is not available;
  // repopulate the UI from the current fetch result.
-
-
+ 
+ 
  [self.collectionView reloadData];
  [self resetCachedAssets];
  }
-
+ 
  });
  }*/
 
@@ -932,12 +930,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         return nil;
     }
     NSMutableArray *indexPaths = [[NSMutableArray alloc] init];
-
+    
     [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
         [indexPaths addObject:[NSIndexPath indexPathForItem:idx inSection:section]];
-
+        
     }];
-
+    
     return indexPaths;
 }
 //- (void)photoLibraryDidChange:(PHChange *)changeInstance
@@ -1011,7 +1009,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             [cell cancelImageRequest];
         }
     }];
-
+    
     [self.imageManager stopCachingImagesForAllAssets];
     self.previousPreheatRect = CGRectZero;
 }
@@ -1020,19 +1018,19 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 {
     BOOL isViewVisible = [self isViewLoaded] && [[self view] window] != nil;
     if (!isViewVisible) { return; }
-
+    
     // The preheat window is twice the height of the visible rect
     CGRect preheatRect = self.collectionView.bounds;
     preheatRect = CGRectInset(preheatRect, 0.0f, -0.5f * CGRectGetHeight(preheatRect));
-
+    
     // If scrolled by a "reasonable" amount...
     CGFloat delta = ABS(CGRectGetMidY(preheatRect) - CGRectGetMidY(self.previousPreheatRect));
     if (delta > CGRectGetHeight(self.collectionView.bounds) / 3.0f) {
-
+        
         // Compute the assets to start caching and to stop caching.
         NSMutableArray *addedIndexPaths = [NSMutableArray array];
         NSMutableArray *removedIndexPaths = [NSMutableArray array];
-
+        
         [self computeDifferenceBetweenRect:self.previousPreheatRect
                                    andRect:preheatRect
                             removedHandler:^(CGRect removedRect) {
@@ -1042,20 +1040,20 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                 NSArray *indexPaths = [self.collectionView aapl_indexPathsForElementsInRect:addedRect];
                                 [addedIndexPaths addObjectsFromArray:indexPaths];
                             }];
-
+        
         NSArray *assetsToStartCaching = [self assetsAtIndexPaths:addedIndexPaths];
         NSArray *assetsToStopCaching = [self assetsAtIndexPaths:removedIndexPaths];
-
+        
         [self.imageManager startCachingImagesForAssets:assetsToStartCaching
                                             targetSize:AssetGridThumbnailSize
                                            contentMode:PHImageContentModeAspectFill
                                                options:nil];
-
+        
         [self.imageManager stopCachingImagesForAssets:assetsToStopCaching
                                            targetSize:AssetGridThumbnailSize
                                           contentMode:PHImageContentModeAspectFill
                                               options:nil];
-
+        
         self.previousPreheatRect = preheatRect;
     }
 }
@@ -1092,7 +1090,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 - (NSArray *)assetsAtIndexPaths:(NSArray *)indexPaths
 {
     if (indexPaths.count == 0) { return nil; }
-
+    
     NSMutableArray *assets = [NSMutableArray arrayWithCapacity:indexPaths.count];
     for (NSIndexPath *indexPath in indexPaths) {
         if ([self.title isEqualToString:self.albumLabel]) {

@@ -56,14 +56,14 @@
                 //    picker.confirmSingleSelection = YES;
                 //    picker.confirmSingleSelectionPrompt = @"Do you want to select the image you have chosen?";
                 
-                picker.showCameraButton = YES;
+//                picker.showCameraButton = YES;
                 picker.autoSelectCameraImages = YES;
                 
                 picker.modalPresentationStyle = UIModalPresentationPopover;
                 
                 picker.mediaTypes = @[@(PHAssetMediaTypeImage),@(PHAssetMediaTypeVideo)];
                 picker.disableRightTopDoneButton = YES;
-                picker.pickerBackgroundColor = [UIColor blackColor];
+                picker.pickerBackgroundColor = [UIColor whiteColor];
                 picker.pickerTextColor = [UIColor darkGrayColor];
                 picker.toolbarBarTintColor = [UIColor colorWithWhite:1.0f alpha:0.0f];
                 picker.toolbarTextColor = [UIColor darkGrayColor];

@@ -366,7 +366,8 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
     [self updateFetchResults];
     
     // assign all photos
-    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.section];
+    gridViewController.title = [self.collectionsFetchResultsTitles objectAtIndex:indexPath.row];
+    gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:indexPath.row];
 
     // setup navigation controller
     _navigationController = [[UINavigationController alloc] initWithRootViewController:gridViewController];
@@ -736,6 +737,7 @@ static inline void delay(NSTimeInterval delay, dispatch_block_t block) {
 
 - (void)dropdownMenu:(MKDropdownMenu *)dropdownMenu didSelectRow:(NSInteger)row inComponent:(NSInteger)component {
     GMGridViewController *gridViewController = (GMGridViewController *)self.navigationController.childViewControllers[0];
+    gridViewController.title = [self.collectionsFetchResultsTitles objectAtIndex:row];
     gridViewController.assetsFetchResults = [self.collectionsFetchResultsAssets objectAtIndex:row];
     [gridViewController reloadData];
     self.selectedRow = row;
