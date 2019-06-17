@@ -386,6 +386,9 @@
     
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
+        viewController.navigationItem.rightBarButtonItem.title = self.selectedAssets.count > 0 ?
+         NSLocalizedStringFromTableInBundle(@"picker.navigation.done-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Done") :
+        NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel");
         viewController.navigationItem.rightBarButtonItem.enabled = (self.autoDisableDoneButton ? self.selectedAssets.count > 0 : TRUE);
     }
 }
@@ -399,13 +402,10 @@
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
         NSUInteger index = 1;
-        if (_showCameraButton) {
-            index++;
-        }
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateNormal];
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateDisabled];
         [[viewController.toolbarItems objectAtIndex:index] setTitle:[self toolbarTitle]];
-        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0 && !self.showCameraButton) animated:YES];
+        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0) animated:YES];
     }
 }
 
@@ -576,21 +576,12 @@
     return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 }
 
-- (UIBarButtonItem *)cameraButtonItem
-{
-    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraButtonPressed:)];
-}
-
 - (NSArray *)toolbarItems
 {
-    UIBarButtonItem *camera = [self cameraButtonItem];
     UIBarButtonItem *title  = [self titleButtonItem];
     UIBarButtonItem *space  = [self spaceButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
-    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) ) {
-        [items addObject:camera];
-    }
     [items addObject:space];
     [items addObject:title];
     [items addObject:space];
