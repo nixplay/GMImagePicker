@@ -811,7 +811,6 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     
                     if (shouldReload) {
                         [collectionView reloadData];
-                        
                     } else {
                         [collectionView performBatchUpdates:^{
                             weakSelf.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
@@ -820,14 +819,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             }
                             
                             if (insertedPaths != nil) {
+                                [UIView setAnimationsEnabled:NO];
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
                                 [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
                             }
                             
                             if (changedPaths != nil) {
-                                if(changedPaths.count>1){
+                                [UIView setAnimationsEnabled:YES];
+                                if (changedPaths.count > 1) {
                                     [collectionView reloadData];
-                                }else{
+                                } else {
                                     [collectionView reloadItemsAtIndexPaths:changedPaths];
                                 }
                             }
