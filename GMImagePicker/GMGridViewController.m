@@ -547,7 +547,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 #pragma mark - Camera
 
 - (void)launchCamera:(id)sender {
-    [self.picker cameraButtonPressed:nil];
+    [self.picker cameraButtonPressed:sender];
 }
 
 #pragma mark - Collection View Delegate

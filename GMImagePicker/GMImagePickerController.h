@@ -195,7 +195,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 - (void)dismiss:(id)sender;
 - (void)finishPickingAssets:(id)sender;
 
-- (void)cameraButtonPressed:(UIBarButtonItem *)button;
+- (void)cameraButtonPressed:(id)button;
 @end
 
 

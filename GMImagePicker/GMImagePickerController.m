@@ -469,7 +469,7 @@
 
 #pragma mark - Toolbar Items
 
-- (void)cameraButtonPressed:(UIBarButtonItem *)button
+- (void)cameraButtonPressed:(id)button
 {
     // This verify camera and microphone access scenario
     AVAuthorizationStatus cameraStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -492,7 +492,7 @@
                           isEnableCamera:YES];
                         return;
                     } else {
-                        [self cameraButtonPressed:nil];
+                        [self cameraButtonPressed:button];
                     }
                 }];
             }
