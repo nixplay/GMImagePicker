@@ -296,7 +296,10 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 - (void)setupButtons
 {
     if (self.picker.allowsMultipleSelection) {
-        NSString *doneTitle = self.picker.customDoneButtonTitle ? self.picker.customDoneButtonTitle : NSLocalizedStringFromTableInBundle(@"picker.navigation.done-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Done");
+        NSString *doneTitle = self.picker.customDoneButtonTitle ? self.picker.customDoneButtonTitle : (
+                                                                                                       self.picker.selectedAssets.count > 0 ?
+                                                                                                       NSLocalizedStringFromTableInBundle(@"picker.navigation.done-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Done") :
+                                                                                                       NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel"));
         self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:doneTitle
                                                                                   style:UIBarButtonItemStyleDone
                                                                                  target:self.picker
@@ -399,7 +402,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             NSIndexPath *newIndexPath = [NSIndexPath indexPathForRow:indexPath.row-1 inSection:0];
 
@@ -544,14 +547,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 #pragma mark - Camera
 
 - (void)launchCamera:(id)sender {
-    [self.picker cameraButtonPressed:nil];
+    [self.picker cameraButtonPressed:sender];
 }
 
 #pragma mark - Collection View Delegate
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel]  && self.picker.showCameraButton ) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -579,7 +582,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -653,7 +656,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -673,7 +676,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
             [self.picker deselectAsset:asset];
@@ -692,7 +695,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -712,7 +715,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -731,7 +734,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel]) {
+    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
 
@@ -754,7 +757,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    NSInteger count = self.assetsFetchResults.count + (([self.title isEqualToString:self.albumLabel]) ? 1 : 0);
+    NSInteger count = self.assetsFetchResults.count + (([self.title isEqualToString:self.albumLabel]  && self.picker.showCameraButton) ? 1 : 0);
     return count;
 }
 
@@ -808,7 +811,6 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     
                     if (shouldReload) {
                         [collectionView reloadData];
-                        
                     } else {
                         [collectionView performBatchUpdates:^{
                             weakSelf.assetsFetchResults = [collectionChanges fetchResultAfterChanges];
@@ -817,14 +819,16 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             }
                             
                             if (insertedPaths != nil) {
+                                [UIView setAnimationsEnabled:NO];
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
                                 [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
                             }
                             
                             if (changedPaths != nil) {
-                                if(changedPaths.count>1){
+                                [UIView setAnimationsEnabled:YES];
+                                if (changedPaths.count > 1) {
                                     [collectionView reloadData];
-                                }else{
+                                } else {
                                     [collectionView reloadItemsAtIndexPaths:changedPaths];
                                 }
                             }
