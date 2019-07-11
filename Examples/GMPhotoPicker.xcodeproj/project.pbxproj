@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0766001622D716B900A41D14 /* UIImage+FixOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0766001522D716B900A41D14 /* UIImage+FixOrientation.m */; };
 		0FFFD67058DA8A379E17EE39 /* libPods-GMPhotoPickerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */; };
 		B31E08651A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084C1A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E08661A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084F1A0C45BC000D7841 /* GMImagePicker.strings */; };
@@ -48,6 +49,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0766001422D716B900A41D14 /* UIImage+FixOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+FixOrientation.h"; sourceTree = "<group>"; };
+		0766001522D716B900A41D14 /* UIImage+FixOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+FixOrientation.m"; sourceTree = "<group>"; };
 		09E0676A85C8504222CB8528 /* Pods-GMPhotoPicker.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPicker.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker.debug.xcconfig"; sourceTree = "<group>"; };
 		248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-GMPhotoPickerTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D7651E4B481A1BBEAC1EC0B /* Pods-GMPhotoPicker.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPicker.release.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker.release.xcconfig"; sourceTree = "<group>"; };
@@ -289,6 +292,8 @@
 				B3A2F8AB19D18A3700A59BE4 /* GMGridViewController.m */,
 				B3A2F8AC19D18A3700A59BE4 /* GMImagePickerController.h */,
 				B3A2F8AD19D18A3700A59BE4 /* GMImagePickerController.m */,
+				0766001422D716B900A41D14 /* UIImage+FixOrientation.h */,
+				0766001522D716B900A41D14 /* UIImage+FixOrientation.m */,
 			);
 			name = GMImagePicker;
 			path = ../../GMImagePicker;
@@ -457,6 +462,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B3A2F8AE19D18A3700A59BE4 /* GMAlbumsViewCell.m in Sources */,
+				0766001622D716B900A41D14 /* UIImage+FixOrientation.m in Sources */,
 				B37D578019CA3B3A007F64BD /* ViewController.m in Sources */,
 				B3A2F8B019D18A3700A59BE4 /* GMGridViewCell.m in Sources */,
 				B37D577D19CA3B3A007F64BD /* AppDelegate.m in Sources */,

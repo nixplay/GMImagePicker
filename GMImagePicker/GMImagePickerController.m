@@ -10,6 +10,7 @@
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
 #import "GMGridViewController.h"
+#import "UIImage+FixOrientation.h"
 @import Photos;
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
@@ -599,6 +600,7 @@
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *image = info[UIImagePickerControllerEditedImage] ? : info[UIImagePickerControllerOriginalImage];
+        image = [image fixOrientation];
         UIImageWriteToSavedPhotosAlbum(image,
                                        self,
                                        @selector(image:finishedSavingWithError:contextInfo:),

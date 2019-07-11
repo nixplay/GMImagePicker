@@ -56,7 +56,7 @@
                 //    picker.confirmSingleSelection = YES;
                 //    picker.confirmSingleSelectionPrompt = @"Do you want to select the image you have chosen?";
                 
-                picker.showCameraButton = NO;
+                picker.showCameraButton = YES;
                 picker.autoSelectCameraImages = YES;
                 
                 picker.modalPresentationStyle = UIModalPresentationPopover;
