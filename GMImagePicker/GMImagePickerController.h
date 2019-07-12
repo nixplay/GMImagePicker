@@ -46,8 +46,8 @@ static CGSize const kPopoverContentSize = {480, 720};
 
 /**
  *  Determines which smart collections are displayed (int array of enum: PHAssetCollectionSubtypeSmartAlbum)
- *  The default smart collections are: 
- *  - Favorites
+ *  The default smart collections are:
+ *  - Favoritesq
  *  - RecentlyAdded
  *  - Videos
  *  - SlomoVideos
@@ -195,6 +195,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 - (void)dismiss:(id)sender;
 - (void)finishPickingAssets:(id)sender;
 
+- (void)cameraButtonPressed:(id)button;
 @end
 
 

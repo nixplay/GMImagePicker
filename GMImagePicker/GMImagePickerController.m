@@ -10,6 +10,7 @@
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
 #import "GMGridViewController.h"
+#import "UIImage+FixOrientation.h"
 @import Photos;
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
@@ -386,6 +387,9 @@
     
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
+        viewController.navigationItem.rightBarButtonItem.title = self.selectedAssets.count > 0 ?
+         NSLocalizedStringFromTableInBundle(@"picker.navigation.done-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Done") :
+        NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel");
         viewController.navigationItem.rightBarButtonItem.enabled = (self.autoDisableDoneButton ? self.selectedAssets.count > 0 : TRUE);
     }
 }
@@ -399,13 +403,10 @@
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
         NSUInteger index = 1;
-        if (_showCameraButton) {
-            index++;
-        }
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateNormal];
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateDisabled];
         [[viewController.toolbarItems objectAtIndex:index] setTitle:[self toolbarTitle]];
-        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0 && !self.showCameraButton) animated:YES];
+        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0) animated:YES];
     }
 }
 
@@ -469,8 +470,47 @@
 
 #pragma mark - Toolbar Items
 
-- (void)cameraButtonPressed:(UIBarButtonItem *)button
+- (void)cameraButtonPressed:(id)button
 {
+    // This verify camera and microphone access scenario
+    AVAuthorizationStatus cameraStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
+    if(cameraStatus == AVAuthorizationStatusDenied){
+
+        [self showDialog:NSLocalizedStringFromTableInBundle(@"NSCameraUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSCameraUsageDescription"])
+          isEnableCamera:NO];
+
+        return;
+    } else if (cameraStatus == AVAuthorizationStatusNotDetermined) {
+
+        [AVCaptureDevice requestAccessForMediaType:AVMediaTypeVideo completionHandler:^(BOOL granted) {
+            if (!granted) {
+                [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                  isEnableCamera:NO];
+            } else {
+                [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                    if (!granted) {
+                        [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                          isEnableCamera:YES];
+                        return;
+                    } else {
+                        [self cameraButtonPressed:button];
+                    }
+                }];
+            }
+        }];
+
+        return;
+    } else if (cameraStatus == AVAuthorizationStatusAuthorized) {
+
+        [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+            if (!granted) {
+                [self showDialog:NSLocalizedStringFromTableInBundle(@"NSMicrophoneUsageDescription",  @"InfoPList", [NSBundle bundleForClass:GMImagePickerController.class], [[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"])
+                  isEnableCamera:YES];
+                return;
+            }
+        }];
+    }
+
     if (![UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera]) {
         
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Camera!"
@@ -537,21 +577,12 @@
     return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
 }
 
-- (UIBarButtonItem *)cameraButtonItem
-{
-    return [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraButtonPressed:)];
-}
-
 - (NSArray *)toolbarItems
 {
-    UIBarButtonItem *camera = [self cameraButtonItem];
     UIBarButtonItem *title  = [self titleButtonItem];
     UIBarButtonItem *space  = [self spaceButtonItem];
     
     NSMutableArray *items = [[NSMutableArray alloc] init];
-    if (_showCameraButton && ([[self.navigationController childViewControllers] count] > 1) ) {
-        [items addObject:camera];
-    }
     [items addObject:space];
     [items addObject:title];
     [items addObject:space];
@@ -569,6 +600,7 @@
     NSString *mediaType = info[UIImagePickerControllerMediaType];
     if ([mediaType isEqualToString:(NSString *)kUTTypeImage]) {
         UIImage *image = info[UIImagePickerControllerEditedImage] ? : info[UIImagePickerControllerOriginalImage];
+        image = [image fixOrientation];
         UIImageWriteToSavedPhotosAlbum(image,
                                        self,
                                        @selector(image:finishedSavingWithError:contextInfo:),
@@ -654,4 +686,50 @@
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
     
 }
+
+#pragma mark - Permission
+
+- (void)showDialog:(NSString*)description isEnableCamera:(BOOL)isEnableCamera {
+
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Share to Nixplay")
+                                                                   message:description
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+
+    if (!isEnableCamera) {
+        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.camera",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Camera Access")
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                                                                  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                              }];
+        [alert addAction:action];
+    }
+
+    AVAudioSessionRecordPermission audioPermission = [[AVAudioSession sharedInstance] recordPermission];
+    if (audioPermission == AVAudioSessionRecordPermissionUndetermined || audioPermission == AVAudioSessionRecordPermissionDenied) {
+        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.microphone",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Microphone Access")
+                                                               style:UIAlertActionStyleDefault
+                                                             handler:^(UIAlertAction * _Nonnull action) {
+                                                                 if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
+                                                                     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                                                                         if (!granted) {
+                                                                             [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
+                                                                         }
+                                                                     }];
+                                                                 } else {
+                                                                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                 }
+                                                             }];
+        [alert addAction:action];
+    }
+
+    UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel")
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:^(UIAlertAction * _Nonnull action) {
+                                                              [alert dismissViewControllerAnimated:YES completion:nil];
+                                                          }];
+    [alert addAction:cancelAction];
+
+    [self presentViewController:alert animated:YES completion:nil];
+}
+
 @end
