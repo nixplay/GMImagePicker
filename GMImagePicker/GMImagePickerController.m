@@ -18,7 +18,7 @@
 @end
 
 @implementation GMImagePickerController
-- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets delegate: (id<GMImagePickerControllerDelegate>) delegate
+- (id)init:(bool)allow_v withAssets: (NSArray*)preSelectedAssets uiLogic:(NSDictionary *)uiLogic delegate: (id<GMImagePickerControllerDelegate>) delegate
 {
     if (self = [super init])
     {
@@ -49,7 +49,12 @@
         _allowsMultipleSelection = YES;
         _confirmSingleSelection = NO;
         _showCameraButton = NO;
-        
+
+        // Modify UI logic options
+        if (uiLogic && [[uiLogic objectForKey:@"allowsMultipleSelection"] isEqualToString:@"0"]) {
+            _allowsMultipleSelection = NO;
+        }
+
         // Grid configuration:
         if([self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInPortrait)] && [self.delegate respondsToSelector:@selector(assetsPickerControllerColumnInLandscape)]) {
             _colsInPortrait =  [self.delegate assetsPickerControllerColumnInPortrait];
