@@ -429,10 +429,10 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
     gridViewController.assetsFetchResults = [[_collectionsFetchResultsAssets objectAtIndex:indexPath.section] objectAtIndex:indexPath.row];
     
     // Remove selection so it looks better on slide in
-    [tableView deselectRowAtIndexPath:indexPath animated:true];
+    [tableView deselectRowAtIndexPath:indexPath animated:false];
     
     // Push GMGridViewController
-    [self.navigationController pushViewController:gridViewController animated:YES];
+    [self.navigationController pushViewController:gridViewController animated:NO];
 }
 
 -(void)tableView:(UITableView *)tableView willDisplayHeaderView:(UIView *)view forSection:(NSInteger)section

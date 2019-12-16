@@ -120,7 +120,7 @@ static UIColor *backgroundColor;
         _videoDuration.frame = CGRectMake(x_offset, self.bounds.size.height-titleHeight, self.bounds.size.width-2*x_offset, titleHeight);
         _videoDuration.contentMode = UIViewContentModeRight;
         _videoDuration.translatesAutoresizingMaskIntoConstraints = NO;
-        _videoDuration.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
+//        _videoDuration.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         [self addSubview:_videoDuration];
         _videoDuration.hidden = YES;
         

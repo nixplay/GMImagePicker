@@ -334,7 +334,7 @@
     
     
     // Push GMGridViewController
-    [_navigationController pushViewController:gridViewController animated:YES];
+    [_navigationController pushViewController:gridViewController animated:NO];
 }
 
 #pragma mark - UIAlertViewDelegate
@@ -411,7 +411,7 @@
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateNormal];
         [[viewController.toolbarItems objectAtIndex:index] setTitleTextAttributes:[self toolbarTitleTextAttributes] forState:UIControlStateDisabled];
         [[viewController.toolbarItems objectAtIndex:index] setTitle:[self toolbarTitle]];
-        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0) animated:YES];
+        [viewController.navigationController setToolbarHidden:(self.selectedAssets.count == 0) animated:NO];
     }
 }
 
@@ -424,7 +424,7 @@
         [self.delegate assetsPickerControllerDidCancel:self];
     }
     
-    [self.presentingViewController dismissViewControllerAnimated:YES completion:nil];
+    [self.presentingViewController dismissViewControllerAnimated:NO completion:nil];
 }
 
 
