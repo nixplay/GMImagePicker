@@ -40,7 +40,7 @@
         } completionHandler:^(BOOL success, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
-                GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil delegate:self];
+                GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil uiLogic:@{} delegate:self];
                 picker.delegate = self;
                 picker.title = @"Custom title";
                 
