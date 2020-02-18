@@ -11,7 +11,6 @@
 #import "GMAlbumsViewController.h"
 #import "GMGridViewCell.h"
 
-#define SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(v)  ([[[UIDevice currentDevice] systemVersion] compare:v options:NSNumericSearch] != NSOrderedAscending)
 
 @import Photos;
 
@@ -469,13 +468,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
 
-                // check ios version
-                // ios 13 = -54, below
-                int ypos = -12; // lower version
-                if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"12")) {
-                    ypos = -54;
-                }
-                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, ypos, cell.bounds.size.width, cell.bounds.size.height)];
+                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -12, cell.bounds.size.width, cell.bounds.size.height)];
                 toolBar.barTintColor = [UIColor whiteColor];
                 toolBar.backgroundColor = [UIColor whiteColor];
                 [toolBar setItems:@[itemSpace, item, itemSpace]];
