@@ -10,12 +10,8 @@
 		0766001622D716B900A41D14 /* UIImage+FixOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0766001522D716B900A41D14 /* UIImage+FixOrientation.m */; };
 		0FFFD67058DA8A379E17EE39 /* libPods-GMPhotoPickerTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 248A44F01E02D0A2E253E1F9 /* libPods-GMPhotoPickerTests.a */; };
 		B31E08651A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084C1A0C45BC000D7841 /* GMImagePicker.strings */; };
-		B31E08661A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E084F1A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E08671A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E08521A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E08681A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E08551A0C45BC000D7841 /* GMImagePicker.strings */; };
-		B31E08691A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E08581A0C45BC000D7841 /* GMImagePicker.strings */; };
-		B31E086A1A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E085B1A0C45BC000D7841 /* GMImagePicker.strings */; };
-		B31E086B1A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E085E1A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E086C1A0C45BC000D7841 /* GMImagePicker.strings in Resources */ = {isa = PBXBuildFile; fileRef = B31E08611A0C45BC000D7841 /* GMImagePicker.strings */; };
 		B31E086D1A0C45BC000D7841 /* GMVideoIcon.png in Resources */ = {isa = PBXBuildFile; fileRef = B31E08631A0C45BC000D7841 /* GMVideoIcon.png */; };
 		B31E086E1A0C45BC000D7841 /* GMVideoIcon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B31E08641A0C45BC000D7841 /* GMVideoIcon@2x.png */; };
@@ -57,12 +53,8 @@
 		33A34883FEEDAD96B9E12139 /* Pods-GMPhotoPickerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPickerTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests.release.xcconfig"; sourceTree = "<group>"; };
 		A71439E475292DF32D7BFE16 /* Pods-GMPhotoPickerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GMPhotoPickerTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-GMPhotoPickerTests/Pods-GMPhotoPickerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B31E084D1A0C45BC000D7841 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = GMImagePicker.strings; sourceTree = "<group>"; };
-		B31E08501A0C45BC000D7841 /* ca */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ca; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08531A0C45BC000D7841 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08561A0C45BC000D7841 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = GMImagePicker.strings; sourceTree = "<group>"; };
-		B31E08591A0C45BC000D7841 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = GMImagePicker.strings; sourceTree = "<group>"; };
-		B31E085C1A0C45BC000D7841 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = GMImagePicker.strings; sourceTree = "<group>"; };
-		B31E085F1A0C45BC000D7841 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08621A0C45BC000D7841 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = GMImagePicker.strings; sourceTree = "<group>"; };
 		B31E08631A0C45BC000D7841 /* GMVideoIcon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = GMVideoIcon.png; sourceTree = "<group>"; };
 		B31E08641A0C45BC000D7841 /* GMVideoIcon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "GMVideoIcon@2x.png"; sourceTree = "<group>"; };
@@ -146,14 +138,6 @@
 			path = Base.lproj;
 			sourceTree = "<group>";
 		};
-		B31E084E1A0C45BC000D7841 /* ca.lproj */ = {
-			isa = PBXGroup;
-			children = (
-				B31E084F1A0C45BC000D7841 /* GMImagePicker.strings */,
-			);
-			path = ca.lproj;
-			sourceTree = "<group>";
-		};
 		B31E08511A0C45BC000D7841 /* de.lproj */ = {
 			isa = PBXGroup;
 			children = (
@@ -170,36 +154,12 @@
 			path = en.lproj;
 			sourceTree = "<group>";
 		};
-		B31E08571A0C45BC000D7841 /* es.lproj */ = {
-			isa = PBXGroup;
-			children = (
-				B31E08581A0C45BC000D7841 /* GMImagePicker.strings */,
-			);
-			path = es.lproj;
-			sourceTree = "<group>";
-		};
-		B31E085A1A0C45BC000D7841 /* fr.lproj */ = {
-			isa = PBXGroup;
-			children = (
-				B31E085B1A0C45BC000D7841 /* GMImagePicker.strings */,
-			);
-			path = fr.lproj;
-			sourceTree = "<group>";
-		};
-		B31E085D1A0C45BC000D7841 /* it.lproj */ = {
-			isa = PBXGroup;
-			children = (
-				B31E085E1A0C45BC000D7841 /* GMImagePicker.strings */,
-			);
-			path = it.lproj;
-			sourceTree = "<group>";
-		};
-		B31E08601A0C45BC000D7841 /* pt.lproj */ = {
+		B31E08601A0C45BC000D7841 /* ja.lproj */ = {
 			isa = PBXGroup;
 			children = (
 				B31E08611A0C45BC000D7841 /* GMImagePicker.strings */,
 			);
-			path = pt.lproj;
+			path = ja.lproj;
 			sourceTree = "<group>";
 		};
 		B37D576B19CA3B39007F64BD = {
@@ -269,13 +229,9 @@
 			isa = PBXGroup;
 			children = (
 				B31E084B1A0C45BC000D7841 /* Base.lproj */,
-				B31E084E1A0C45BC000D7841 /* ca.lproj */,
 				B31E08511A0C45BC000D7841 /* de.lproj */,
 				B31E08541A0C45BC000D7841 /* en.lproj */,
-				B31E08571A0C45BC000D7841 /* es.lproj */,
-				B31E085A1A0C45BC000D7841 /* fr.lproj */,
-				B31E085D1A0C45BC000D7841 /* it.lproj */,
-				B31E08601A0C45BC000D7841 /* pt.lproj */,
+				B31E08601A0C45BC000D7841 /* ja.lproj */,
 				B31E08631A0C45BC000D7841 /* GMVideoIcon.png */,
 				B31E08641A0C45BC000D7841 /* GMVideoIcon@2x.png */,
 				B321E47219D1A5FD0021FE16 /* GMEmptyFolder@1x.png */,
@@ -390,16 +346,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				B321E46F19D19A5B0021FE16 /* GMSelected@2x.png in Resources */,
-				B31E086A1A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
 				B321E46E19D19A5B0021FE16 /* GMSelected.png in Resources */,
 				B321E47419D1A5FD0021FE16 /* GMEmptyFolder@1x.png in Resources */,
 				B31E086C1A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
-				B31E086B1A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
 				B31E08681A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
 				B321E47519D1A5FD0021FE16 /* GMEmptyFolder@2x.png in Resources */,
 				B37D579F19CA44AF007F64BD /* Main.storyboard in Resources */,
-				B31E08661A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
-				B31E08691A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
 				B37D578519CA3B3A007F64BD /* Images.xcassets in Resources */,
 				B31E08651A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
 				B31E08671A0C45BC000D7841 /* GMImagePicker.strings in Resources */,
@@ -500,14 +452,6 @@
 			name = GMImagePicker.strings;
 			sourceTree = "<group>";
 		};
-		B31E084F1A0C45BC000D7841 /* GMImagePicker.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B31E08501A0C45BC000D7841 /* ca */,
-			);
-			name = GMImagePicker.strings;
-			sourceTree = "<group>";
-		};
 		B31E08521A0C45BC000D7841 /* GMImagePicker.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -520,30 +464,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				B31E08561A0C45BC000D7841 /* en */,
-			);
-			name = GMImagePicker.strings;
-			sourceTree = "<group>";
-		};
-		B31E08581A0C45BC000D7841 /* GMImagePicker.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B31E08591A0C45BC000D7841 /* es */,
-			);
-			name = GMImagePicker.strings;
-			sourceTree = "<group>";
-		};
-		B31E085B1A0C45BC000D7841 /* GMImagePicker.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B31E085C1A0C45BC000D7841 /* fr */,
-			);
-			name = GMImagePicker.strings;
-			sourceTree = "<group>";
-		};
-		B31E085E1A0C45BC000D7841 /* GMImagePicker.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				B31E085F1A0C45BC000D7841 /* it */,
 			);
 			name = GMImagePicker.strings;
 			sourceTree = "<group>";

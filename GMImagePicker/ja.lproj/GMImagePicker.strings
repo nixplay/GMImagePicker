@@ -1,0 +1,64 @@
+
+/* Cancel */
+"picker.navigation.cancel-button" = "キャンセル";
+
+/* Done */
+"picker.navigation.done-button" = "完了";
+
+/* Camera */
+"picker.navigation.camera-button" = "カメラ";
+
+/* Navigation bar default title */
+"picker.navigation.title" = "GMImagePicker";
+
+/* %@ Items Selected */
+"picker.selection.multiple-items" = "%@個のアイテムが選択されています";
+
+/* %@ Photos Selected */
+"picker.selection.multiple-photos" = "%@枚の写真を選択";
+
+/* %@ Videos Selected */
+"picker.selection.multiple-videos" = "%@本の動画が選択されました";
+
+/* 1 Photo Selected */
+"picker.selection.single-photo" = "1枚の写真を選択";
+
+/* 1 Video Selected */
+"picker.selection.single-video" = "1本のビデオを選択";
+
+/* All photos */
+"picker.table.all-photos-label" = "カメラロール";
+
+/* My Photo Stream */
+"picker.table.my-photo-stream-header" = "マイフォトストリーム";
+/* My Photo Stream */
+"picker.table.synced-album-header" = "同期アルバム";
+/* Cloud Shared */
+"picker.table.cloud-shared-header" = "クラウド共有";
+
+/* Smart Albums */
+"picker.table.smart-albums-header" = "スマートコレクション";
+
+/* Albums */
+"picker.table.user-albums-header" = "コレクション";
+
+/* Confirmation of single selection alert title */
+"picker.confirm.title" = "本気ですか？";
+
+/* Confirmation of single selection alert message */
+"picker.confirm.message" = "タップした画像を選択しますか？";
+
+/* Action (button) deny/no/refuse */
+"picker.action.no" = "番号";
+
+/* Action (button) agree/yes/approve */
+"picker.action.yes" = "はい";
+
+/* Action (button) permission - mic */
+"picker.action.permission.microphone" = "マイクアクセスを有効にする";
+
+/* Action (button) permission - camera */
+"picker.action.permission.camera" = "カメラアクセスを有効にする";
+
+/* Action (title) permission */
+"picker.action.permission.title" = "Nixplayで共有";
