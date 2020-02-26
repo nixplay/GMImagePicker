@@ -23,6 +23,7 @@
     if (self = [super init])
     {
         self.delegate = delegate;
+        self.modalPresentationStyle = UIModalPresentationFullScreen;
         self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
@@ -536,25 +537,32 @@
         [((GMAlbumsViewController *)self.navigationController.topViewController) selectAllAlbumsCell];
     }
     
-    UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-    picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-//    picker.videoMaximumDuration = self.videoMaximumDuration;
-    if(_allow_video){
-        picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
-        picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
-    }else{
-        picker.mediaTypes = @[(NSString *)kUTTypeImage];
-    }
-    picker.allowsEditing = self.allowsEditingCameraImages;
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        // This allows the selection of the image taken to be better seen if the user is not already in that VC
+        if (self.autoSelectCameraImages && [self.navigationController.topViewController isKindOfClass:[GMAlbumsViewController class]]) {
+            [((GMAlbumsViewController *)self.navigationController.topViewController) selectAllAlbumsCell];
+        }
 
-    picker.delegate = self;
-    picker.modalPresentationStyle = UIModalPresentationFullScreen;
-    
-    UIPopoverPresentationController *popPC = picker.popoverPresentationController;
-    popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
-    popPC.barButtonItem = button;
-    
-    [self showViewController:picker sender:button];
+        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+        picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+    //    picker.videoMaximumDuration = self.videoMaximumDuration;
+        if(_allow_video){
+            picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
+            picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+        }else{
+            picker.mediaTypes = @[(NSString *)kUTTypeImage];
+        }
+        picker.allowsEditing = self.allowsEditingCameraImages;
+
+        picker.delegate = self;
+        picker.modalPresentationStyle = UIModalPresentationPopover;
+
+        UIPopoverPresentationController *popPC = picker.popoverPresentationController;
+        popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
+        popPC.barButtonItem = button;
+
+        [self showViewController:picker sender:button];
+    });
 }
 
 - (NSDictionary *)toolbarTitleTextAttributes {
