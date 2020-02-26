@@ -59,7 +59,7 @@
                 picker.showCameraButton = YES;
                 picker.autoSelectCameraImages = YES;
                 
-                picker.modalPresentationStyle = UIModalPresentationPopover;
+                picker.modalPresentationStyle = UIModalPresentationFullScreen;
                 
                 picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
                 
@@ -95,7 +95,7 @@
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     picker.delegate = self;
-    picker.modalPresentationStyle = UIModalPresentationPopover;
+    picker.modalPresentationStyle = UIModalPresentationFullScreen;
     
     UIPopoverPresentationController *popPC = picker.popoverPresentationController;
     popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;

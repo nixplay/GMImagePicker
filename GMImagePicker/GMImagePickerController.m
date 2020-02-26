@@ -548,7 +548,7 @@
     picker.allowsEditing = self.allowsEditingCameraImages;
 
     picker.delegate = self;
-    picker.modalPresentationStyle = UIModalPresentationPopover;
+    picker.modalPresentationStyle = UIModalPresentationFullScreen;
     
     UIPopoverPresentationController *popPC = picker.popoverPresentationController;
     popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;

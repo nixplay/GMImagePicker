@@ -467,7 +467,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
                 UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
 
-                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -12, cell.bounds.size.width, cell.bounds.size.height)];
+                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, -(cell.bounds.size.height/2)+12, cell.bounds.size.width, cell.bounds.size.height)];
                 toolBar.barTintColor = [UIColor whiteColor];
                 toolBar.backgroundColor = [UIColor whiteColor];
                 [toolBar setItems:@[itemSpace, item, itemSpace]];
