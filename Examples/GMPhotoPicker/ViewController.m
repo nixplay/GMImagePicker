@@ -40,7 +40,7 @@
         } completionHandler:^(BOOL success, NSError *error) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 
-                GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil delegate:self];
+                GMImagePickerController *picker = [[GMImagePickerController alloc] init:YES withAssets:nil uiLogic:@{} delegate:self];
                 picker.delegate = self;
                 picker.title = @"Custom title";
                 
@@ -59,7 +59,7 @@
                 picker.showCameraButton = YES;
                 picker.autoSelectCameraImages = YES;
                 
-                picker.modalPresentationStyle = UIModalPresentationPopover;
+                picker.modalPresentationStyle = UIModalPresentationFullScreen;
                 
                 picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
                 
@@ -95,7 +95,7 @@
     UIImagePickerController *picker = [[UIImagePickerController alloc] init];
     picker.sourceType = UIImagePickerControllerSourceTypePhotoLibrary;
     picker.delegate = self;
-    picker.modalPresentationStyle = UIModalPresentationPopover;
+    picker.modalPresentationStyle = UIModalPresentationFullScreen;
     
     UIPopoverPresentationController *popPC = picker.popoverPresentationController;
     popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
