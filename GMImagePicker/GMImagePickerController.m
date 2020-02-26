@@ -14,7 +14,7 @@
 @import Photos;
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
-
+@property (nonatomic, assign) BOOL isCameraPress;
 @end
 
 @implementation GMImagePickerController
@@ -537,32 +537,36 @@
         [((GMAlbumsViewController *)self.navigationController.topViewController) selectAllAlbumsCell];
     }
     
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        // This allows the selection of the image taken to be better seen if the user is not already in that VC
-        if (self.autoSelectCameraImages && [self.navigationController.topViewController isKindOfClass:[GMAlbumsViewController class]]) {
-            [((GMAlbumsViewController *)self.navigationController.topViewController) selectAllAlbumsCell];
-        }
+    if (![self isCameraPress]) {
+        [self setIsCameraPress:YES];
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            // This allows the selection of the image taken to be better seen if the user is not already in that VC
+            if (self.autoSelectCameraImages && [self.navigationController.topViewController isKindOfClass:[GMAlbumsViewController class]]) {
+                [((GMAlbumsViewController *)self.navigationController.topViewController) selectAllAlbumsCell];
+            }
 
-        UIImagePickerController *picker = [[UIImagePickerController alloc] init];
-        picker.sourceType = UIImagePickerControllerSourceTypeCamera;
-    //    picker.videoMaximumDuration = self.videoMaximumDuration;
-        if(_allow_video){
-            picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
-            picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
-        }else{
-            picker.mediaTypes = @[(NSString *)kUTTypeImage];
-        }
-        picker.allowsEditing = self.allowsEditingCameraImages;
+            UIImagePickerController *picker = [[UIImagePickerController alloc] init];
+            picker.sourceType = UIImagePickerControllerSourceTypeCamera;
+        //    picker.videoMaximumDuration = self.videoMaximumDuration;
+            if(_allow_video){
+                picker.mediaTypes = @[(NSString *)kUTTypeImage,(NSString *)kUTTypeMovie];
+                picker.videoQuality = UIImagePickerControllerQualityTypeHigh;
+            }else{
+                picker.mediaTypes = @[(NSString *)kUTTypeImage];
+            }
+            picker.allowsEditing = self.allowsEditingCameraImages;
 
-        picker.delegate = self;
-        picker.modalPresentationStyle = UIModalPresentationPopover;
+            picker.delegate = self;
+            picker.modalPresentationStyle = UIModalPresentationFullScreen;
 
-        UIPopoverPresentationController *popPC = picker.popoverPresentationController;
-        popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
-        popPC.barButtonItem = button;
+            UIPopoverPresentationController *popPC = picker.popoverPresentationController;
+            popPC.permittedArrowDirections = UIPopoverArrowDirectionAny;
+            popPC.barButtonItem = button;
 
-        [self showViewController:picker sender:button];
-    });
+            [self showViewController:picker sender:button];
+            [self setIsCameraPress:NO];
+        });
+    }
 }
 
 - (NSDictionary *)toolbarTitleTextAttributes {
