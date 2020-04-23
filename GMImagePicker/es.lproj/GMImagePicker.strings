@@ -1,0 +1,44 @@
+/* Cancel */
+"picker.navigation.cancel-button" = "Cancelar";
+
+/* Done */
+"picker.navigation.done-button" = "OK";
+
+/* Camera */
+"picker.navigation.camera-button" = "Cámara";
+
+/* Navigation bar default title */
+"picker.navigation.title" = "GMImagePicker";
+
+/* %@ Items Selected */
+"picker.selection.multiple-items" = "%@ ítems selec.";
+
+/* %@ Photos Selected */
+"picker.selection.multiple-photos" = "%@ fotos selec.";
+
+/* %@ Videos Selected */
+"picker.selection.multiple-videos" = "%@ vídeos selec.";
+
+/* 1 Photo Selected */
+"picker.selection.single-photo" = "1 foto selec.";
+
+/* 1 Video Selected */
+"picker.selection.single-video" = "1 vídeo selec.";
+
+/* All photos */
+"picker.table.all-photos-label" = "Carrete";
+
+/* Smart Albums */
+"picker.table.smart-albums-header" = "COLECCIONES INTELIGENTES";
+
+/* Albums */
+"picker.table.user-albums-header" = "COLECCIONES";
+
+/* Action (button) permission - mic */
+"picker.action.permission.microphone" = "Habilitar el acceso al micrófono";
+
+/* Action (button) permission - camera */
+"picker.action.permission.camera" = "Habilitar el acceso a la cámara";
+
+/* Action (title) permission */
+"picker.action.permission.title" = "Compartir en Nixplay";
