@@ -328,6 +328,7 @@
 				fr,
 				it,
 				pt,
+				ja,
 			);
 			mainGroup = B37D576B19CA3B39007F64BD;
 			productRefGroup = B37D577519CA3B3A007F64BD /* Products */;
