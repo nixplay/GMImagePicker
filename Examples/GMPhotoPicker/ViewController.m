@@ -131,6 +131,26 @@
     NSLog(@"GMImagePicker: User ended picking assets. Number of selected items is: %lu", (unsigned long)assetArray.count);
 }
 
+- (void)assetsPickerController:(GMImagePickerController *)picker didSelectVideo:(PHAsset *)asset {
+    // get meta data for video length
+    @try {
+        PHImageManager *manager = [PHImageManager defaultManager];
+        PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
+        videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
+        {
+            NSLog(@"PHVideoRequestOptions progressHandler %@",@{@"progress" : @(progress)});
+        };
+        videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
+        videoRequestOptions.networkAccessAllowed = YES;
+        [manager requestAVAssetForVideo:asset options:videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+            float assetDuration = CMTimeGetSeconds(avasset.duration);
+            NSLog(@"GMImagePicker: video duration %f", assetDuration);
+        }];
+    } @catch (NSException *exception) {
+        NSLog(@"GMImagePicker: catch error %@", exception);
+    }
+}
+
 //Optional implementation:
 -(void)assetsPickerControllerDidCancel:(GMImagePickerController *)picker
 {
