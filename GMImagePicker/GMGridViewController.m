@@ -704,7 +704,10 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            // detect video assets
+            if (asset.mediaType == PHAssetMediaTypeVideo) {
+                [self.picker.delegate assetsPickerController:self.picker didSelectVideo:asset];
+            }
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
                 return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
             }
