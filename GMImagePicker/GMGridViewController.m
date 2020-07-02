@@ -830,7 +830,17 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             if (insertedPaths != nil) {
                                 [UIView setAnimationsEnabled:NO];
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
-                                [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                    if (weakSelf.picker.selectedAssets.count < weakSelf.picker.maxItems) {
+                                        [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+                                        [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                                        PHAsset *asset = weakSelf.assetsFetchResults[0];
+                                        // detect video assets
+                                        if (asset.mediaType == PHAssetMediaTypeVideo) {
+                                            [weakSelf.picker.delegate assetsPickerController:weakSelf.picker didSelectVideo:asset];
+                                        }
+                                    }
+                                });
                             }
                             
                             if (changedPaths != nil) {
