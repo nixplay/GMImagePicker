@@ -832,12 +832,22 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
                                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                                     if (weakSelf.picker.selectedAssets.count < weakSelf.picker.maxItems) {
-                                        [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
-                                        [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                                        NSPredicate *videoPredicate = [weakSelf predicateOfAssetType:PHAssetMediaTypeVideo];
+                                        NSInteger nVideos = [weakSelf.picker.selectedAssets filteredArrayUsingPredicate:videoPredicate].count;
                                         PHAsset *asset = weakSelf.assetsFetchResults[0];
+                                        BOOL isSelected = false;
                                         // detect video assets
                                         if (asset.mediaType == PHAssetMediaTypeVideo) {
-                                            [weakSelf.picker.delegate assetsPickerController:weakSelf.picker didSelectVideo:asset];
+                                            if((nVideos) < weakSelf.picker.maxVideoCount){
+                                                [weakSelf.picker.delegate assetsPickerController:weakSelf.picker didSelectVideo:asset];
+                                                isSelected = true;
+                                            }
+                                        } else {
+                                            isSelected = true;
+                                        }
+                                        if (isSelected) {
+                                            [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+                                            [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
                                         }
                                     }
                                 });
@@ -1127,6 +1137,13 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
     }
     return assets;
+}
+
+- (NSPredicate *)predicateOfAssetType:(PHAssetMediaType)type
+{
+    return [NSPredicate predicateWithBlock:^BOOL(PHAsset *asset, NSDictionary *bindings) {
+        return (asset.mediaType == type);
+    }];
 }
 
 @end

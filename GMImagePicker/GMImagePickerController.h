@@ -143,6 +143,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 @property (nonatomic) NSInteger colsInPortrait;
 @property (nonatomic) NSInteger colsInLandscape;
 @property (nonatomic) NSInteger maxItems;
+@property (nonatomic) NSInteger maxVideoCount;
 @property (nonatomic) double minimumInteritemSpacing;
 
 /**
