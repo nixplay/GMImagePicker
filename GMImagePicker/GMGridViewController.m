@@ -704,7 +704,10 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
-
+            // detect video assets
+            if (asset.mediaType == PHAssetMediaTypeVideo) {
+                [self.picker.delegate assetsPickerController:self.picker didSelectVideo:asset];
+            }
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldHighlightAsset:)]) {
                 return [self.picker.delegate assetsPickerController:self.picker shouldHighlightAsset:asset];
             }
@@ -827,7 +830,27 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             if (insertedPaths != nil) {
                                 [UIView setAnimationsEnabled:NO];
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
-                                [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                    if (weakSelf.picker.selectedAssets.count < weakSelf.picker.maxItems) {
+                                        NSPredicate *videoPredicate = [weakSelf predicateOfAssetType:PHAssetMediaTypeVideo];
+                                        NSInteger nVideos = [weakSelf.picker.selectedAssets filteredArrayUsingPredicate:videoPredicate].count;
+                                        PHAsset *asset = weakSelf.assetsFetchResults[0];
+                                        BOOL isSelected = false;
+                                        // detect video assets
+                                        if (asset.mediaType == PHAssetMediaTypeVideo) {
+                                            if((nVideos) < weakSelf.picker.maxVideoCount){
+                                                [weakSelf.picker.delegate assetsPickerController:weakSelf.picker didSelectVideo:asset];
+                                                isSelected = true;
+                                            }
+                                        } else {
+                                            isSelected = true;
+                                        }
+                                        if (isSelected) {
+                                            [weakSelf collectionView:weakSelf.collectionView didSelectItemAtIndexPath:[NSIndexPath indexPathForRow:1 inSection:0]];
+                                            [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                                        }
+                                    }
+                                });
                             }
                             
                             if (changedPaths != nil) {
@@ -1114,6 +1137,13 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
     }
     return assets;
+}
+
+- (NSPredicate *)predicateOfAssetType:(PHAssetMediaType)type
+{
+    return [NSPredicate predicateWithBlock:^BOOL(PHAsset *asset, NSDictionary *bindings) {
+        return (asset.mediaType == type);
+    }];
 }
 
 @end

@@ -142,6 +142,8 @@ static CGSize const kPopoverContentSize = {480, 720};
  */
 @property (nonatomic) NSInteger colsInPortrait;
 @property (nonatomic) NSInteger colsInLandscape;
+@property (nonatomic) NSInteger maxItems;
+@property (nonatomic) NSInteger maxVideoCount;
 @property (nonatomic) double minimumInteritemSpacing;
 
 /**
@@ -214,6 +216,7 @@ static CGSize const kPopoverContentSize = {480, 720};
 
 - (void)assetsPickerController:(GMImagePickerController *)picker didFinishPickingAssets:(NSArray *)assets;
 
+- (void)assetsPickerController:(GMImagePickerController *)picker didSelectVideo:(PHAsset *)asset;
 
 @optional
 
