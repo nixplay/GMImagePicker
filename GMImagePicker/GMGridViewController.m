@@ -597,6 +597,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
 
                     if (iCloud) {
+                        [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
                         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"iCloud Video"
                                                                                        message:@"We don’t support iCloud video uploads yet."
                                                                                 preferredStyle:UIAlertControllerStyleAlert];
@@ -609,6 +610,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                         [self collectionView:self.collectionView didDeselectItemAtIndexPath:indexPath];
                         [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
                     } else {
+                        [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
                         PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
                         videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
                         videoRequestOptions.networkAccessAllowed = YES;
