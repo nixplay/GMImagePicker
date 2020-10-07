@@ -591,7 +591,36 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
+            // detect video assets
+            if (asset.mediaType == PHAssetMediaTypeVideo) {
+                [[PHImageManager defaultManager] requestImageDataForAsset:asset options:nil resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                    BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
 
+                    if (iCloud) {
+                        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"iCloud Video"
+                                                                                       message:@"We don’t support iCloud video uploads yet."
+                                                                                preferredStyle:UIAlertControllerStyleAlert];
+                        UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK"
+                                                                     style:UIAlertActionStyleDefault
+                                                                   handler:^(UIAlertAction * _Nonnull action) {}];
+                        [alert addAction:ok];
+                        [self presentViewController:alert animated:YES completion:nil];
+
+                        [self collectionView:self.collectionView didDeselectItemAtIndexPath:indexPath];
+                        [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                    } else {
+                        PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
+                        videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
+                        videoRequestOptions.networkAccessAllowed = YES;
+                        [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                            if (![[(AVURLAsset*)avasset URL] isFileURL]) {
+                                [self collectionView:self.collectionView didDeselectItemAtIndexPath:indexPath];
+                                [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                            }
+                        }];
+                    }
+                }];
+            }
             [self.picker selectAsset:asset];
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
                 [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
