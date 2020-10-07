@@ -218,6 +218,8 @@ static CGSize const kPopoverContentSize = {480, 720};
 
 - (void)assetsPickerController:(GMImagePickerController *)picker didSelectVideo:(PHAsset *)asset;
 
+- (void)assetsPickerController:(GMImagePickerController *)picker didSelectiCloudVideo:(PHAsset *)asset;
+
 @optional
 
 /**
