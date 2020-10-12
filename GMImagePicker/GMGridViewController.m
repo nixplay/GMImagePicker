@@ -588,7 +588,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    if ([self.title isEqualToString:self.albumLabel] && self.picker.showCameraButton) {
+    if (self.picker.showCameraButton) {
         if (indexPath.row) {
             PHAsset *asset = self.assetsFetchResults[indexPath.row-1];
             // detect video assets
@@ -623,9 +623,11 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     }
                 }];
             }
-            [self.picker selectAsset:asset];
-            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
-                [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+            if ([self.title isEqualToString:self.albumLabel]) {
+                [self.picker selectAsset:asset];
+                if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
+                    [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+                }
             }
         }
     } else {
@@ -701,12 +703,6 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
             }
         }
-    } else {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
-        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
-            return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
-        }
     }
     return YES;
 }
@@ -720,12 +716,6 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
                 [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
             }
-        }
-    } else {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row];
-        [self.picker deselectAsset:asset];
-        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
-            [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
         }
     }
 }
