@@ -599,7 +599,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     if (iCloud) {
                         [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
                         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"iCloud Video"
-                                                                                       message:@"We don’t support iCloud video uploads yet."
+                                                                                       message:[NSString stringWithFormat:@"We don’t support iCloud video uploads yet. row :%ld, section: %ld",indexPath.row, indexPath.section]
                                                                                 preferredStyle:UIAlertControllerStyleAlert];
                         UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK"
                                                                      style:UIAlertActionStyleDefault
@@ -607,8 +607,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                         [alert addAction:ok];
                         [self presentViewController:alert animated:YES completion:nil];
 
-                        [self collectionView:self.collectionView didDeselectItemAtIndexPath:indexPath];
-                        [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
+                        [collectionView deselectItemAtIndexPath:indexPath animated:YES];
                     } else {
                         [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
                         PHVideoRequestOptions *videoRequestOptions = [PHVideoRequestOptions new];
@@ -623,11 +622,9 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                     }
                 }];
             }
-            if ([self.title isEqualToString:self.albumLabel]) {
-                [self.picker selectAsset:asset];
-                if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
-                    [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
-                }
+            [self.picker selectAsset:asset];
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
             }
         }
     } else {
@@ -703,6 +700,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
             }
         }
+    } else {
+//        PHAsset *asset = self.assetsFetchResults[indexPath.row];
+//
+//        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
+//            return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
+//        }
     }
     return YES;
 }
@@ -717,6 +720,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
             }
         }
+    } else {
+//        PHAsset *asset = self.assetsFetchResults[indexPath.row];
+//        [self.picker deselectAsset:asset];
+//        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
+//            [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+//        }
     }
 }
 
