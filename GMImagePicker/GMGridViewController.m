@@ -598,7 +598,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 if (iCloud) {
                     [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
                     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"iCloud Video"
-                                                                                   message:[NSString stringWithFormat:@"We don’t support iCloud video uploads yet. row :%ld, section: %ld",indexPath.row, indexPath.section]
+                                                                                   message:@"We don’t support iCloud video uploads yet."
                                                                             preferredStyle:UIAlertControllerStyleAlert];
                     UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK"
                                                                  style:UIAlertActionStyleDefault
