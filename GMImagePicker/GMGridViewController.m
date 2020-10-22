@@ -463,31 +463,29 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         } else {
             UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:CameraCellIdentifier forIndexPath:indexPath];
 
-            if ([cell subviews].count == 1) {
-                cell.backgroundColor = [UIColor whiteColor];
+            cell.backgroundColor = [UIColor whiteColor];
 
-                UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
-                UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
+            UIBarButtonItem *itemSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+            UIBarButtonItem *item = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(launchCamera:)];
 
-                int ypos = -12;
-                if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"13.0")) {
-                    ypos = -(cell.bounds.size.height/2)+12;
-                }
-                UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, ypos, cell.bounds.size.width, cell.bounds.size.height)];
-                toolBar.barTintColor = [UIColor whiteColor];
-                toolBar.backgroundColor = [UIColor whiteColor];
-                [toolBar setItems:@[itemSpace, item, itemSpace]];
-                [cell addSubview:toolBar];
-
-                UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, (cell.bounds.size.height/2), cell.bounds.size.width, 24)];
-                label.font = [UIFont systemFontOfSize:12];
-                label.textColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
-                label.textAlignment = NSTextAlignmentCenter;
-                label.contentMode = UIViewContentModeCenter;
-                label.text = NSLocalizedStringFromTableInBundle(@"picker.navigation.camera-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Camera");
-
-                [cell addSubview:label];
+            int ypos = -12;
+            if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"13.0")) {
+                ypos = -(cell.bounds.size.height/2)+12;
             }
+            UIToolbar *toolBar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, ypos, cell.bounds.size.width, cell.bounds.size.height)];
+            toolBar.barTintColor = [UIColor whiteColor];
+            toolBar.backgroundColor = [UIColor whiteColor];
+            [toolBar setItems:@[itemSpace, item, itemSpace]];
+            [cell addSubview:toolBar];
+
+            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, (cell.bounds.size.height/2), cell.bounds.size.width, 24)];
+            label.font = [UIFont systemFontOfSize:12];
+            label.textColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
+            label.textAlignment = NSTextAlignmentCenter;
+            label.contentMode = UIViewContentModeCenter;
+            label.text = NSLocalizedStringFromTableInBundle(@"picker.navigation.camera-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Camera");
+
+            [cell addSubview:label];
 
             return cell;
         }
