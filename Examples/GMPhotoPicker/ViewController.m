@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import "GMImagePickerController.h"
 
+#define LIGHT_BLUE_COLOR [UIColor colorWithRed:(99/255.0f)  green:(176/255.0f)  blue:(228.0f/255.0f) alpha:1.0]
+
 @import UIKit;
 @import Photos;
 
@@ -63,6 +65,25 @@
                 
                 picker.mediaTypes = @[@(PHAssetMediaTypeImage)];
                 
+
+                picker.mediaTypes = @[@(PHAssetMediaTypeImage),
+                                      @(PHAssetMediaTypeVideo)];
+                picker.customSmartCollections = @[@(PHAssetCollectionSubtypeSmartAlbumVideos),
+                                                  @(PHAssetCollectionSubtypeSmartAlbumFavorites),
+                                                  @(PHAssetCollectionSubtypeSmartAlbumRecentlyAdded),
+                                                  @(PHAssetCollectionSubtypeSmartAlbumPanoramas)];
+
+                picker.customNavigationBarPrompt = nil;
+                picker.minimumInteritemSpacing = 2.0;
+                picker.showCameraButton = YES;
+                picker.autoDisableDoneButton = NO;
+                picker.autoSelectCameraImages = YES;
+                picker.pickerStatusBarStyle = UIStatusBarStyleDefault;
+                picker.navigationBarTintColor = LIGHT_BLUE_COLOR;
+                picker.toolbarTextColor = LIGHT_BLUE_COLOR;
+                picker.toolbarTintColor = LIGHT_BLUE_COLOR;
+                picker.maxItems = 100;
+                picker.maxVideoCount = 10;
                 //    picker.pickerBackgroundColor = [UIColor blackColor];
                 //    picker.pickerTextColor = [UIColor whiteColor];
                 //    picker.toolbarBarTintColor = [UIColor darkGrayColor];
