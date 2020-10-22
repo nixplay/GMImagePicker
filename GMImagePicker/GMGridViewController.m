@@ -694,7 +694,6 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         }
     } else {
         PHAsset *asset = self.assetsFetchResults[indexPath.row];
-
         if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:shouldDeselectAsset:)]) {
             return [self.picker.delegate assetsPickerController:self.picker shouldDeselectAsset:asset];
         }
@@ -713,10 +712,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
             }
         }
     } else {
-        PHAsset *asset = self.assetsFetchResults[indexPath.row];
-        [self.picker deselectAsset:asset];
-        if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
-            [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+        if (indexPath.row < self.assetsFetchResults.count) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.row];
+            if (asset != nil) {
+                [self.picker deselectAsset:asset];
+                if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didDeselectAsset:)]) {
+                    [self.picker.delegate assetsPickerController:self.picker didDeselectAsset:asset];
+                }
+            }
         }
     }
 }

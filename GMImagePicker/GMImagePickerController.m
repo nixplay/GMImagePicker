@@ -376,7 +376,11 @@
 
 - (void)deselectAsset:(PHAsset *)asset
 {
-    [self.selectedAssets removeObjectAtIndex:[self.selectedAssets indexOfObject:asset]];
+    NSUInteger index = [self.selectedAssets indexOfObject:asset];
+    if (index < self.selectedAssets.count) {
+        [self.selectedAssets removeObjectAtIndex:index];
+    }
+
     if (self.selectedAssets.count == 0) {
         [self updateDoneButton];
     }
