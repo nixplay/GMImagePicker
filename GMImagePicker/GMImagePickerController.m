@@ -708,46 +708,47 @@
 #pragma mark - Permission
 
 - (void)showDialog:(NSString*)description isEnableCamera:(BOOL)isEnableCamera {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Share to Nixplay")
+                                                                       message:description
+                                                                preferredStyle:UIAlertControllerStyleAlert];
 
-    UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Share to Nixplay")
-                                                                   message:description
-                                                            preferredStyle:UIAlertControllerStyleAlert];
+        if (!isEnableCamera) {
+            UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.camera",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Camera Access")
+                                                                    style:UIAlertActionStyleDefault
+                                                                  handler:^(UIAlertAction * _Nonnull action) {
+                                                                      [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                  }];
+            [alert addAction:action];
+        }
 
-    if (!isEnableCamera) {
-        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.camera",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Camera Access")
+        AVAudioSessionRecordPermission audioPermission = [[AVAudioSession sharedInstance] recordPermission];
+        if (audioPermission == AVAudioSessionRecordPermissionUndetermined || audioPermission == AVAudioSessionRecordPermissionDenied) {
+            UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.microphone",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Microphone Access")
+                                                                   style:UIAlertActionStyleDefault
+                                                                 handler:^(UIAlertAction * _Nonnull action) {
+                                                                     if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
+                                                                         [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
+                                                                             if (!granted) {
+                                                                                 [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
+                                                                             }
+                                                                         }];
+                                                                     } else {
+                                                                         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                     }
+                                                                 }];
+            [alert addAction:action];
+        }
+
+        UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel")
                                                                 style:UIAlertActionStyleDefault
                                                               handler:^(UIAlertAction * _Nonnull action) {
-                                                                  [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+                                                                  [alert dismissViewControllerAnimated:YES completion:nil];
                                                               }];
-        [alert addAction:action];
-    }
+        [alert addAction:cancelAction];
 
-    AVAudioSessionRecordPermission audioPermission = [[AVAudioSession sharedInstance] recordPermission];
-    if (audioPermission == AVAudioSessionRecordPermissionUndetermined || audioPermission == AVAudioSessionRecordPermissionDenied) {
-        UIAlertAction * action = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.action.permission.microphone",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Enable Microphone Access")
-                                                               style:UIAlertActionStyleDefault
-                                                             handler:^(UIAlertAction * _Nonnull action) {
-                                                                 if ([[AVAudioSession sharedInstance] recordPermission] == AVAudioSessionRecordPermissionUndetermined) {
-                                                                     [[AVAudioSession sharedInstance] requestRecordPermission:^(BOOL granted) {
-                                                                         if (!granted) {
-                                                                             [self showDialog:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSMicrophoneUsageDescription"] isEnableCamera:isEnableCamera];
-                                                                         }
-                                                                     }];
-                                                                 } else {
-                                                                     [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
-                                                                 }
-                                                             }];
-        [alert addAction:action];
-    }
-
-    UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:NSLocalizedStringFromTableInBundle(@"picker.navigation.cancel-button",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Cancel")
-                                                            style:UIAlertActionStyleDefault
-                                                          handler:^(UIAlertAction * _Nonnull action) {
-                                                              [alert dismissViewControllerAnimated:YES completion:nil];
-                                                          }];
-    [alert addAction:cancelAction];
-
-    [self presentViewController:alert animated:YES completion:nil];
+        [self presentViewController:alert animated:YES completion:nil];
+    });
 }
 
 @end
