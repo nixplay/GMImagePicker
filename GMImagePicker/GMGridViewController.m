@@ -853,7 +853,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                             if (insertedPaths != nil) {
                                 [UIView setAnimationsEnabled:NO];
                                 [collectionView insertItemsAtIndexPaths:insertedPaths];
-                                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+                                dispatch_async(dispatch_get_main_queue(), ^{
                                     if (weakSelf.picker.selectedAssets.count < weakSelf.picker.maxItems) {
                                         NSPredicate *videoPredicate = [weakSelf predicateOfAssetType:PHAssetMediaTypeVideo];
                                         NSInteger nVideos = [weakSelf.picker.selectedAssets filteredArrayUsingPredicate:videoPredicate].count;
