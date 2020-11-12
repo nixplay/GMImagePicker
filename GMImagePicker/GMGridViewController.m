@@ -591,31 +591,12 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
         if (row < self.assetsFetchResults.count) {
             __block PHAsset *asset = self.assetsFetchResults[row];
             if (asset != nil) {
-                // detect video assets
                 if (asset.mediaType == PHAssetMediaTypeVideo) {
-                    [[PHImageManager defaultManager] requestImageDataForAsset:asset options:nil resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
-                        BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
-                        if (iCloud) {
-                            [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
-                            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"iCloud Video"
-                                                                                           message:@"We don’t support iCloud video uploads yet."
-                                                                                    preferredStyle:UIAlertControllerStyleAlert];
-                            UIAlertAction *ok = [UIAlertAction actionWithTitle:@"OK"
-                                                                         style:UIAlertActionStyleDefault
-                                                                       handler:^(UIAlertAction * _Nonnull action) {}];
-                            [alert addAction:ok];
-                            [self presentViewController:alert animated:YES completion:nil];
-
-                            [collectionView deselectItemAtIndexPath:indexPath animated:YES];
-                        } else {
-                            [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
-                            [self.picker selectAsset:asset];
-                            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
-                                [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
-                            }
-
-                        }
-                    }];
+                    // [self.picker.delegate assetsPickerController:self.picker didSelectiCloudVideo:asset];
+                    [self.picker selectAsset:asset];
+                    if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
+                        [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+                    }
                 } else {
                     [self.picker selectAsset:asset];
                     if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
