@@ -7,6 +7,7 @@
 //
 
 #import <MobileCoreServices/MobileCoreServices.h>
+#import <SVProgressHUD/SVProgressHUD.h>
 #import "GMImagePickerController.h"
 #import "GMAlbumsViewController.h"
 #import "GMGridViewController.h"
@@ -15,6 +16,9 @@
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
 @property (nonatomic, assign) BOOL isCameraPress;
+@property (strong) PHImageRequestOptions *imageRequestOptions;
+@property (strong) PHVideoRequestOptions *videoRequestOptions;
+@property (nonatomic, assign) NSUInteger currentIndex;
 @end
 
 @implementation GMImagePickerController
@@ -36,8 +40,27 @@
         [_selectedAssets sortUsingComparator:^NSComparisonResult(PHAsset *asset1, PHAsset *asset2) {
             return [@([preSelectedAssets indexOfObject:asset1.localIdentifier]) compare:@([preSelectedAssets indexOfObject:asset2.localIdentifier])];
         }];
-        
-        
+        __weak typeof(self)weakSelf = self;
+        // request options
+        if (self.imageRequestOptions == nil) {
+            self.imageRequestOptions = [PHImageRequestOptions new];
+            self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
+            self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
+            self.imageRequestOptions.networkAccessAllowed = YES;
+        }
+        // video
+        if (self.videoRequestOptions == nil) {
+            self.videoRequestOptions = [PHVideoRequestOptions new];
+            self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
+            {
+                NSString *appendString = (self.currentIndex+1 > 1) ? @"s" : @"";
+                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Checking selected item%@ %lu / %lu", appendString ,self.currentIndex+1, [weakSelf.selectedAssets count]]];
+                NSLog(@"video-dl %f", progress);
+            };
+            self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
+            self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
+            self.videoRequestOptions.networkAccessAllowed = YES;
+        }
         // _selectedAssets = [fetchResult copy];
         _allow_video = allow_v;
         
@@ -436,11 +459,94 @@
 
 - (void)finishPickingAssets:(id)sender
 {
-    if ([self.delegate respondsToSelector:@selector(assetsPickerController:didFinishPickingAssets:)]) {
-        [self.delegate assetsPickerController:self didFinishPickingAssets:self.selectedAssets];
+    if ([self.selectedAssets count]) {
+        // disable right navigation button
+        UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
+        for (UIViewController *viewController in nav.viewControllers) {
+            viewController.navigationItem.rightBarButtonItem.enabled = NO;
+        }
+        // show head up display
+        [SVProgressHUD showWithStatus:@"Initiate checking item/s."];
+        // check selected items
+        [self checkingSelected:self.selectedAssets];
+    } else {
+        if ([self.delegate respondsToSelector:@selector(assetsPickerController:didFinishPickingAssets:)]) {
+            [self.delegate assetsPickerController:self didFinishPickingAssets:self.selectedAssets];
+        }
     }
 }
 
+#pragma mark - Checking Selected Items
+
+- (void)checkingSelected:(NSMutableArray *)fetchArray {
+    dispatch_group_t dispatchGroup = dispatch_group_create();
+    dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        __block NSMutableArray *responses = [[NSMutableArray alloc ] initWithCapacity:[fetchArray count]];
+        __weak typeof(self)weakSelf = self;
+        if (fetchArray.count > 0) {
+            [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
+                weakSelf.currentIndex = idx;
+                NSMutableDictionary *response = [NSMutableDictionary new];
+                [response setValue:[NSString stringWithFormat:@"ph://%@",asset.localIdentifier] forKey:@"uri"];
+                [response setValue: ((asset.mediaType == PHAssetMediaTypeImage) ? @"image": (asset.mediaType == PHAssetMediaTypeVideo) ? @"video" : @"unknown") forKey:@"type"];
+                if (asset.location) {
+                    [response setObject:@(asset.location.coordinate.latitude) forKey:@"latitude"];
+                    [response setObject:@(asset.location.coordinate.longitude) forKey:@"longitude"];
+                }
+                if (asset.creationDate) {
+                    [response setValue:[[self ISO8601DateFormatter] stringFromDate:asset.creationDate] forKey:@"timestamp"];
+                }
+                [response setValue: @(asset.pixelWidth) forKey:@"width"];
+                [response setValue: @(asset.pixelHeight) forKey:@"height"];
+                [response setValue: @(idx) forKey:@"index"];
+
+                NSString *source = @"Photos";
+                dispatch_semaphore_t    semaphore = dispatch_semaphore_create(0);
+                // video
+                if (asset.mediaType == PHAssetMediaTypeVideo) {
+                    [response setValue: @(asset.duration) forKey:@"duration"];
+                    [response setValue:source forKey:@"source"];
+                    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                        [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
+                        [responses addObject:response];
+
+                        if([responses count] >= [fetchArray count]) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [SVProgressHUD dismiss];
+                                [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                            });
+                        }
+                        dispatch_semaphore_signal(semaphore);
+                    }];
+                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+                } else {
+                // image
+                    self.imageRequestOptions.synchronous = NO;
+                    [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                        BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
+                        NSString *source = (iCloud) ? @"iCloud" : @"Photos";
+                        float imageSize = imageData.length;
+                        [response setValue:source forKey:@"source"];
+                        [response setValue: @(imageSize) forKey:@"fileSize"];
+
+                        [responses addObject:response];
+                        if([responses count] >= [fetchArray count]) {
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                               // done
+                                if(([responses count] >= [fetchArray count])){
+                                    dispatch_async(dispatch_get_main_queue(), ^{
+                                        [SVProgressHUD dismiss];
+                                        [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                                    });
+                                }
+                            });
+                        }
+                    }];
+                }
+            }];
+        }
+    });
+}
 
 #pragma mark - Toolbar Title
 
@@ -753,6 +859,21 @@
 
         [self presentViewController:alert animated:YES completion:nil];
     });
+}
+
+#pragma mark Helper
+
+- (NSDateFormatter * _Nonnull)ISO8601DateFormatter {
+    static NSDateFormatter *ISO8601DateFormatter;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        ISO8601DateFormatter = [[NSDateFormatter alloc] init];
+        NSLocale *enUSPOSIXLocale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
+        ISO8601DateFormatter.locale = enUSPOSIXLocale;
+        ISO8601DateFormatter.timeZone = [NSTimeZone timeZoneWithAbbreviation:@"GMT"];
+        ISO8601DateFormatter.dateFormat = @"yyyy-MM-dd'T'HH:mm:ssZZZZZ";
+    });
+    return ISO8601DateFormatter;
 }
 
 @end
