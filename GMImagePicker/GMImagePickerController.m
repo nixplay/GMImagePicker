@@ -19,6 +19,8 @@
 @property (strong) PHImageRequestOptions *imageRequestOptions;
 @property (strong) PHVideoRequestOptions *videoRequestOptions;
 @property (nonatomic, assign) NSUInteger currentIndex;
+@property (nonatomic, assign) BOOL hasUnavailable;
+@property (nonatomic, assign) BOOL hasShownCloudWarning;
 @end
 
 @implementation GMImagePickerController
@@ -76,6 +78,11 @@
         // Modify UI logic options
         if (uiLogic && [[uiLogic objectForKey:@"allowsMultipleSelection"] isEqualToString:@"0"]) {
             _allowsMultipleSelection = NO;
+        }
+
+         // iCloud Warning hasShownCloudWarning
+        if (uiLogic && [[uiLogic objectForKey:@"hasShownCloudWarning"] isEqualToString:@"1"]) {
+            _hasShownCloudWarning = true;
         }
 
         // Grid configuration:
@@ -464,11 +471,11 @@
         for (UIViewController *viewController in nav.viewControllers) {
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
         }
-        // show head up display
+        // settings for head up display
+        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
         [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-        [SVProgressHUD showWithStatus:@"Loading..."];
         // check selected items
-        [self checkingSelected:self.selectedAssets];
+        [self detectIfHasCloud:self.selectedAssets];
     } else {
         if ([self.delegate respondsToSelector:@selector(assetsPickerController:didFinishPickingAssets:)]) {
             [self.delegate assetsPickerController:self didFinishPickingAssets:self.selectedAssets];
@@ -477,6 +484,40 @@
 }
 
 #pragma mark - Checking Selected Items
+
+- (void)detectIfHasCloud:(NSMutableArray *)fetchArray {
+    if (fetchArray.count > 0) {
+        __weak typeof(self)weakSelf = self;
+        [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
+
+            NSArray *assetResource = [PHAssetResource assetResourcesForAsset:asset];
+            BOOL isAvailable = (BOOL)[assetResource.firstObject valueForKey:@"locallyAvailable"];
+            if (!isAvailable) {
+                weakSelf.hasUnavailable = true;
+                return;
+            }
+        }];
+        if (self.hasUnavailable && !self.hasShownCloudWarning) {
+            self.hasShownCloudWarning = true;
+            // invoke to emit JS pm
+            [weakSelf.delegate didShownCloudWarning];
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"iCloud Contents")
+                                                                           message:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-body",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.")
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            UIAlertAction * okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Got it", nil)
+                                                                style:UIAlertActionStyleDefault
+                                                              handler:^(UIAlertAction * _Nonnull action) {
+                [alert dismissViewControllerAnimated:YES completion:^{
+                    [self checkingSelected:self.selectedAssets];
+                }];
+                                                              }];
+            [alert addAction:okAction];
+            [self presentViewController:alert animated:YES completion:nil];
+        } else {
+            [self checkingSelected:self.selectedAssets];
+        }
+    }
+}
 
 - (void)checkingSelected:(NSMutableArray *)fetchArray {
     dispatch_group_t dispatchGroup = dispatch_group_create();
