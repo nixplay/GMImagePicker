@@ -62,3 +62,12 @@
 
 /* Action (title) permission */
 "picker.action.permission.title" = "Nixplayで共有";
+
+/* Alert Got it title */
+"picker.alert.got-it-title" = "iCloud Contents";
+
+/* Alert Got it button */
+"picker.alert.got-it-button" = "Got it";
+
+/* Alert Got it body */
+"picker.alert.got-it-body" = "Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.";
