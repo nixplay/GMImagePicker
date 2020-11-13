@@ -72,6 +72,7 @@
         _displayAlbumsNumberOfAssets = YES;
         _autoDisableDoneButton = YES;
         _allowsMultipleSelection = YES;
+        _hasShownCloudWarning = NO;
         _confirmSingleSelection = NO;
         _showCameraButton = NO;
 
@@ -82,7 +83,7 @@
 
          // iCloud Warning hasShownCloudWarning
         if (uiLogic && [[uiLogic objectForKey:@"hasShownCloudWarning"] isEqualToString:@"1"]) {
-            _hasShownCloudWarning = true;
+            _hasShownCloudWarning = YES;
         }
 
         // Grid configuration:
@@ -489,16 +490,14 @@
     if (fetchArray.count > 0) {
         __weak typeof(self)weakSelf = self;
         [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
-
             NSArray *assetResource = [PHAssetResource assetResourcesForAsset:asset];
-            BOOL isAvailable = (BOOL)[assetResource.firstObject valueForKey:@"locallyAvailable"];
+            BOOL isAvailable =  [[assetResource.firstObject valueForKey:@"locallyAvailable"] boolValue];
             if (!isAvailable) {
-                weakSelf.hasUnavailable = true;
-                return;
+                weakSelf.hasUnavailable = YES;
             }
         }];
         if (self.hasUnavailable && !self.hasShownCloudWarning) {
-            self.hasShownCloudWarning = true;
+            self.hasShownCloudWarning = YES;
             // invoke to emit JS pm
             [weakSelf.delegate didShownCloudWarning];
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"iCloud Contents")
