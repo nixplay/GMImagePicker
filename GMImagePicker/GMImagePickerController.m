@@ -465,6 +465,7 @@
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
         }
         // show head up display
+        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
         [SVProgressHUD showWithStatus:@"Loading..."];
         // check selected items
         [self checkingSelected:self.selectedAssets];
