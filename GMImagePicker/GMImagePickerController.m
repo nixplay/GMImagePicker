@@ -53,8 +53,7 @@
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSString *appendString = (self.currentIndex+1 > 1) ? @"s" : @"";
-                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Checking selected item%@ %lu / %lu", appendString ,self.currentIndex+1, [weakSelf.selectedAssets count]]];
+                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu.", self.currentIndex+1, [weakSelf.selectedAssets count]]];
                 NSLog(@"video-dl %f", progress);
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
@@ -466,7 +465,7 @@
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
         }
         // show head up display
-        [SVProgressHUD showWithStatus:@"Initiate checking item/s."];
+        [SVProgressHUD showWithStatus:@"Loading..."];
         // check selected items
         [self checkingSelected:self.selectedAssets];
     } else {
