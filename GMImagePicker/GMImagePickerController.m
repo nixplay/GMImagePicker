@@ -518,7 +518,7 @@
         if (self.hasUnavailable && !self.hasShownCloudWarning) {
             self.hasShownCloudWarning = YES;
             // invoke to emit JS pm
-//            [weakSelf.delegate didShownCloudWarning];
+            [weakSelf.delegate didShownCloudWarning];
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"iCloud Contents")
                                                                            message:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-body",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.")
                                                                     preferredStyle:UIAlertControllerStyleAlert];
