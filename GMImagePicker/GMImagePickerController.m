@@ -21,6 +21,10 @@
 @property (nonatomic, assign) NSUInteger currentIndex;
 @property (nonatomic, assign) BOOL hasUnavailable;
 @property (nonatomic, assign) BOOL hasShownCloudWarning;
+@property (nonatomic, assign) BOOL hasExecuteCancel;
+@property PHImageRequestID phImageReqId;
+@property (nonatomic) dispatch_group_t dispatchGroup;
+@property (nonatomic) dispatch_semaphore_t semaphore;
 @end
 
 @implementation GMImagePickerController
@@ -55,8 +59,8 @@
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu.", self.currentIndex+1, [weakSelf.selectedAssets count]]];
                 NSLog(@"video-dl %f", progress);
+                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu.", self.currentIndex+1, [weakSelf.selectedAssets count]]];
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
             self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
@@ -469,7 +473,11 @@
         viewController.navigationItem.rightBarButtonItem.enabled = YES;
         [viewController.navigationController setToolbarHidden:NO animated:NO];
     }
-    [SVProgressHUD dismiss];
+    self.hasExecuteCancel = YES;
+    [[PHImageManager defaultManager] cancelImageRequest:self.phImageReqId];
+    [SVProgressHUD dismissWithCompletion:^{
+        self.hasExecuteCancel = NO;
+    }];
 }
 
 - (void)finishPickingAssets:(id)sender
@@ -510,7 +518,7 @@
         if (self.hasUnavailable && !self.hasShownCloudWarning) {
             self.hasShownCloudWarning = YES;
             // invoke to emit JS pm
-            [weakSelf.delegate didShownCloudWarning];
+//            [weakSelf.delegate didShownCloudWarning];
             UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"iCloud Contents")
                                                                            message:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-body",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.")
                                                                     preferredStyle:UIAlertControllerStyleAlert];
@@ -530,69 +538,74 @@
 }
 
 - (void)checkingSelected:(NSMutableArray *)fetchArray {
-    dispatch_group_t dispatchGroup = dispatch_group_create();
-    dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    self.dispatchGroup = dispatch_group_create();
+    dispatch_group_async(self.dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         __block NSMutableArray *responses = [[NSMutableArray alloc ] initWithCapacity:[fetchArray count]];
         __weak typeof(self)weakSelf = self;
         if (fetchArray.count > 0) {
             [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
-                weakSelf.currentIndex = idx;
-                NSMutableDictionary *response = [NSMutableDictionary new];
-                [response setValue:[NSString stringWithFormat:@"ph://%@",asset.localIdentifier] forKey:@"uri"];
-                [response setValue: ((asset.mediaType == PHAssetMediaTypeImage) ? @"image": (asset.mediaType == PHAssetMediaTypeVideo) ? @"video" : @"unknown") forKey:@"type"];
-                if (asset.location) {
-                    [response setObject:@(asset.location.coordinate.latitude) forKey:@"latitude"];
-                    [response setObject:@(asset.location.coordinate.longitude) forKey:@"longitude"];
-                }
-                if (asset.creationDate) {
-                    [response setValue:[[self ISO8601DateFormatter] stringFromDate:asset.creationDate] forKey:@"timestamp"];
-                }
-                [response setValue: @(asset.pixelWidth) forKey:@"width"];
-                [response setValue: @(asset.pixelHeight) forKey:@"height"];
-                [response setValue: @(idx) forKey:@"index"];
+                if (!self.hasExecuteCancel) {
+                    weakSelf.currentIndex = idx;
+                    NSMutableDictionary *response = [NSMutableDictionary new];
+                    [response setValue:[NSString stringWithFormat:@"ph://%@",asset.localIdentifier] forKey:@"uri"];
+                    [response setValue: ((asset.mediaType == PHAssetMediaTypeImage) ? @"image": (asset.mediaType == PHAssetMediaTypeVideo) ? @"video" : @"unknown") forKey:@"type"];
+                    if (asset.location) {
+                        [response setObject:@(asset.location.coordinate.latitude) forKey:@"latitude"];
+                        [response setObject:@(asset.location.coordinate.longitude) forKey:@"longitude"];
+                    }
+                    if (asset.creationDate) {
+                        [response setValue:[[self ISO8601DateFormatter] stringFromDate:asset.creationDate] forKey:@"timestamp"];
+                    }
+                    [response setValue: @(asset.pixelWidth) forKey:@"width"];
+                    [response setValue: @(asset.pixelHeight) forKey:@"height"];
+                    [response setValue: @(idx) forKey:@"index"];
 
-                NSString *source = @"Photos";
-                dispatch_semaphore_t    semaphore = dispatch_semaphore_create(0);
-                // video
-                if (asset.mediaType == PHAssetMediaTypeVideo) {
-                    [response setValue: @(asset.duration) forKey:@"duration"];
-                    [response setValue:source forKey:@"source"];
-                    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
-                        [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
-                        [responses addObject:response];
-
-                        if([responses count] >= [fetchArray count]) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                                [SVProgressHUD dismiss];
-                                [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
-                            });
-                        }
-                        dispatch_semaphore_signal(semaphore);
-                    }];
-                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
-                } else {
-                // image
-                    self.imageRequestOptions.synchronous = NO;
-                    [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
-                        BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
-                        NSString *source = (iCloud) ? @"iCloud" : @"Photos";
-                        float imageSize = imageData.length;
+                    NSString *source = @"Photos";
+                    weakSelf.semaphore = dispatch_semaphore_create(0);
+                    // video
+                    if (asset.mediaType == PHAssetMediaTypeVideo) {
+                        [response setValue: @(asset.duration) forKey:@"duration"];
                         [response setValue:source forKey:@"source"];
-                        [response setValue: @(imageSize) forKey:@"fileSize"];
+                        weakSelf.phImageReqId = [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                            [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
+                            [responses addObject:response];
 
-                        [responses addObject:response];
-                        if([responses count] >= [fetchArray count]) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                               // done
-                                if(([responses count] >= [fetchArray count])){
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        [SVProgressHUD dismiss];
-                                        [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
-                                    });
-                                }
-                            });
-                        }
-                    }];
+                            if([responses count] >= [fetchArray count]) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                    [SVProgressHUD dismiss];
+                                    [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                                });
+                            }
+                            dispatch_semaphore_signal(weakSelf.semaphore);
+                        }];
+                        dispatch_semaphore_wait(weakSelf.semaphore, DISPATCH_TIME_FOREVER);
+                    } else {
+                    // image
+                        self.imageRequestOptions.synchronous = NO;
+                        [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                            BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
+                            NSString *source = (iCloud) ? @"iCloud" : @"Photos";
+                            float imageSize = imageData.length;
+                            [response setValue:source forKey:@"source"];
+                            [response setValue: @(imageSize) forKey:@"fileSize"];
+
+                            [responses addObject:response];
+                            if([responses count] >= [fetchArray count]) {
+                                dispatch_async(dispatch_get_main_queue(), ^{
+                                   // done
+                                    if(([responses count] >= [fetchArray count])){
+                                        dispatch_async(dispatch_get_main_queue(), ^{
+                                            [SVProgressHUD dismiss];
+                                            [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                                        });
+                                    }
+                                });
+                            }
+                        }];
+                    }
+                } else {
+                    *stop = YES;
+                    return;
                 }
             }];
         }
