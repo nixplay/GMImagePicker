@@ -60,7 +60,7 @@
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
                 NSLog(@"video-dl %f", progress);
-                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu.", self.currentIndex+1, [weakSelf.selectedAssets count]]];
+                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu", self.currentIndex+1, [weakSelf.selectedAssets count]]];
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
             self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
