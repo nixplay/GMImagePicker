@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
+platform :ios, '9.0'
 
 target 'GMPhotoPicker' do
   # Uncomment the next line if you're using Swift or would like to use dynamic frameworks
@@ -7,6 +7,7 @@ target 'GMPhotoPicker' do
 
   # Pods for GMPhotoPicker
   pod "Masonry"
+  pod "SVProgressHUD", :git => 'https://github.com/nixplay/SVProgressHUD.git', :tag => '2.2.7-dev2'
   target 'GMPhotoPickerTests' do
     inherit! :search_paths
     # Pods for testing

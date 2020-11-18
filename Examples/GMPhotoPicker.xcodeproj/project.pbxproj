@@ -266,6 +266,7 @@
 				B37D577019CA3B3A007F64BD /* Sources */,
 				B37D577119CA3B3A007F64BD /* Frameworks */,
 				B37D577219CA3B3A007F64BD /* Resources */,
+				91B28ABB0121C45FF69B682E /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -307,6 +308,7 @@
 					B37D577319CA3B3A007F64BD = {
 						CreatedOnToolsVersion = 6.0;
 						DevelopmentTeam = FLA95J3G7U;
+						ProvisioningStyle = Manual;
 					};
 					B37D578C19CA3B3A007F64BD = {
 						CreatedOnToolsVersion = 6.0;
@@ -387,6 +389,24 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		91B28ABB0121C45FF69B682E /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker-resources.sh",
+				"${PODS_ROOT}/SVProgressHUD/SVProgressHUD/SVProgressHUD.bundle",
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/SVProgressHUD.bundle",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GMPhotoPicker/Pods-GMPhotoPicker-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		A1015D9F00103B038A01BBAC /* [CP] Check Pods Manifest.lock */ = {
@@ -579,11 +599,14 @@
 			baseConfigurationReference = 09E0676A85C8504222CB8528 /* Pods-GMPhotoPicker.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development: Nicks Play (8T9YN74A5J)";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = FLA95J3G7U;
 				INFOPLIST_FILE = GMPhotoPicker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.creedon.Nixplay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development com.creedon.Nixplay";
 			};
 			name = Debug;
 		};
@@ -592,10 +615,11 @@
 			baseConfigurationReference = 2D7651E4B481A1BBEAC1EC0B /* Pods-GMPhotoPicker.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Distribution: Creedon Technologies USA LLC (FLA95J3G7U)";
 				DEVELOPMENT_TEAM = FLA95J3G7U;
 				INFOPLIST_FILE = GMPhotoPicker/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.creedon.Nixplay;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

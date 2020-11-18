@@ -1,16 +1,31 @@
 PODS:
   - Masonry (1.1.0)
+  - SVProgressHUD (2.2.7-dev2):
+    - SVProgressHUD/Core (= 2.2.7-dev2)
+  - SVProgressHUD/Core (2.2.7-dev2)
 
 DEPENDENCIES:
   - Masonry
+  - SVProgressHUD (from `https://github.com/nixplay/SVProgressHUD.git`, tag `2.2.7-dev2`)
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - Masonry
+
+EXTERNAL SOURCES:
+  SVProgressHUD:
+    :git: https://github.com/nixplay/SVProgressHUD.git
+    :tag: 2.2.7-dev2
+
+CHECKOUT OPTIONS:
+  SVProgressHUD:
+    :git: https://github.com/nixplay/SVProgressHUD.git
+    :tag: 2.2.7-dev2
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  SVProgressHUD: 7f66d2c9e3f1b693f0392c58029bf04d0b4fbbcc
 
-PODFILE CHECKSUM: f761a2ed0dd6c85057379d6f6d0a84a187417a8b
+PODFILE CHECKSUM: 0906c7b219e6cb7e25fccb962d867a01d2c8d3d8
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.10.0.beta.2
