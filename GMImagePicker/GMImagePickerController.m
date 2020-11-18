@@ -463,6 +463,14 @@
     [self.presentingViewController dismissViewControllerAnimated:NO completion:nil];
 }
 
+-(IBAction)onTapCancel:(id)sender {
+    UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
+    for (UIViewController *viewController in nav.viewControllers) {
+        viewController.navigationItem.rightBarButtonItem.enabled = YES;
+        [viewController.navigationController setToolbarHidden:NO animated:NO];
+    }
+    [SVProgressHUD dismiss];
+}
 
 - (void)finishPickingAssets:(id)sender
 {
@@ -471,10 +479,13 @@
         UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
         for (UIViewController *viewController in nav.viewControllers) {
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
+            [viewController.navigationController setToolbarHidden:YES animated:NO];
         }
         // settings for head up display
         [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
         [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+        [SVProgressHUD sourceDelegate:self];
+        [SVProgressHUD cancelMethod:@selector(onTapCancel:)];
         // check selected items
         [self detectIfHasCloud:self.selectedAssets];
     } else {
