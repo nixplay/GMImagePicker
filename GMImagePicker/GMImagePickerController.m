@@ -343,7 +343,7 @@
             }
             options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
 
-            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"modificationDate" ascending:NO],[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
+            options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsWithOptions:options];
             
             [allFetchResultArray addObject:assetsFetchResult];
@@ -474,6 +474,7 @@
 -(IBAction)onTapCancel:(id)sender {
     UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
     for (UIViewController *viewController in nav.viewControllers) {
+        viewController.view.userInteractionEnabled = YES;
         viewController.navigationItem.rightBarButtonItem.enabled = YES;
         [viewController.navigationController setToolbarHidden:NO animated:NO];
     }
@@ -492,6 +493,7 @@
         for (UIViewController *viewController in nav.viewControllers) {
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
             [viewController.navigationController setToolbarHidden:YES animated:NO];
+            viewController.view.userInteractionEnabled = NO;
         }
         // settings for head up display
         [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
