@@ -61,7 +61,7 @@
                 NSLog(@"image-dl %f", progress);
                 NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading";
+                    displayText = @"Downloading from iCloud...";
                 }
                 [SVProgressHUD showProgress:progress status:displayText];
             };
@@ -74,7 +74,7 @@
                 NSLog(@"video-dl %f", progress);
                 NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading";
+                    displayText = @"Downloading from iCloud...";
                 }
                 [SVProgressHUD showProgress:progress status:displayText];
             };
