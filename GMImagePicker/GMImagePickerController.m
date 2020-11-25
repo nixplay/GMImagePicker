@@ -565,7 +565,7 @@
                     } else {
                     // image
                         self.imageRequestOptions.synchronous = NO;
-                        [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                        weakSelf.phImageReqId = [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
                             BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
                             NSString *source = (iCloud) ? @"iCloud" : @"Photos";
                             float imageSize = imageData.length;
