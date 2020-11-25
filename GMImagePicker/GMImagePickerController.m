@@ -56,7 +56,7 @@
             self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
                 NSLog(@"image-dl %f", progress);
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
                     displayText = @"Downloading";
                 }
@@ -69,7 +69,7 @@
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
                 NSLog(@"video-dl %f", progress);
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud...", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
                     displayText = @"Downloading";
                 }
