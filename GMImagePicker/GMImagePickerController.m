@@ -22,7 +22,8 @@
 @property (nonatomic, assign) BOOL hasUnavailable;
 @property (nonatomic, assign) BOOL hasShownCloudWarning;
 @property (nonatomic, assign) BOOL hasExecuteCancel;
-@property PHImageRequestID phImageReqId;
+@property (nonatomic, strong) NSMutableArray *phImageRefIds;
+@property PHImageRequestID phImageReqId; // video
 @property (nonatomic) dispatch_group_t dispatchGroup;
 @property (nonatomic) dispatch_semaphore_t semaphore;
 @end
@@ -37,6 +38,8 @@
         self.videoMaximumDuration = 15;
         _selectedAssets = [[NSMutableArray alloc] init];
         
+        self.phImageRefIds = [NSMutableArray new];
+
         PHFetchOptions *options = [[PHFetchOptions alloc] init];
         PHFetchResult *fetchResult = [PHAsset fetchAssetsWithLocalIdentifiers:preSelectedAssets options:options];
         for (PHAsset *asset in fetchResult) {
@@ -488,7 +491,9 @@
         [viewController.navigationController setToolbarHidden:NO animated:NO];
     }
     self.hasExecuteCancel = YES;
-    [[PHImageManager defaultManager] cancelImageRequest:self.phImageReqId];
+    for (NSNumber *requestId in self.phImageRefIds) {
+        [[PHImageManager defaultManager] cancelImageRequest:[requestId intValue]];
+    }
     [SVProgressHUD dismissWithCompletion:^{
         self.hasExecuteCancel = NO;
     }];
@@ -549,7 +554,7 @@
                     if (asset.mediaType == PHAssetMediaTypeVideo) {
                         [response setValue: @(asset.duration) forKey:@"duration"];
                         [response setValue:source forKey:@"source"];
-                        weakSelf.phImageReqId = [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                        PHImageRequestID requestID = [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
                             [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
                             [responses addObject:response];
 
@@ -561,11 +566,13 @@
                             }
                             dispatch_semaphore_signal(weakSelf.semaphore);
                         }];
+                        weakSelf.phImageReqId = requestID;
+                        [weakSelf.phImageRefIds addObject:[NSNumber numberWithInt:requestID]];
                         dispatch_semaphore_wait(weakSelf.semaphore, DISPATCH_TIME_FOREVER);
                     } else {
                     // image
                         self.imageRequestOptions.synchronous = NO;
-                        weakSelf.phImageReqId = [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                        PHImageRequestID requestID = [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
                             BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
                             NSString *source = (iCloud) ? @"iCloud" : @"Photos";
                             float imageSize = imageData.length;
@@ -585,6 +592,8 @@
                                 });
                             }
                         }];
+                        weakSelf.phImageReqId = requestID;
+                        [weakSelf.phImageRefIds addObject:[NSNumber numberWithInt:requestID]];
                     }
                 } else {
                     *stop = YES;
