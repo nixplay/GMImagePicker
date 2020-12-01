@@ -59,11 +59,17 @@
             self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
                 NSLog(@"image-dl %f", progress);
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
                     displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
                 }
-                [SVProgressHUD showProgress:progress status:displayText];
             };
         }
         // video
@@ -75,8 +81,14 @@
                 NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
                     displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
                 }
-                [SVProgressHUD showProgress:progress status:displayText];
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
             self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
@@ -510,10 +522,14 @@
             viewController.view.userInteractionEnabled = NO;
         }
         // settings for head up display
-        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
-        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-        [SVProgressHUD sourceDelegate:self];
-        [SVProgressHUD cancelMethod:@selector(onTapCancel:)];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
+            [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+            [SVProgressHUD sourceDelegate:self];
+            [SVProgressHUD cancelMethod:@selector(onTapCancel:)];
+            [SVProgressHUD showProgress:0 status:displayText];
+        });
         // check selected items
         [self checkingSelected:self.selectedAssets];
     } else {
