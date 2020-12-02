@@ -49,16 +49,41 @@
             self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
             self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
             self.imageRequestOptions.networkAccessAllowed = YES;
+            self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
+            {
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                if ([weakSelf.selectedAssets count] == 1) {
+                    displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    double itemProgress = (progress * ((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + itemProgress) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
+                }
+            };
         }
         // video
         if (self.videoRequestOptions == nil) {
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                [SVProgressHUD showProgress:progress status:[NSString stringWithFormat:@"Downloading %lu of %lu from iCloud...", self.currentIndex+1, [weakSelf.selectedAssets count]]];
-                NSLog(@"video-dl %f", progress);
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                if ([weakSelf.selectedAssets count] == 1) {
+                    displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    double itemProgress = (progress * ((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + itemProgress) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
+                }
             };
-            self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
+            self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
             self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
             self.videoRequestOptions.networkAccessAllowed = YES;
         }
@@ -471,10 +496,16 @@
         UINavigationController *nav = (UINavigationController *)self.childViewControllers[0];
         for (UIViewController *viewController in nav.viewControllers) {
             viewController.navigationItem.rightBarButtonItem.enabled = NO;
+            [viewController.navigationController setToolbarHidden:YES animated:NO];
+            viewController.view.userInteractionEnabled = NO;
         }
         // settings for head up display
-        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
-        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
+            [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+            [SVProgressHUD showProgress:0 status:displayText];
+        });
         // check selected items
         [self checkingSelected:self.selectedAssets];
     } else {
