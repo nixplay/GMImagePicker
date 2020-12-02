@@ -502,6 +502,9 @@
         // settings for head up display
         dispatch_async(dispatch_get_main_queue(), ^{
             NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            if ([self.selectedAssets count] == 1) {
+                displayText = @"Downloading from iCloud";
+            }
             [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
             [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
             [SVProgressHUD showProgress:0 status:displayText];
@@ -567,18 +570,12 @@
                         float imageSize = imageData.length;
                         [response setValue:source forKey:@"source"];
                         [response setValue: @(imageSize) forKey:@"fileSize"];
-
                         [responses addObject:response];
-                        if([responses count] >= [fetchArray count]) {
-                            dispatch_async(dispatch_get_main_queue(), ^{
-                               // done
-                                if(([responses count] >= [fetchArray count])){
-                                    dispatch_async(dispatch_get_main_queue(), ^{
-                                        [SVProgressHUD dismiss];
-                                        [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
-                                    });
-                                }
-                            });
+                        if(([responses count] >= [fetchArray count])){
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 [SVProgressHUD dismiss];
+                                 [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                             });
                         }
                     }];
                 }
