@@ -7,6 +7,7 @@ target 'GMPhotoPicker' do
 
   # Pods for GMPhotoPicker
   pod "Masonry"
+  pod "SVProgressHUD"
   target 'GMPhotoPickerTests' do
     inherit! :search_paths
     # Pods for testing

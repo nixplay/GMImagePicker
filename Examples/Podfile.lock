@@ -1,16 +1,20 @@
 PODS:
   - Masonry (1.1.0)
+  - SVProgressHUD (2.2.5)
 
 DEPENDENCIES:
   - Masonry
+  - SVProgressHUD
 
 SPEC REPOS:
-  https://github.com/cocoapods/specs.git:
+  trunk:
     - Masonry
+    - SVProgressHUD
 
 SPEC CHECKSUMS:
   Masonry: 678fab65091a9290e40e2832a55e7ab731aad201
+  SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
 
-PODFILE CHECKSUM: f761a2ed0dd6c85057379d6f6d0a84a187417a8b
+PODFILE CHECKSUM: d4fbe10ae79a43ef55b4af5d25fe66e7d4b167f0
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.10.0.beta.2
