@@ -84,7 +84,7 @@
                 }
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
-            self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
+//            self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
             self.videoRequestOptions.networkAccessAllowed = YES;
         }
         // _selectedAssets = [fetchResult copy];
