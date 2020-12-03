@@ -16,6 +16,7 @@
 
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
 @property (nonatomic, assign) BOOL isCameraPress;
+//@property (nonatomic, strong) AVAssetReader *reader;
 @property (strong) PHImageRequestOptions *imageRequestOptions;
 @property (strong) PHVideoRequestOptions *videoRequestOptions;
 @property (nonatomic, assign) NSUInteger currentIndex;
@@ -83,8 +84,8 @@
                     });
                 }
             };
-            self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeMediumQualityFormat;
-//            self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
+            self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
+            self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
             self.videoRequestOptions.networkAccessAllowed = YES;
         }
         // _selectedAssets = [fetchResult copy];
@@ -553,6 +554,7 @@
                         [responses addObject:response];
 
                         if([responses count] >= [fetchArray count]) {
+//                            [self validateExportSession:responses];
                             dispatch_async(dispatch_get_main_queue(), ^{
                                 [SVProgressHUD dismiss];
                                 [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
@@ -584,6 +586,43 @@
     });
 }
 
+//- (void)validateExportSession:(NSMutableArray *)responses {
+//    dispatch_group_t dispatchGroup = dispatch_group_create();
+//    dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        __weak typeof(self)weakSelf = self;
+//        if (self.selectedAssets.count > 0) {
+//            [self.selectedAssets enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
+//                weakSelf.currentIndex = idx;
+//                dispatch_semaphore_t    semaphore = dispatch_semaphore_create(0);
+//                if (asset.mediaType == PHAssetMediaTypeVideo) {
+//                    // start validating the video
+//                    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+//
+//                        NSLog(@"VIDEO-AUDIOMIX %@", audioMix);
+//                        NSLog(@"VIDEO-INFO %@", info);
+//                        NSLog(@"VIDEO-AVASSET %@", avasset);
+//
+//                        NSError *readerError;
+//                        self.reader = [AVAssetReader.alloc initWithAsset:avasset error:&readerError];
+//                        if (readerError)
+//                        {
+//                            NSLog(@"VIDEO ITEM: %lu, has error: %@", (unsigned long)idx, readerError);
+//                        }
+//
+//                        if((weakSelf.currentIndex >= ([weakSelf.selectedAssets count] - 1))){
+//                            [SVProgressHUD dismiss];
+//                            NSLog(@"RESPONSES: %@", responses);
+//                        }
+//                        dispatch_semaphore_signal(semaphore);
+//                    }];
+//                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+//                } else {
+//                    // skip, no need
+//                }
+//            }];
+//        }
+//    });
+//}
 #pragma mark - Toolbar Title
 
 - (NSPredicate *)predicateOfAssetType:(PHAssetMediaType)type
