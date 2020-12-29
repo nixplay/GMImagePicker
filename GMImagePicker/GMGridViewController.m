@@ -255,36 +255,36 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
     
     [self resetCachedAssets];
     
-    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
-        //This is optional. Reload visible thumbnails:
-        for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
-            NSInteger currentTag = cell.tag;
-            
-            
-            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:cell.asset
-                                                                      targetSize:AssetGridThumbnailSize
-                                                                     contentMode:PHImageContentModeAspectFill
-                                                                         options:self.imageRequestOptions
-                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
-                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
-                                                                       dispatch_async(dispatch_get_main_queue(), ^{
-                                                                           if (cell.tag == currentTag) {
-                                                                               [cell.imageView setImage:result];
-                                                                           }
-                                                                       });
-
-                                                                   }];
-            if(requestID != cell.assetRequestID){
-                if ([cell isKindOfClass:[GMGridViewCell class]]) {
-                    [cell cancelImageRequest];
-                }
-                cell.assetRequestID = requestID;
-            }
-            
-        }
-        
-        [self.collectionView setCollectionViewLayout:layout animated:NO];
-    } completion:nil];
+//    [coordinator animateAlongsideTransition:^(id<UIViewControllerTransitionCoordinatorContext> context) {
+//        //This is optional. Reload visible thumbnails:
+//        for (GMGridViewCell *cell in [self.collectionView visibleCells]) {
+//            NSInteger currentTag = cell.tag;
+//
+//
+//            PHImageRequestID requestID=  [self.imageManager requestImageForAsset:cell.asset
+//                                                                      targetSize:AssetGridThumbnailSize
+//                                                                     contentMode:PHImageContentModeAspectFill
+//                                                                         options:self.imageRequestOptions
+//                                                                   resultHandler:^(UIImage *result, NSDictionary *info) {
+//                                                                       // Only update the thumbnail if the cell tag hasn't changed. Otherwise, the cell has been re-used.
+//                                                                       dispatch_async(dispatch_get_main_queue(), ^{
+//                                                                           if (cell.tag == currentTag) {
+//                                                                               [cell.imageView setImage:result];
+//                                                                           }
+//                                                                       });
+//
+//                                                                   }];
+//            if(requestID != cell.assetRequestID){
+//                if ([cell isKindOfClass:[GMGridViewCell class]]) {
+//                    [cell cancelImageRequest];
+//                }
+//                cell.assetRequestID = requestID;
+//            }
+//
+//        }
+//
+//        [self.collectionView setCollectionViewLayout:layout animated:NO];
+//    } completion:nil];
 }
 
 #pragma mark - Setup
