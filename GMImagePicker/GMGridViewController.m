@@ -879,7 +879,7 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                                 [collectionView reloadItemsAtIndexPaths: [collectionView indexPathsForVisibleItems]];
                             }
                             [weakSelf updateCachedAssets];
-                            dispatch_semaphore_signal(weakSelf.phPhotoLibChageMutex);
+//                            dispatch_semaphore_signal(weakSelf.phPhotoLibChageMutex);
                         }];
                     }
                     
