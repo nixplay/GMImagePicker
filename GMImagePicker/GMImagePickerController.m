@@ -52,9 +52,10 @@
             self.imageRequestOptions.networkAccessAllowed = YES;
             self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                // NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-item-from-icloud",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Downloading %@ of %@ from iCloud" ), weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading from iCloud";
+                    displayText = NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-from-icloud", @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Downloading from iCloud");
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [SVProgressHUD showProgress:progress status:displayText];
                     });
@@ -71,9 +72,11 @@
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                // NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-item-from-icloud",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Downloading %@ of %@ from iCloud" ), self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading from iCloud";
+                    displayText = NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-from-icloud", @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Downloading from iCloud");
+                    // displayText = @"Downloading from iCloud";
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [SVProgressHUD showProgress:progress status:displayText];
                     });
@@ -502,9 +505,10 @@
         }
         // settings for head up display
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            // NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            NSString *displayText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-item-from-icloud",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Downloading %@ of %@ from iCloud" ), self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
             if ([self.selectedAssets count] == 1) {
-                displayText = @"Downloading from iCloud";
+                displayText = NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-from-icloud", @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Downloading from iCloud");
             }
             [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
             [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];

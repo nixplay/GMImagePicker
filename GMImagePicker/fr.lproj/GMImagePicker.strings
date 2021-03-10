@@ -42,3 +42,9 @@
 
 /* Action (title) permission */
 "picker.action.permission.title" = "Partager sur Nixplay";
+
+/* Alert Downloading from iCloud */
+"picker.alert.downloading-from-icloud" = "Téléchargement depuis iCloud";
+
+/* Alert Downloading @ of @ from iCloud */
+"picker.alert.downloading-item-from-icloud" = "Téléchargement de @ depuis iCloud";
