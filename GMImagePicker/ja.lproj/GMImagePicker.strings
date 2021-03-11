@@ -76,4 +76,4 @@
 "picker.alert.downloading-from-icloud" = "iCloudからダウンロード";
 
 /* Alert Downloading @ of @ from iCloud */
-"picker.alert.downloading-item-from-icloud" = iCloudから@をダウンロードする";
+"picker.alert.downloading-item-from-icloud" = iCloudから%@をダウンロードする";

@@ -47,4 +47,4 @@
 "picker.alert.downloading-from-icloud" = "Téléchargement depuis iCloud";
 
 /* Alert Downloading @ of @ from iCloud */
-"picker.alert.downloading-item-from-icloud" = "Téléchargement de @ depuis iCloud";
+"picker.alert.downloading-item-from-icloud" = "Téléchargement de %@ depuis iCloud";
