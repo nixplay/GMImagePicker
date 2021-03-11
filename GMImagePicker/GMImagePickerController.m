@@ -506,7 +506,7 @@
         // settings for head up display
         dispatch_async(dispatch_get_main_queue(), ^{
             // NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
-            NSString *displayText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-item-from-icloud",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Downloading %@ of %@ from iCloud" ), self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+            NSString *displayText = [NSString stringWithFormat:NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-item-from-icloud",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Downloading %@ of %@ from iCloud" ), self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
             if ([self.selectedAssets count] == 1) {
                 displayText = NSLocalizedStringFromTableInBundle(@"picker.alert.downloading-from-icloud", @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Downloading from iCloud");
             }
