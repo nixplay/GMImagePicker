@@ -14,8 +14,11 @@
 #import "UIImage+FixOrientation.h"
 @import Photos;
 
+#import <FirebaseAnalytics/FirebaseAnalytics.h>
+
 @interface GMImagePickerController () <UINavigationControllerDelegate, UIImagePickerControllerDelegate, UIAlertViewDelegate>
 @property (nonatomic, assign) BOOL isCameraPress;
+//@property (nonatomic, strong) AVAssetReader *reader;
 @property (strong) PHImageRequestOptions *imageRequestOptions;
 @property (strong) PHVideoRequestOptions *videoRequestOptions;
 @property (nonatomic, assign) NSUInteger currentIndex;
@@ -53,18 +56,39 @@
             self.imageRequestOptions.deliveryMode = PHImageRequestOptionsDeliveryModeOpportunistic;
             self.imageRequestOptions.resizeMode = PHImageRequestOptionsResizeModeFast;
             self.imageRequestOptions.networkAccessAllowed = YES;
+            self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
+            {
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                if ([weakSelf.selectedAssets count] == 1) {
+                    displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    double itemProgress = (progress * ((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + itemProgress) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
+                }
+            };
         }
         // video
         if (self.videoRequestOptions == nil) {
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSLog(@"video-dl %f", progress);
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading";
+                    displayText = @"Downloading from iCloud";
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:progress status:displayText];
+                    });
+                } else {
+                    double itemProgress = (progress * ((double)self.currentIndex + 1) / (double)[weakSelf.selectedAssets count]);
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [SVProgressHUD showProgress:(((double)self.currentIndex + itemProgress) / (double)[weakSelf.selectedAssets count]) status:displayText];
+                    });
                 }
-                [SVProgressHUD showProgress:progress status:displayText];
             };
             self.videoRequestOptions.deliveryMode = PHVideoRequestOptionsDeliveryModeHighQualityFormat;
             self.videoRequestOptions.version = PHVideoRequestOptionsVersionOriginal;
@@ -496,12 +520,17 @@
             viewController.view.userInteractionEnabled = NO;
         }
         // settings for head up display
-        [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
-        [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
-        [SVProgressHUD sourceDelegate:self];
-        [SVProgressHUD cancelMethod:@selector(onTapCancel:)];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
+            if ([self.selectedAssets count] == 1) {
+                displayText = @"Downloading from iCloud";
+            }
+            [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
+            [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
+            [SVProgressHUD showProgress:0 status:displayText];
+        });
         // check selected items
-        [self detectIfHasCloud:self.selectedAssets];
+        [self checkingSelected:self.selectedAssets];
     } else {
         if ([self.delegate respondsToSelector:@selector(assetsPickerController:didFinishPickingAssets:)]) {
             [self.delegate assetsPickerController:self didFinishPickingAssets:self.selectedAssets];
@@ -511,38 +540,6 @@
 
 #pragma mark - Checking Selected Items
 
-- (void)detectIfHasCloud:(NSMutableArray *)fetchArray {
-    if (fetchArray.count > 0) {
-        __weak typeof(self)weakSelf = self;
-        [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
-            NSArray *assetResource = [PHAssetResource assetResourcesForAsset:asset];
-            BOOL isAvailable =  [[assetResource.firstObject valueForKey:@"locallyAvailable"] boolValue];
-            if (!isAvailable) {
-                weakSelf.hasUnavailable = YES;
-            }
-        }];
-        if (self.hasUnavailable && !self.hasShownCloudWarning) {
-            self.hasShownCloudWarning = YES;
-            // invoke to emit JS pm
-            [weakSelf.delegate didShownCloudWarning];
-            UIAlertController *alert = [UIAlertController alertControllerWithTitle:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-title",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"iCloud Contents")
-                                                                           message:NSLocalizedStringFromTableInBundle(@"picker.alert.got-it-body",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class], @"Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.")
-                                                                    preferredStyle:UIAlertControllerStyleAlert];
-            UIAlertAction * okAction = [UIAlertAction actionWithTitle:NSLocalizedString(@"Got it", nil)
-                                                                style:UIAlertActionStyleDefault
-                                                              handler:^(UIAlertAction * _Nonnull action) {
-                [alert dismissViewControllerAnimated:YES completion:^{
-                    [self checkingSelected:self.selectedAssets];
-                }];
-                                                              }];
-            [alert addAction:okAction];
-            [self presentViewController:alert animated:YES completion:nil];
-        } else {
-            [self checkingSelected:self.selectedAssets];
-        }
-    }
-}
-
 - (void)checkingSelected:(NSMutableArray *)fetchArray {
     self.dispatchGroup = dispatch_group_create();
     dispatch_group_async(self.dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -550,74 +547,101 @@
         __weak typeof(self)weakSelf = self;
         if (fetchArray.count > 0) {
             [fetchArray enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
-                if (!self.hasExecuteCancel) {
-                    weakSelf.currentIndex = idx;
-                    NSMutableDictionary *response = [NSMutableDictionary new];
-                    [response setValue:[NSString stringWithFormat:@"ph://%@",asset.localIdentifier] forKey:@"uri"];
-                    [response setValue: ((asset.mediaType == PHAssetMediaTypeImage) ? @"image": (asset.mediaType == PHAssetMediaTypeVideo) ? @"video" : @"unknown") forKey:@"type"];
-                    if (asset.location) {
-                        [response setObject:@(asset.location.coordinate.latitude) forKey:@"latitude"];
-                        [response setObject:@(asset.location.coordinate.longitude) forKey:@"longitude"];
-                    }
-                    if (asset.creationDate) {
-                        [response setValue:[[self ISO8601DateFormatter] stringFromDate:asset.creationDate] forKey:@"timestamp"];
-                    }
-                    [response setValue: @(asset.pixelWidth) forKey:@"width"];
-                    [response setValue: @(asset.pixelHeight) forKey:@"height"];
-                    [response setValue: @(idx) forKey:@"index"];
+                weakSelf.currentIndex = idx;
+                NSMutableDictionary *response = [NSMutableDictionary new];
+                [response setValue:[NSString stringWithFormat:@"ph://%@",asset.localIdentifier] forKey:@"uri"];
+                [response setValue: ((asset.mediaType == PHAssetMediaTypeImage) ? @"image": (asset.mediaType == PHAssetMediaTypeVideo) ? @"video" : @"unknown") forKey:@"type"];
+                if (asset.location) {
+                    [response setObject:@(asset.location.coordinate.latitude) forKey:@"latitude"];
+                    [response setObject:@(asset.location.coordinate.longitude) forKey:@"longitude"];
+                }
+                if (asset.creationDate) {
+                    [response setValue:[[self ISO8601DateFormatter] stringFromDate:asset.creationDate] forKey:@"timestamp"];
+                }
+                [response setValue: @(asset.pixelWidth) forKey:@"width"];
+                [response setValue: @(asset.pixelHeight) forKey:@"height"];
+                [response setValue: @(idx) forKey:@"index"];
 
-                    NSString *source = @"Photos";
-                    weakSelf.semaphore = dispatch_semaphore_create(0);
-                    // video
-                    if (asset.mediaType == PHAssetMediaTypeVideo) {
-                        [response setValue: @(asset.duration) forKey:@"duration"];
-                        [response setValue:source forKey:@"source"];
-                        weakSelf.phImageReqId = [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
-                            [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
-                            [responses addObject:response];
+                NSString *source = @"Photos";
+                dispatch_semaphore_t    semaphore = dispatch_semaphore_create(0);
+                // video
+                if (asset.mediaType == PHAssetMediaTypeVideo) {
+                    [response setValue: @(asset.duration) forKey:@"duration"];
+                    [response setValue:source forKey:@"source"];
+                    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                        [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
+                        [responses addObject:response];
 
-                            if([responses count] >= [fetchArray count]) {
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                    [SVProgressHUD dismiss];
-                                    [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
-                                });
-                            }
-                            dispatch_semaphore_signal(weakSelf.semaphore);
-                        }];
-                        dispatch_semaphore_wait(weakSelf.semaphore, DISPATCH_TIME_FOREVER);
-                    } else {
-                    // image
-                        self.imageRequestOptions.synchronous = NO;
-                        [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
-                            BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
-                            NSString *source = (iCloud) ? @"iCloud" : @"Photos";
-                            float imageSize = imageData.length;
-                            [response setValue:source forKey:@"source"];
-                            [response setValue: @(imageSize) forKey:@"fileSize"];
-
-                            [responses addObject:response];
-                            if([responses count] >= [fetchArray count]) {
-                                dispatch_async(dispatch_get_main_queue(), ^{
-                                   // done
-                                    if(([responses count] >= [fetchArray count])){
-                                        dispatch_async(dispatch_get_main_queue(), ^{
-                                            [SVProgressHUD dismiss];
-                                            [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
-                                        });
-                                    }
-                                });
-                            }
-                        }];
-                    }
+                        if([responses count] >= [fetchArray count]) {
+//                            [self validateExportSession:responses];
+                            dispatch_async(dispatch_get_main_queue(), ^{
+                                [SVProgressHUD dismiss];
+                                [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                            });
+                        }
+                        dispatch_semaphore_signal(semaphore);
+                    }];
+                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
                 } else {
-                    *stop = YES;
-                    return;
+                // image
+                    self.imageRequestOptions.synchronous = NO;
+                    [[PHImageManager defaultManager] requestImageDataForAsset:asset options:self.imageRequestOptions resultHandler:^(NSData *imageData, NSString *dataUTI, UIImageOrientation orientation, NSDictionary *info) {
+                        BOOL iCloud = [info valueForKey: PHImageResultIsInCloudKey] != nil ? [info[PHImageResultIsInCloudKey] intValue] : NO;
+                        NSString *source = (iCloud) ? @"iCloud" : @"Photos";
+                        float imageSize = imageData.length;
+                        [response setValue:source forKey:@"source"];
+                        [response setValue: @(imageSize) forKey:@"fileSize"];
+                        [responses addObject:response];
+                        if(([responses count] >= [fetchArray count])){
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 [SVProgressHUD dismiss];
+                                 [weakSelf.delegate assetsPickerController:self didFinishPickingAssets:responses];
+                             });
+                        }
+                    }];
                 }
             }];
         }
     });
 }
 
+//- (void)validateExportSession:(NSMutableArray *)responses {
+//    dispatch_group_t dispatchGroup = dispatch_group_create();
+//    dispatch_group_async(dispatchGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+//        __weak typeof(self)weakSelf = self;
+//        if (self.selectedAssets.count > 0) {
+//            [self.selectedAssets enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
+//                weakSelf.currentIndex = idx;
+//                dispatch_semaphore_t    semaphore = dispatch_semaphore_create(0);
+//                if (asset.mediaType == PHAssetMediaTypeVideo) {
+//                    // start validating the video
+//                    [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+//
+//                        NSLog(@"VIDEO-AUDIOMIX %@", audioMix);
+//                        NSLog(@"VIDEO-INFO %@", info);
+//                        NSLog(@"VIDEO-AVASSET %@", avasset);
+//
+//                        NSError *readerError;
+//                        self.reader = [AVAssetReader.alloc initWithAsset:avasset error:&readerError];
+//                        if (readerError)
+//                        {
+//                            NSLog(@"VIDEO ITEM: %lu, has error: %@", (unsigned long)idx, readerError);
+//                        }
+//
+//                        if((weakSelf.currentIndex >= ([weakSelf.selectedAssets count] - 1))){
+//                            [SVProgressHUD dismiss];
+//                            NSLog(@"RESPONSES: %@", responses);
+//                        }
+//                        dispatch_semaphore_signal(semaphore);
+//                    }];
+//                    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER);
+//                } else {
+//                    // skip, no need
+//                }
+//            }];
+//        }
+//    });
+//}
 #pragma mark - Toolbar Title
 
 - (NSPredicate *)predicateOfAssetType:(PHAssetMediaType)type
@@ -719,6 +743,7 @@
     }
     
     if (![self isCameraPress]) {
+        [FIRAnalytics logEventWithName:@"use_camera" parameters:@{}];
         [self setIsCameraPress:YES];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             // This allows the selection of the image taken to be better seen if the user is not already in that VC

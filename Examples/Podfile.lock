@@ -11,6 +11,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Masonry
+    - SVProgressHUD
 
 EXTERNAL SOURCES:
   SVProgressHUD:

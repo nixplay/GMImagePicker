@@ -181,8 +181,11 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                 //Albums collections are allways PHAssetCollectionType=1 & PHAssetCollectionSubtype=2
                 
                 PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-                [userFetchResultArray addObject:assetsFetchResult];
-                [userFetchResultLabel addObject:collection.localizedTitle];
+                if(assetsFetchResult.count > 0 && collection.localizedTitle != nil)
+                {
+                    [userFetchResultArray addObject:assetsFetchResult];
+                    [userFetchResultLabel addObject:collection.localizedTitle];
+                }
             }
         }
     }
@@ -200,7 +203,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            if(assetsFetchResult.count>0)
+            if(assetsFetchResult.count > 0 && collection.localizedTitle != nil)
             {
                 [myPhotoStreamFetchResultArray addObject:assetsFetchResult];
                 [myPhotoStreamFetchResultLabel addObject:collection.localizedTitle];
@@ -226,7 +229,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
                     options.predicate = [NSPredicate predicateWithFormat:@"(mediaType in %@) AND !((mediaSubtype & %d) == %d)", self.picker.mediaTypes, PHAssetMediaSubtypeVideoHighFrameRate, PHAssetMediaSubtypeVideoHighFrameRate ];
                     options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
                     PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-                    if(assetsFetchResult.count>0)
+                    if(assetsFetchResult.count > 0 && collection.localizedTitle != nil)
                     {
                         [smartFetchResultArray addObject:assetsFetchResult];
                         [smartFetchResultLabel addObject:collection.localizedTitle];
@@ -249,7 +252,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            if(assetsFetchResult.count>0)
+            if(assetsFetchResult.count > 0 && collection.localizedTitle != nil)
             {
                 [cloudSharedFetchResultArray addObject:assetsFetchResult];
                 [cloudSharedFetchResultLabel addObject:collection.localizedTitle];
@@ -272,7 +275,7 @@ static NSString * const CollectionCellReuseIdentifier = @"CollectionCell";
             options.predicate = [NSPredicate predicateWithFormat:@"mediaType in %@", @[@(PHAssetMediaTypeImage)]];
             options.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:NO]];
             PHFetchResult *assetsFetchResult = [PHAsset fetchAssetsInAssetCollection:assetCollection options:options];
-            if(assetsFetchResult.count>0)
+            if(assetsFetchResult.count > 0 && collection.localizedTitle != nil)
             {
                 [syncedAlbumFetchResultArray addObject:assetsFetchResult];
                 [syncedAlbumFetchResultLabel addObject:collection.localizedTitle];

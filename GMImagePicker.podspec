@@ -60,4 +60,5 @@ Pod::Spec.new do |s|
 	# s.dependency "JSONKit", "~> 1.4"
 	s.dependency "Masonry"
 	s.dependency "SVProgressHUD"
+	s.dependency "Firebase/Analytics"
 end
