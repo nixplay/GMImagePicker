@@ -552,6 +552,7 @@
                     [response setValue: @(asset.duration) forKey:@"duration"];
                     [response setValue:source forKey:@"source"];
                     [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
+                        [response setValue:[NSString stringWithFormat:@"%hhu",(BOOL)(audioMix != nil)] forKey:@"hasAudio"];
                         [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
                         [responses addObject:response];
 
