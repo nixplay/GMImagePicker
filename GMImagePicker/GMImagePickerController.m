@@ -569,7 +569,18 @@
                     [response setValue: @(asset.duration) forKey:@"duration"];
                     [response setValue:source forKey:@"source"];
                     [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
-                        [response setValue:[NSString stringWithFormat:@"%hhu",(BOOL)(audioMix != nil)] forKey:@"hasAudio"];
+                        BOOL hasAudio = NO;
+                        NSArray *audioTracks = [avasset tracksWithMediaType:AVMediaTypeAudio];
+                        if (audioTracks.count) {
+                            AVAssetTrack *audioTrack = audioTracks[0];
+                            NSString *audioRef = [NSString stringWithFormat:@"%@",[audioTrack formatDescriptions]];
+                            if ([audioRef containsString:@"Stereo"] && [audioRef containsString:@"44100"]) {
+                                hasAudio = NO;
+                            } else {
+                                hasAudio = YES;
+                            }
+                        }
+                        [response setValue:[NSString stringWithFormat:@"%d",hasAudio] forKey:@"hasAudio"];
                         [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
                         [responses addObject:response];
 
