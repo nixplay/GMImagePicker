@@ -605,6 +605,14 @@ NSString * const CameraCellIdentifier = @"CameraCellIdentifier";
                 }
             }
         }
+    } else {
+        if (indexPath.item >= 0) {
+            PHAsset *asset = self.assetsFetchResults[indexPath.item];
+            [self.picker selectAsset:asset];
+            if ([self.picker.delegate respondsToSelector:@selector(assetsPickerController:didSelectAsset:)]) {
+                [self.picker.delegate assetsPickerController:self.picker didSelectAsset:asset];
+            }
+        }
     }
 }
 
