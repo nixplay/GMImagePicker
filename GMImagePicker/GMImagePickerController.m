@@ -554,14 +554,9 @@
                     [[PHImageManager defaultManager] requestAVAssetForVideo:asset options:self.videoRequestOptions resultHandler:^(AVAsset * _Nullable avasset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
                         BOOL hasAudio = NO;
                         NSArray *audioTracks = [avasset tracksWithMediaType:AVMediaTypeAudio];
-                        if (audioTracks.count) {
-                            AVAssetTrack *audioTrack = audioTracks[0];
-                            NSString *audioRef = [NSString stringWithFormat:@"%@",[audioTrack formatDescriptions]];
-                            if ([audioRef containsString:@"Stereo"] && [audioRef containsString:@"44100"]) {
-                                hasAudio = NO;
-                            } else {
-                                hasAudio = YES;
-                            }
+                        // check mediatype for screen recording in ios
+                        if (audioTracks.count && ![[asset description] containsString:@"mediaType=2/524288"]) {
+                            hasAudio = YES;
                         }
                         [response setValue:[NSString stringWithFormat:@"%d",hasAudio] forKey:@"hasAudio"];
                         [response setValue:[NSString stringWithFormat:@"%@",[(AVURLAsset*)avasset URL]] forKey:@"videoFullFilePath"];
