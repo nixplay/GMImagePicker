@@ -42,3 +42,9 @@
 
 /* Action (title) permission */
 "picker.action.permission.title" = "Partager sur Nixplay";
+
+/* modal download icloud */
+"picker.download.icloud" = "Téléchargement de %lu sur %lu depuis iCloud";
+
+/* modal download icloud single */
+"picker.download.icloud.single" = "Téléchargement depuis iCloud";
