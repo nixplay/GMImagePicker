@@ -9,7 +9,7 @@
 #import "ViewController.h"
 #import "GMImagePickerController.h"
 
-#define LIGHT_BLUE_COLOR [UIColor colorWithRed:(99/255.0f)  green:(176/255.0f)  blue:(228.0f/255.0f) alpha:1.0]
+#define LIGHT_BLUE_COLOR [UIColor colorWithRed:(8.0f/255.0f) green:(130.0f/255.0f) blue:(157.0f/255.0f) alpha:1.0]
 
 @import UIKit;
 @import Photos;

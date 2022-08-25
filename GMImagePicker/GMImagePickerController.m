@@ -750,7 +750,7 @@
     }
     
     if (![self isCameraPress]) {
-        [FIRAnalytics logEventWithName:@"use_camera" parameters:@{}];
+       [FIRAnalytics logEventWithName:@"use_camera" parameters:@{}];
         [self setIsCameraPress:YES];
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0f * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
             // This allows the selection of the image taken to be better seen if the user is not already in that VC
