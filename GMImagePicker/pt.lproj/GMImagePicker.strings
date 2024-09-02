@@ -1,0 +1,79 @@
+
+/* Cancel */
+"picker.navigation.cancel-button" = "Cancelar";
+
+/* Done */
+"picker.navigation.done-button" = "Concluído";
+
+/* Camera */
+"picker.navigation.camera-button" = "Câmera";
+
+/* Navigation bar default title */
+"picker.navigation.title" = "GMImagePicker";
+
+/* %@ Items Selected */
+"picker.selection.multiple-items" = "%@ Itens Selecionados";
+
+/* %@ Photos Selected */
+"picker.selection.multiple-photos" = "%@ Fotos Selecionados";
+
+/* %@ Videos Selected */
+"picker.selection.multiple-videos" = "%@ Videos Selecionados";
+
+/* 1 Photo Selected */
+"picker.selection.single-photo" = "1 Foto Selecionada";
+
+/* 1 Video Selected */
+"picker.selection.single-video" = "1 Video Selecionada";
+
+/* All photos */
+"picker.table.all-photos-label" = "Rolo da câmera";
+
+/* My Photo Stream */
+"picker.table.my-photo-stream-header" = "MEU STREAM DE FOTOS";
+/* My Photo Stream */
+"picker.table.synced-album-header" = "ÁLBUM SINCRONIZADO";
+/* Cloud Shared */
+"picker.table.cloud-shared-header" = "COMPARTILHADO NA NUVEM";
+
+/* Smart Albums */
+"picker.table.smart-albums-header" = "COLEÇÕES INTELIGENTES";
+
+/* Albums */
+"picker.table.user-albums-header" = "COLEÇÕES";
+
+/* Confirmation of single selection alert title */
+"picker.confirm.title" = "Tem certeza?";
+
+/* Confirmation of single selection alert message */
+"picker.confirm.message" = "Deseja selecionar a imagem em que tocou?";
+
+/* Action (button) deny/no/refuse */
+"picker.action.no" = "Não";
+
+/* Action (button) agree/yes/approve */
+"picker.action.yes" = "Sim";
+
+/* Action (button) permission - mic */
+"picker.action.permission.microphone" = "Habilitar acesso ao microfone";
+
+/* Action (button) permission - camera */
+"picker.action.permission.camera" = "Habilitar acesso à câmera";
+
+/* Action (title) permission */
+"picker.action.permission.title" = "Compartilhar na Nixplay";
+
+/* Alert Got it title */
+"picker.alert.got-it-title" = "Conteúdo do iCloud";
+
+/* Alert Got it button */
+"picker.alert.got-it-button" = "Entendi";
+
+/* Alert Got it body */
+"picker.alert.got-it-body" = "Alguns conteúdos selecionados são armazenados no iCloud. Levará algum tempo para recuperar esse conteúdo antes que o upload possa continuar.";
+
+/* modal download icloud */
+"picker.download.icloud" = "Baixando %lu de %lu do iCloud";
+
+/* modal download icloud single */
+"picker.download.icloud.single" = "Baixando do iCloud";
