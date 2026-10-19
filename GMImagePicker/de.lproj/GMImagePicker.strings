@@ -59,7 +59,10 @@
 "picker.alert.got-it-body" = "Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.";
 
 /* modal download icloud */
-"picker.download.icloud" = "%lu von %lu iCloud herunterladen";
+"picker.download.icloud" = "Bezig met voorbereiden...";
 
 /* modal download icloud single */
-"picker.download.icloud.single" = "Herunterladen von iCloud";
+"picker.download.icloud.single" = "Bezig met voorbereiden...";
+
+/* modal preparing media */
+"picker.preparing.media" = "Bezig met voorbereiden...";

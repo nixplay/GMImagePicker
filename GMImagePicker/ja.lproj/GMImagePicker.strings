@@ -73,7 +73,10 @@
 "picker.alert.got-it-body" = "Some selected contents are stored in iCloud. It will take some time to retrieve these contents before the upload can continue.";
 
 /* modal download icloud */
-"picker.download.icloud" = "iCloudから%luの%luをダウンロードする";
+"picker.download.icloud" = "メディアを準備中...";
 
 /* modal download icloud single */
-"picker.download.icloud.single" = "iCloudからダウンロード";
+"picker.download.icloud.single" = "メディアを準備中...";
+
+/* modal preparing media */
+"picker.preparing.media" = "メディアを準備中...";

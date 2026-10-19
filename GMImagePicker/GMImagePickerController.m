@@ -58,9 +58,8 @@
             self.imageRequestOptions.networkAccessAllowed = YES;
             self.imageRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", weakSelf.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = NSLocalizedStringFromTableInBundle(@"picker.preparing.media",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Preparing media...");
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading from iCloud";
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [SVProgressHUD showProgress:progress status:displayText];
                     });
@@ -77,9 +76,8 @@
             self.videoRequestOptions = [PHVideoRequestOptions new];
             self.videoRequestOptions.progressHandler = ^void (double progress, NSError *__nullable error, BOOL *stop, NSDictionary *__nullable info)
             {
-                NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[weakSelf.selectedAssets count]];
+                NSString *displayText = NSLocalizedStringFromTableInBundle(@"picker.preparing.media",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Preparing media...");
                 if ([weakSelf.selectedAssets count] == 1) {
-                    displayText = @"Downloading from iCloud";
                     dispatch_async(dispatch_get_main_queue(), ^{
                         [SVProgressHUD showProgress:progress status:displayText];
                     });
@@ -521,10 +519,7 @@
         }
         // settings for head up display
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *displayText = [NSString stringWithFormat:@"Downloading %lu of %lu from iCloud", self.currentIndex+1, (unsigned long)[self.selectedAssets count]];
-            if ([self.selectedAssets count] == 1) {
-                displayText = @"Downloading from iCloud";
-            }
+            NSString *displayText = NSLocalizedStringFromTableInBundle(@"picker.preparing.media",  @"GMImagePicker", [NSBundle bundleForClass:GMImagePickerController.class],  @"Preparing media...");
             [SVProgressHUD setDefaultStyle:SVProgressHUDStyleLight];
             [SVProgressHUD setDefaultMaskType:SVProgressHUDMaskTypeClear];
             [SVProgressHUD showProgress:0 status:displayText];
